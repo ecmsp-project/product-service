@@ -1,0 +1,58 @@
+package com.ecmsp.productservice.domain;
+
+import lombok.*;
+import jakarta.persistence.*;
+import java.util.UUID;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Table(name = "variants")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+public class Variant {
+
+    @Id
+    @GeneratedValue
+    @Column(name = "id")
+    @EqualsAndHashCode.Include
+    private UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    @Column(name = "sku", nullable = false, length = 10)
+    private String sku;
+
+    @Column(name = "price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
+
+    @Column(name = "stock_quantity", nullable = false)
+    private int stockQuantity;
+
+    @Column(name = "image_url", nullable = false)
+    private String imageUrl;
+
+    @Column(name = "additional_attributes", columnDefinition = "jsonb")
+    private String additionalAttributes;
+
+    @Column(name="description", columnDefinition = "text")
+    private String description;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<VariantAttribute> variantAttributes  = new HashSet<>();
+}
