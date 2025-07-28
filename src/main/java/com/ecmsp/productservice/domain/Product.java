@@ -2,10 +2,10 @@ package com.ecmsp.productservice.domain;
 
 import lombok.*;
 import jakarta.persistence.*;
-import java.util.UUID;
+import org.hibernate.annotations.Type;
+
+import java.util.*;
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "products")
@@ -39,8 +39,10 @@ public class Product {
     @Column(name = "description", columnDefinition = "text")
     private String description;
 
+    @Type(io.hypersistence.utils.hibernate.type.json.JsonType.class)
     @Column(name = "info", columnDefinition = "jsonb")
-    private String info;
+    @Builder.Default
+    private Map<String, Object> info = new HashMap<>();
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
