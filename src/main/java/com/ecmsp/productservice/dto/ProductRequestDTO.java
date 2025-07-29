@@ -1,6 +1,7 @@
 package com.ecmsp.productservice.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ProductRequestDTO {
     @NotBlank(message = "Product name cannot be blank")
     private String name;
@@ -23,7 +25,7 @@ public class ProductRequestDTO {
     private BigDecimal approximatePrice;
 
     @NotNull(message = "Delivery price is required")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Delivery price cannot be negative")
+    @DecimalMin(value = "0.0", message = "Delivery price cannot be negative")
     private BigDecimal deliveryPrice;
 
     @NotBlank(message = "Description cannot be blank")
