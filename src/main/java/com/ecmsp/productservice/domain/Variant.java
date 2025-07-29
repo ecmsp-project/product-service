@@ -2,11 +2,11 @@ package com.ecmsp.productservice.domain;
 
 import lombok.*;
 import jakarta.persistence.*;
-import java.util.UUID;
+import org.hibernate.annotations.Type;
+
+import java.util.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "variants")
@@ -40,8 +40,10 @@ public class Variant {
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
+    @Type(io.hypersistence.utils.hibernate.type.json.JsonType.class)
     @Column(name = "additional_attributes", columnDefinition = "jsonb")
-    private String additionalAttributes;
+    @Builder.Default
+    private Map<String, Object> additionalAttributes = new HashMap<>();
 
     @Column(name="description", columnDefinition = "text")
     private String description;
