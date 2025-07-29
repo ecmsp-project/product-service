@@ -25,11 +25,6 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
-    /**
-     * Converts a Product entity to a ProductResponseDTO using a builder.
-     * @param product The Product entity to convert.
-     * @return The corresponding ProductResponseDTO.
-     */
     private ProductResponseDTO convertToDto(Product product) {
         ProductResponseDTO.ProductResponseDTOBuilder dtoBuilder = ProductResponseDTO.builder()
                 .id(product.getId())
@@ -46,13 +41,6 @@ public class ProductService {
         return dtoBuilder.build();
     }
 
-    /**
-     * Converts a ProductRequestDTO to a Product entity using a builder.
-     * This method requires fetching the Category entity based on categoryId.
-     * @param productRequestDTO The DTO containing product data.
-     * @return The corresponding Product entity.
-     * @throws ResourceNotFoundException if the specified category does not exist.
-     */
     private Product convertToEntity(ProductRequestDTO productRequestDTO) {
         Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", productRequestDTO.getCategoryId()));
@@ -67,33 +55,18 @@ public class ProductService {
                 .build();
     }
 
-    /**
-     * Retrieves all products, mapped to DTOs.
-     * @return A list of ProductResponseDTOs.
-     */
     public List<ProductResponseDTO> getAllProducts() {
         return productRepository.findAll().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Retrieves a product by ID, mapped to a DTO.
-     * @param id The UUID of the product.
-     * @return The ProductResponseDTO.
-     * @throws ResourceNotFoundException if the product is not found.
-     */
     public ProductResponseDTO getProductById(UUID id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
         return convertToDto(product);
     }
 
-    /**
-     * Creates a new product from a DTO.
-     * @param productRequestDTO The DTO with product data.
-     * @return The ProductResponseDTO of the created product.
-     */
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
         Product product = convertToEntity(productRequestDTO);
@@ -101,13 +74,6 @@ public class ProductService {
         return convertToDto(savedProduct);
     }
 
-    /**
-     * Updates an existing product from a DTO.
-     * @param id The UUID of the product to update.
-     * @param productRequestDTO The DTO with updated product data.
-     * @return The ProductResponseDTO of the updated product.
-     * @throws ResourceNotFoundException if the product or category is not found.
-     */
     @Transactional
     public ProductResponseDTO updateProduct(UUID id, ProductRequestDTO productRequestDTO) {
         Product existingProduct = productRepository.findById(id)
@@ -129,11 +95,6 @@ public class ProductService {
         return convertToDto(updatedProduct);
     }
 
-    /**
-     * Deletes a product by ID.
-     * @param id The UUID of the product to delete.
-     * @throws ResourceNotFoundException if the product is not found.
-     */
     @Transactional
     public void deleteProduct(UUID id) {
         if (!productRepository.existsById(id)) {
