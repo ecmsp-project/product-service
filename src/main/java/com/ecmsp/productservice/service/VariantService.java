@@ -27,7 +27,7 @@ public class VariantService {
     }
 
     private VariantResponseDTO convertToDto(Variant variant) {
-        VariantResponseDTO.VariantResponseDTOBuilder dtoBuilder = VariantResponseDTO.builder()
+        return VariantResponseDTO.builder()
                 .id(variant.getId())
                 .sku(variant.getSku())
                 .price(variant.getPrice())
@@ -35,17 +35,10 @@ public class VariantService {
                 .imageUrl(variant.getImageUrl())
                 .additionalAttributes(variant.getAdditionalAttributes())
                 .description(variant.getDescription())
-                .createdAt(variant.getCreatedAt())
-                .updatedAt(variant.getUpdatedAt());
-
-        if (variant.getProduct() != null) {
-            dtoBuilder.productId(variant.getProduct().getId())
-                    .productName(variant.getProduct().getName());
-        }
-
-        dtoBuilder.variantAttributeCount(variant.getVariantAttributes() != null ? variant.getVariantAttributes().size() : 0);
-
-        return dtoBuilder.build();
+                .productId(variant.getProduct().getId())
+                .variantAttributeCount(variant.getVariantAttributes().size())
+                .updatedAt(variant.getUpdatedAt())
+                .build();
     }
 
     private Variant convertToEntity(VariantRequestDTO variantRequestDTO) {
@@ -62,8 +55,8 @@ public class VariantService {
                 .additionalAttributes(variantRequestDTO.getAdditionalAttributes())
                 .description(variantRequestDTO.getDescription())
                 .product(product)
-                .createdAt(now)
-                .updatedAt(now)
+                .createdAt(now) // TODO: ->
+                .updatedAt(now) // TODO: it is possible for Spring to automatically update times during creation or update
                 .build();
     }
 
@@ -99,7 +92,10 @@ public class VariantService {
         existingVariant.setDescription(variantRequestDTO.getDescription());
         existingVariant.setUpdatedAt(LocalDateTime.now());
 
-        if (!existingVariant.getProduct().getId().equals(variantRequestDTO.getProductId())) {
+        UUID newProductId = variantRequestDTO.getProductId();
+        UUID currentProductId = existingVariant.getProduct().getId();
+
+        if (!newProductId.equals(currentProductId)) {
             Product newProduct = productRepository.findById(variantRequestDTO.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product", variantRequestDTO.getProductId()));
             existingVariant.setProduct(newProduct);

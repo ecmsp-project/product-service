@@ -82,9 +82,14 @@ public class ProductService {
         existingProduct.setDescription(productRequestDTO.getDescription());
         existingProduct.setInfo(productRequestDTO.getInfo());
 
-        Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category", productRequestDTO.getCategoryId()));
-        existingProduct.setCategory(category);
+        UUID newCategoryId = productRequestDTO.getCategoryId();
+        UUID currentCategoryId = existingProduct.getCategory().getId();
+
+        if (!newCategoryId.equals(currentCategoryId)) {
+            Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", productRequestDTO.getCategoryId()));
+            existingProduct.setCategory(category);
+        }
 
         Product updatedProduct = productRepository.save(existingProduct);
         return convertToDto(updatedProduct);

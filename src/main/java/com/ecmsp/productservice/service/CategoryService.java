@@ -31,6 +31,7 @@ public class CategoryService {
                     .parentCategoryName(category.getParentCategory().getName());
         }
 
+        // TODO: let's check later if it is required
         dtoBuilder.subCategoryCount(category.getSubCategories() != null ? category.getSubCategories().size() : 0);
         dtoBuilder.productCount(category.getProducts() != null ? category.getProducts().size() : 0);
         dtoBuilder.attributeCount(category.getAttributes() != null ? category.getAttributes().size() : 0);
@@ -58,9 +59,9 @@ public class CategoryService {
     }
 
     public CategoryResponseDTO getCategoryById(UUID id) {
-        Category category = categoryRepository.findById(id)
+        return categoryRepository.findById(id)
+                .map(this::convertToDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", id));
-        return convertToDto(category);
     }
 
     @Transactional

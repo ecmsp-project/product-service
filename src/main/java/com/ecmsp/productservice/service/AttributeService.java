@@ -82,14 +82,19 @@ public class AttributeService {
         Attribute existingAttribute = attributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
 
-        Category category = categoryRepository.findById(attributeRequestDTO.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category", attributeRequestDTO.getCategoryId()));
-
         existingAttribute.setName(attributeRequestDTO.getName());
         existingAttribute.setUnit(attributeRequestDTO.getUnit());
         existingAttribute.setDataType(attributeRequestDTO.getDataType());
         existingAttribute.setFilterable(attributeRequestDTO.getFilterable());
-        existingAttribute.setCategory(category);
+
+        UUID newCategoryId = attributeRequestDTO.getCategoryId();
+        UUID currentCategoryId = existingAttribute.getCategory().getId();
+
+        if (!newCategoryId.equals(currentCategoryId)) {
+            Category category = categoryRepository.findById(attributeRequestDTO.getCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", attributeRequestDTO.getCategoryId()));
+            existingAttribute.setCategory(category);
+        }
 
         Attribute updatedAttribute = attributeRepository.save(existingAttribute);
         return convertToDto(updatedAttribute);

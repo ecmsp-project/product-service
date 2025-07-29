@@ -22,9 +22,10 @@ import java.util.stream.Collectors;
 public class VariantAttributeService {
 
     private final VariantAttributeRepository variantAttributeRepository;
+    private final AttributeValueRepository attributeValueRepository;
+
     private final VariantRepository variantRepository;
     private final AttributeRepository attributeRepository;
-    private final AttributeValueRepository attributeValueRepository;
 
     public VariantAttributeService(
             VariantAttributeRepository variantAttributeRepository,
@@ -44,6 +45,8 @@ public class VariantAttributeService {
                 requestDTO.getValueBoolean() != null ||
                 requestDTO.getValueDate() != null;
 
+        // TODO: As far as I'm concerned, it is possible to have both attributeValueId and direct value field (valueText, valueDecimal, etc.)
+        // TODO: AttributeValues table is used to represent values at frontend (as text), but on backend, we would want to keep values of different types
         if (isAttributeValueIdProvided && isDirectValueProvided) {
             throw new IllegalArgumentException("Cannot provide both 'attributeValueId' and direct value fields (valueText, valueDecimal, etc.). Choose one.");
         }
@@ -64,6 +67,7 @@ public class VariantAttributeService {
         entity.setValueDecimal(null);
         entity.setValueBoolean(null);
         entity.setValueDate(null);
+
 
         if (isAttributeValueIdProvided) {
             AttributeValue attributeValue = attributeValueRepository.findById(requestDTO.getAttributeValueId())
@@ -98,11 +102,13 @@ public class VariantAttributeService {
         }
     }
 
+    // TODO: move this function to variant service
     private Variant findVariantById(UUID variantId) {
         return variantRepository.findById(variantId)
                 .orElseThrow(() -> new ResourceNotFoundException("Variant", variantId));
     }
 
+    // TODO: move this function to attribute service
     private Attribute findAttributeById(UUID attributeId) {
         return attributeRepository.findById(attributeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", attributeId));
@@ -117,6 +123,8 @@ public class VariantAttributeService {
         }
 
         Attribute attribute = variantAttribute.getAttribute();
+        // TODO: is putting all that information in DTO response a good choice? Shall we send just attribute id?
+        // TODO: On the other hand, in microservices, maybe it is a good approach
         if (attribute != null) {
             dtoBuilder.attributeId(attribute.getId())
                     .attributeName(attribute.getName())
