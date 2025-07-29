@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ProductService {
@@ -26,19 +25,16 @@ public class ProductService {
     }
 
     private ProductResponseDTO convertToDto(Product product) {
-        ProductResponseDTO.ProductResponseDTOBuilder dtoBuilder = ProductResponseDTO.builder()
+        return ProductResponseDTO.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .approximatePrice(product.getApproximatePrice())
                 .deliveryPrice(product.getDeliveryPrice())
                 .description(product.getDescription())
-                .info(product.getInfo());
+                .info(product.getInfo())
+                .categoryId(product.getCategory().getId())
+                .build();
 
-        if (product.getCategory() != null) {
-            dtoBuilder.categoryId(product.getCategory().getId())
-                    .categoryName(product.getCategory().getName());
-        }
-        return dtoBuilder.build();
     }
 
     private Product convertToEntity(ProductRequestDTO productRequestDTO) {
@@ -58,13 +54,14 @@ public class ProductService {
     public List<ProductResponseDTO> getAllProducts() {
         return productRepository.findAll().stream()
                 .map(this::convertToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public ProductResponseDTO getProductById(UUID id) {
-        Product product = productRepository.findById(id)
+        return productRepository.findById(id)
+                .map(this::convertToDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
-        return convertToDto(product);
+
     }
 
     @Transactional
@@ -85,11 +82,9 @@ public class ProductService {
         existingProduct.setDescription(productRequestDTO.getDescription());
         existingProduct.setInfo(productRequestDTO.getInfo());
 
-        if (!existingProduct.getCategory().getId().equals(productRequestDTO.getCategoryId())) {
-            Category newCategory = categoryRepository.findById(productRequestDTO.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category", productRequestDTO.getCategoryId()));
-            existingProduct.setCategory(newCategory);
-        }
+        Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", productRequestDTO.getCategoryId()));
+        existingProduct.setCategory(category);
 
         Product updatedProduct = productRepository.save(existingProduct);
         return convertToDto(updatedProduct);
@@ -97,9 +92,8 @@ public class ProductService {
 
     @Transactional
     public void deleteProduct(UUID id) {
-        if (!productRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Product", id);
-        }
-        productRepository.deleteById(id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product", id));
+        productRepository.delete(product);
     }
 }

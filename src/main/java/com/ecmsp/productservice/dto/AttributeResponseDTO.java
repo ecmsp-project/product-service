@@ -20,6 +20,7 @@ public class AttributeResponseDTO {
     private boolean filterable;
     private UUID categoryId;
     private String categoryName;
+
     private int attributeValueCount;
     private int variantAttributeCount;
 }

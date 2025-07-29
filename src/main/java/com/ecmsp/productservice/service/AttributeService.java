@@ -26,22 +26,23 @@ public class AttributeService {
     }
 
     private AttributeResponseDTO convertToDto(Attribute attribute) {
-        AttributeResponseDTO.AttributeResponseDTOBuilder dtoBuilder = AttributeResponseDTO.builder()
+        return AttributeResponseDTO.builder()
                 .id(attribute.getId())
                 .name(attribute.getName())
                 .unit(attribute.getUnit())
                 .dataType(attribute.getDataType())
-                .filterable(attribute.isFilterable());
+                .filterable(attribute.isFilterable())
+                .categoryId(attribute.getCategory().getId())
+                .attributeValueCount(attribute.getAttributeValues().size())
+                .variantAttributeCount(attribute.getVariantAttributes().size())
+                .build();
 
-        if (attribute.getCategory() != null) {
-            dtoBuilder.categoryId(attribute.getCategory().getId())
-                    .categoryName(attribute.getCategory().getName());
-        }
+        // Attribute builder has default values on below fields. If we use it every time we create new entities, we won't
+        // have to check for nullable - but we've got to stick to it.
 
-        dtoBuilder.attributeValueCount(attribute.getAttributeValues() != null ? attribute.getAttributeValues().size() : 0);
-        dtoBuilder.variantAttributeCount(attribute.getVariantAttributes() != null ? attribute.getVariantAttributes().size() : 0);
+        // dtoBuilder.attributeValueCount(attribute.getAttributeValues() != null ? attribute.getAttributeValues().size() : 0);
+        // dtoBuilder.variantAttributeCount(attribute.getVariantAttributes() != null ? attribute.getVariantAttributes().size() : 0);
 
-        return dtoBuilder.build();
     }
 
     private Attribute convertToEntity(AttributeRequestDTO attributeRequestDTO) {
@@ -60,13 +61,13 @@ public class AttributeService {
     public List<AttributeResponseDTO> getAllAttributes() {
         return attributeRepository.findAll().stream()
                 .map(this::convertToDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public AttributeResponseDTO getAttributeById(UUID id) {
-        Attribute attribute = attributeRepository.findById(id)
+        return attributeRepository.findById(id)
+                .map(this::convertToDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
-        return convertToDto(attribute);
     }
 
     @Transactional
@@ -81,16 +82,14 @@ public class AttributeService {
         Attribute existingAttribute = attributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
 
+        Category category = categoryRepository.findById(attributeRequestDTO.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", attributeRequestDTO.getCategoryId()));
+
         existingAttribute.setName(attributeRequestDTO.getName());
         existingAttribute.setUnit(attributeRequestDTO.getUnit());
         existingAttribute.setDataType(attributeRequestDTO.getDataType());
         existingAttribute.setFilterable(attributeRequestDTO.getFilterable());
-
-        if (!existingAttribute.getCategory().getId().equals(attributeRequestDTO.getCategoryId())) {
-            Category newCategory = categoryRepository.findById(attributeRequestDTO.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category", attributeRequestDTO.getCategoryId()));
-            existingAttribute.setCategory(newCategory);
-        }
+        existingAttribute.setCategory(category);
 
         Attribute updatedAttribute = attributeRepository.save(existingAttribute);
         return convertToDto(updatedAttribute);
@@ -98,9 +97,8 @@ public class AttributeService {
 
     @Transactional
     public void deleteAttribute(UUID id) {
-        if (!attributeRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Attribute", id);
-        }
-        attributeRepository.deleteById(id);
+        Attribute attribute = attributeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
+        attributeRepository.delete(attribute);
     }
 }
