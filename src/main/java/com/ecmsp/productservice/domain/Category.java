@@ -40,4 +40,9 @@ public class Category {
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<Attribute> attributes = new HashSet<>();
+
+    @Override
+    public String toString() {
+        return String.format("Category{id = %s, name = %s}", id, name);
+    }
 }

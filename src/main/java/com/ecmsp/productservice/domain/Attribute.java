@@ -33,7 +33,8 @@ public class Attribute {
     private String unit;
 
     @Column(name = "data_type", nullable = false)
-    private String dataType;
+    @Enumerated(EnumType.STRING)
+    private AttributeDataType dataType;
 
     @Column(name = "filterable", nullable = false)
     private boolean filterable;
@@ -45,4 +46,5 @@ public class Attribute {
     @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<VariantAttribute> variantAttributes = new HashSet<>();
+
 }
