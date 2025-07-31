@@ -21,4 +21,5 @@ public class AttributeValueRequestDTO {
 
     @NotNull(message = "Attribute ID is required")
     private UUID attributeId;
+    // TODO: is this field required in DTOs? What if we want just to change AttributeValue's value? Check in other DTOs.
 }

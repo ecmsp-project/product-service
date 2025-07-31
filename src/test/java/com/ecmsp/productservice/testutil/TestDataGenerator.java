@@ -2,6 +2,7 @@ package com.ecmsp.productservice.testutil;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -42,5 +43,17 @@ public class TestDataGenerator {
 
     public static String randomDescription() {
         return DESCRIPTIONS[RANDOM.nextInt(DESCRIPTIONS.length)];
+    }
+
+    public static String randomString(int length) {
+        return UUID.randomUUID().toString().substring(0, length);
+    }
+
+    public static Map<String, Object> randomInfo() {
+        return Map.ofEntries(
+                Map.entry("productionCountry", "CHINA"),
+                Map.entry("quality", "GOOD"),
+                Map.entry("satisfactionRate", "5")
+        );
     }
 }
