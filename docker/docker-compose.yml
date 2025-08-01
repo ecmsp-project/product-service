@@ -1,0 +1,35 @@
+name: ecmsp-dev
+
+services:
+    product-service-db-dev:
+        image: postgres:15-alpine
+        container_name: product-service-db-dev
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+            interval: 10s
+            retries: 5
+            start_period: 30s
+            timeout: 10s
+
+        ports:
+            - "5432:5432"
+        volumes:
+            - product-service-db:/var/lib/postgresql/data
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+        secrets:
+            - product-service-db-password
+        environment:
+            - POSTGRES_USER=admin
+            - POSTGRES_DB=product-service-db
+            - POSTGRES_PASSWORD_FILE=/run/secrets/product-service-db-password
+        env_file:
+            -
+                path: ./database-env.txt
+                required: false
+
+volumes:
+    product-service-db:
+
+secrets:
+    product-service-db-password:
+        file: ./database-password.txt
