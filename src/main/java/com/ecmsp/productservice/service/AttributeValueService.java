@@ -86,7 +86,8 @@ public class AttributeValueService {
 
     @Transactional
     public void deleteAttributeValue(UUID id) {
-        AttributeValue attributeValue = attributeValueRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("AttributeValue", id));
+        AttributeValue attributeValue = attributeValueRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", id));
         attributeValueRepository.delete(attributeValue);
     }
 }

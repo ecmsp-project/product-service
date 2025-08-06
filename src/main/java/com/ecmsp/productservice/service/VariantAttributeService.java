@@ -133,8 +133,7 @@ public class VariantAttributeService {
 
             String effectiveValue;
             if (variantAttribute.getAttributeValue() != null) {
-                dtoBuilder.attributeValueId(variantAttribute.getAttributeValue().getId())
-                        .attributeValueValue(variantAttribute.getAttributeValue().getValue());
+                dtoBuilder.attributeValueId(variantAttribute.getAttributeValue().getId());
                 effectiveValue = variantAttribute.getAttributeValue().getValue();
             } else {
                 effectiveValue = switch (attribute.getDataType()) {

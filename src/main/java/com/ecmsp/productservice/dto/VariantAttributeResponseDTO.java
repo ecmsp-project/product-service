@@ -25,7 +25,6 @@ public class VariantAttributeResponseDTO {
     private AttributeDataType attributeDataType;
 
     private UUID attributeValueId;
-    private String attributeValueValue;
 
     private String valueText;
     private BigDecimal valueDecimal;
