@@ -13,6 +13,8 @@ services:
             -
                 path: ../cart-service/docker/app-env.txt
                 required: false
+        environment:
+            - SPRING_PROFILES_ACTIVE=${CART_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
         depends_on:
             cart-service-db:
                 restart: true
@@ -57,6 +59,8 @@ services:
             -
                 path: ../order-service/docker/app-env.txt
                 required: false
+        environment:
+            - SPRING_PROFILES_ACTIVE=${CART_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
         depends_on:
             order-service-db:
                 restart: true
@@ -101,6 +105,8 @@ services:
             -
                 path: ../payment-service/docker/app-env.txt
                 required: false
+        environment:
+            - SPRING_PROFILES_ACTIVE=${CART_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
         depends_on:
             payment-service-db:
                 restart: true
@@ -186,6 +192,3 @@ volumes:
     cart-service-db:
     order-service-db:
     payment-service-db:
-
-# docker compose -f product-docker-compose.yaml up cart-service-db
-# docker compose -f product-docker-compose.yaml down -v

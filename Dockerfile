@@ -4,7 +4,7 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn clean package -DskipTests -DfailOnNoContracts=false
 
-FROM eclipse-temurin:21-jre AS runtime
+FROM eclipse-temurin:21-jdk AS runtime
 WORKDIR /app
 
 COPY --from=builder /app/target/*.jar ./app.jar
