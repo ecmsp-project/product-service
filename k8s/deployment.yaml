@@ -17,10 +17,20 @@ spec:
                 app: product-service
         spec:
             containers:
-                - name: product-service
-                  image: product-service
-                  ports:
-                      - containerPort: 8080
-                  env:
-                      - name: SPRING_PROFILES_ACTIVE
-                        value: k8s
+                -
+                    name: product-service
+                    image: product-service
+                    ports:
+                        - containerPort: 8080
+                    env:
+                        -
+                            name: SPRING_PROFILES_ACTIVE
+                            value: k8s
+                        -
+                            name: SPRING_
+
+
+
+
+
+
