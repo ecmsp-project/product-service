@@ -21,13 +21,11 @@ spec:
                     name: product-service
                     image: product-service
                     ports:
-                        - containerPort: 8080
+                        - containerPort: 8400
                     env:
                         -
                             name: SPRING_PROFILES_ACTIVE
                             value: k8s
-                        -
-                            name: SPRING_
 
 
 
