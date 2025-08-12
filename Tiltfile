@@ -1,4 +1,6 @@
 
+# include('../order-service/Tiltfile')
+
 local_resource(
     'product-service-compile',
     'mvn package -DskipTests -DfailOnNoContracts=false && ' +

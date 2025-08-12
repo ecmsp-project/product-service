@@ -1,4 +1,4 @@
-name: ecmsp-dev
+name: ecmsp-dev-product-service
 
 services:
     product-service-db-dev:
