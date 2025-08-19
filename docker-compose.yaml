@@ -2,29 +2,30 @@ name: ecmsp-full
 
 services:
 
-    cart-service:
+    product-service:
         build:
-            context: ../cart-service
+            context: ../product-service
             dockerfile: Dockerfile
-        container_name: cart-service
+        container_name: product-service
         ports:
-            - "${CART_SERVICE_PORT:?error}:8080"
+            - "${PRODUCT_SERVICE_PORT:?error}:8080"
         env_file:
             -
-                path: ../cart-service/docker/app-env.txt
+                path: ../product-service/docker/app-env.txt
                 required: false
         environment:
-            - SPRING_PROFILES_ACTIVE=${CART_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
+            - SPRING_PROFILES_ACTIVE=${PRODUCT_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
         depends_on:
-            cart-service-db:
+            product-service-db:
                 restart: true
                 condition: service_healthy
             kafka:
                 condition: service_healthy
+        profiles: [product-service]
     #
-    cart-service-db:
+    product-service-db:
         image: postgres:15-alpine
-        container_name: cart-service-db
+        container_name: product-service-db
         healthcheck:
             test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
             interval: 10s
@@ -32,20 +33,21 @@ services:
             start_period: 30s
             timeout: 10s
         ports:
-            - "${CART_SERVICE_DB_PORT:?error}:5432"
+            - "${PRODUCT_SERVICE_DB_PORT:?error}:5432"
         volumes:
-            - ../cart-service/docker/init.sql:/docker-entrypoint-initdb.d/init.sql
-            - cart-service-db:/var/lib/postgresql/data
+            - ../product-service/docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+            - product-service-db:/var/lib/postgresql/data
         secrets:
-            - cart-service-db-password
+            - product-service-db-password
         environment:
             - POSTGRES_USER=admin
-            - POSTGRES_DB=cart-service-db
-            - POSTGRES_PASSWORD_FILE=/run/secrets/cart-service-db-password
+            - POSTGRES_DB=product-service-db
+            - POSTGRES_PASSWORD_FILE=/run/secrets/product-service-db-password
         env_file:
             -
-                path: ../cart-service/docker/database-env.txt
+                path: ../product-service/docker/database-env.txt
                 required: false
+        profiles: [product-service]
     #
 
     order-service:
@@ -60,13 +62,14 @@ services:
                 path: ../order-service/docker/app-env.txt
                 required: false
         environment:
-            - SPRING_PROFILES_ACTIVE=${CART_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
+            - SPRING_PROFILES_ACTIVE=${ORDER_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
         depends_on:
             order-service-db:
                 restart: true
                 condition: service_healthy
             kafka:
                 condition: service_healthy
+        profiles: [order-service]
     #
     order-service-db:
         image: postgres:15-alpine
@@ -92,6 +95,7 @@ services:
             -
                 path: ../order-service/docker/database-env.txt
                 required: false
+        profiles: [order-service]
     #
 
     payment-service:
@@ -106,13 +110,14 @@ services:
                 path: ../payment-service/docker/app-env.txt
                 required: false
         environment:
-            - SPRING_PROFILES_ACTIVE=${CART_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
+            - SPRING_PROFILES_ACTIVE=${PAYMENT_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
         depends_on:
             payment-service-db:
                 restart: true
                 condition: service_healthy
             kafka:
                 condition: service_healthy
+        profiles: [payment-service]
     #
     payment-service-db:
         image: postgres:15-alpine
@@ -138,6 +143,55 @@ services:
             -
                 path: ../payment-service/docker/database-env.txt
                 required: false
+        profiles: [payment-service]
+    #
+
+    cart-service:
+        build:
+            context: ../cart-service
+            dockerfile: Dockerfile
+        container_name: cart-service
+        ports:
+            - "${CART_SERVICE_PORT:?error}:8080"
+        env_file:
+            -
+                path: ../cart-service/docker/app-env.txt
+                required: false
+        environment:
+            - SPRING_PROFILES_ACTIVE=${CART_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
+        depends_on:
+            cart-service-db:
+                restart: true
+                condition: service_healthy
+            kafka:
+                condition: service_healthy
+        profiles: [cart-service]
+    #
+    cart-service-db:
+        image: postgres:15-alpine
+        container_name: cart-service-db
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+            interval: 10s
+            retries: 5
+            start_period: 30s
+            timeout: 10s
+        ports:
+            - "${CART_SERVICE_DB_PORT:?error}:5432"
+        volumes:
+            - ../cart-service/docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+            - cart-service-db:/var/lib/postgresql/data
+        secrets:
+            - cart-service-db-password
+        environment:
+            - POSTGRES_USER=admin
+            - POSTGRES_DB=cart-service-db
+            - POSTGRES_PASSWORD_FILE=/run/secrets/cart-service-db-password
+        env_file:
+            -
+                path: ../cart-service/docker/database-env.txt
+                required: false
+        profiles: [cart-service]
     #
 
     kafka:
@@ -165,6 +219,7 @@ services:
             interval: 10s
             timeout: 10s
             retries: 5
+        profiles: [kafka]
 
     kafka-ui:
         image: provectuslabs/kafka-ui:latest
@@ -179,16 +234,19 @@ services:
         depends_on:
             kafka:
                 condition: service_healthy
+        profiles: [kafka]
 
 secrets:
-    cart-service-db-password:
-        file: ../cart-service/docker/database-password.txt
+    product-service-db-password:
+        file: ../product-service/docker/database-password.txt
     order-service-db-password:
         file: ../order-service/docker/database-password.txt
     payment-service-db-password:
         file: ../payment-service/docker/database-password.txt
-
+    cart-service-db-password:
+        file: ../cart-service/docker/database-password.txt
 volumes:
-    cart-service-db:
+    product-service-db:
     order-service-db:
     payment-service-db:
+    cart-service-db:
