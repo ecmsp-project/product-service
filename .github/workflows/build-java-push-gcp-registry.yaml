@@ -10,7 +10,7 @@ on:
 env:
     GCP_REGISTRY: "europe-west1-docker.pkg.dev/ecmsp-466719/ecmsp"
     IMAGE_TAG: ${{ github.sha }}
-    IMAGE_NAME: ${GITHUB_REPOSITORY##*/}
+    IMAGE_NAME: ${{ github.event.repository.name }}
 
 jobs:
     build_deploy:
