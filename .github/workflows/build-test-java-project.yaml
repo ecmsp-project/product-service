@@ -2,6 +2,7 @@ name: Build and run Java project
 
 on:
     pull_request:
+    push:
     workflow_dispatch:
 
 jobs:
