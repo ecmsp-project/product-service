@@ -48,7 +48,6 @@ jobs:
 
             - 
                 name: Build, tag, and push backend Docker image to GCP Artifact Registry
-                env:
                 run: |
                     docker build \
                       -t $GCP_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
