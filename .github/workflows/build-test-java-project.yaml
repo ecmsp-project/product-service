@@ -1,4 +1,4 @@
-name: Build and run Java project 
+name: Build and test Java project
 
 on:
     pull_request:

@@ -1,4 +1,4 @@
-name: Build and deploy Docker images to AWS ECR GCP
+name: Build and deploy Docker images to GCP Artifact Registry
 
 on:
     push:
@@ -29,6 +29,10 @@ jobs:
                     distribution: 'temurin'
                     cache: 'maven'
 
+            -
+                name: Update Maven snapshots
+                run: mvn -U dependency:resolve
+
             - 
                 name: Authenticate to Google Cloud
                 uses: google-github-actions/auth@v1
@@ -45,6 +49,10 @@ jobs:
             - 
                 name: Install gcloud auth
                 run: gcloud components install gke-gcloud-auth-plugin
+
+            -
+                name: Configure Docker for Artifact Registry
+                run: gcloud auth configure-docker europe-west1-docker.pkg.dev
 
             - 
                 name: Build, tag, and push backend Docker image to GCP Artifact Registry
