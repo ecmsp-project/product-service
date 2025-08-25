@@ -28,7 +28,7 @@ jobs:
 
             -
                 name: Build Docker image for Trivy
-                if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'test' || github.event.pull_request.base.ref == 'development')
+#                 if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'test' || github.event.pull_request.base.ref == 'development')
                 run: |
                     docker build \
                         -t service:latest \
@@ -36,7 +36,7 @@ jobs:
 
             -
                 name: Run Trivy vulnerability scanner
-                if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'test' || github.event.pull_request.base.ref == 'development')
+#                 if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'test' || github.event.pull_request.base.ref == 'development')
                 uses: aquasecurity/trivy-action@0.28.0
                 with:
                     image-ref: "service:latest"
