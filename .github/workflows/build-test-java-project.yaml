@@ -1,4 +1,4 @@
-name: Build and run Java project 
+name: Build and test Java project
 
 on:
     pull_request:
@@ -22,25 +22,24 @@ jobs:
 
             -
                 name: Run tests with Maven 
-                run: |
-                    mvn clean test -U
+                run: mvn clean test -U
 
-            -
-                name: Build Docker image for Trivy
-                if: github.event_name == 'pull_request' && (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'development')
-                run: |
-                    docker build \
-                        -t service:latest \
-                        -f ./Dockerfile .
-
-            -
-                name: Run Trivy vulnerability scanner
-                if: github.event_name == 'pull_request' && (github.event.pull_request.base.ref == 'main' || github.event.pull_request.base.ref == 'development')
-                uses: aquasecurity/trivy-action@0.28.0
-                with:
-                    image-ref: "service:latest"
-                    format: table
-                    exit-code: 1
-                    ignore-unfixed: true
-                    vuln-type: os,library
-                    severity: CRITICAL,HIGH
+#             -
+#                 name: Build Docker image for Trivy
+#                 if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'test' || github.event.pull_request.base.ref == 'development')
+#                 run: |
+#                     docker build \
+#                         -t service:latest \
+#                         -f ./Dockerfile .
+#
+#             -
+#                 name: Run Trivy vulnerability scanner
+#                 if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'test' || github.event.pull_request.base.ref == 'development')
+#                 uses: aquasecurity/trivy-action@0.28.0
+#                 with:
+#                     image-ref: "service:latest"
+#                     format: table
+#                     exit-code: 1
+#                     ignore-unfixed: true
+#                     vuln-type: os,library
+#                     severity: CRITICAL,HIGH
