@@ -1,0 +1,45 @@
+name: Build and test Java project
+
+on:
+    pull_request:
+    workflow_dispatch:
+
+jobs:
+    build_test:
+        runs-on: ubuntu-latest
+        steps:
+            -
+                name: Checkout repository
+                uses: actions/checkout@v2
+
+            - 
+                name: Set up JDK 21 
+                uses: actions/setup-java@v3
+                with:
+                    java-version: '21'
+                    distribution: 'temurin'
+                    cache: 'maven'
+
+            -
+                name: Run tests with Maven 
+                run: mvn clean test -U
+
+#             -
+#                 name: Build Docker image for Trivy
+#                 if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'test' || github.event.pull_request.base.ref == 'development')
+#                 run: |
+#                     docker build \
+#                         -t service:latest \
+#                         -f ./Dockerfile .
+#
+#             -
+#                 name: Run Trivy vulnerability scanner
+#                 if: github.event_name == 'push' && (github.event.pull_request.base.ref == 'test' || github.event.pull_request.base.ref == 'development')
+#                 uses: aquasecurity/trivy-action@0.28.0
+#                 with:
+#                     image-ref: "service:latest"
+#                     format: table
+#                     exit-code: 1
+#                     ignore-unfixed: true
+#                     vuln-type: os,library
+#                     severity: CRITICAL,HIGH
