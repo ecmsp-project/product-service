@@ -24,6 +24,6 @@ public class AttributeValue {
     @JoinColumn(name = "attribute_id", nullable = false)
     private Attribute attribute;
 
-    @Column(name = "value", nullable = false, columnDefinition = "text")
-    private String value;
+    @Column(name = "attribute_value", nullable = false, columnDefinition = "text")
+    private String attributeValue;
 }

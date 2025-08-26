@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -70,12 +71,18 @@ public class AttributeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
     }
 
+    public Optional<Attribute> getAttributeEntityById(UUID id) {
+        return attributeRepository.findById(id);
+    }
+
     @Transactional
     public AttributeResponseDTO createAttribute(AttributeRequestDTO attributeRequestDTO) {
         Attribute attribute = convertToEntity(attributeRequestDTO);
         Attribute savedAttribute = attributeRepository.save(attribute);
         return convertToDto(savedAttribute);
     }
+
+
 
     @Transactional
     public AttributeResponseDTO updateAttribute(UUID id, AttributeRequestDTO attributeRequestDTO) {

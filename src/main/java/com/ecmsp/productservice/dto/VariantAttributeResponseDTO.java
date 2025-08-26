@@ -30,6 +30,4 @@ public class VariantAttributeResponseDTO {
     private BigDecimal valueDecimal;
     private Boolean valueBoolean;
     private LocalDate valueDate;
-
-    private String effectiveValue;
 }
