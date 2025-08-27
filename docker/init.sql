@@ -16,7 +16,7 @@ CREATE TABLE attributes (
                             category_id uuid  NOT NULL,
                             name varchar(255)  NOT NULL,
                             unit varchar(50)  NULL,
-                            data_type text  NOT NULL CHECK ('text', 'number', 'boolean', 'date'),
+                            data_type text  NOT NULL CHECK (data_type in ('text', 'number', 'boolean', 'date')),
     filterable boolean  NOT NULL,
     CONSTRAINT attributes_pk PRIMARY KEY (id)
 );
