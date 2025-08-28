@@ -13,10 +13,12 @@ import com.ecmsp.productservice.repository.AttributeValueRepository;
 import com.ecmsp.productservice.repository.VariantAttributeRepository;
 import com.ecmsp.productservice.repository.VariantRepository;
 import jakarta.transaction.Transactional;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,10 +27,6 @@ import java.util.stream.Collectors;
 public class VariantAttributeService {
 
     private final VariantAttributeRepository variantAttributeRepository;
-//    private final AttributeValueRepository attributeValueRepository;
-
-//    private final VariantRepository variantRepository;
-//    private final AttributeRepository attributeRepository;
 
     private final AttributeService attributeService;
     private final VariantService variantService;
@@ -36,44 +34,42 @@ public class VariantAttributeService {
 
     public VariantAttributeService(
             VariantAttributeRepository variantAttributeRepository,
-            VariantRepository variantRepository,
-            AttributeRepository attributeRepository,
-            AttributeValueRepository attributeValueRepository,
             AttributeService attributeService,
             VariantService variantService,
             AttributeValueService attributeValueService) {
         this.variantAttributeRepository = variantAttributeRepository;
-//        this.variantRepository = variantRepository;
-//        this.attributeRepository = attributeRepository;
-//        this.attributeValueRepository = attributeValueRepository;
-
         this.attributeService = attributeService;
         this.variantService = variantService;
         this.attributeValueService = attributeValueService;
     }
 
+    /**
+        Returns AttributeValue based on AttributeValueID specified in request
+        Validates if the AttributeValue entity's attributeID FK matches the one in the request
+     */
     private AttributeValue getAttributeValueEntity(VariantAttributeRequestDTO requestDTO) {
+        if (requestDTO.getAttributeValueId() == null) { return null; }
+
         Attribute attribute = attributeService.getAttributeEntityById(requestDTO.getAttributeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", requestDTO.getAttributeId()));
 
-        if (requestDTO.getAttributeValueId() != null) {
-            AttributeValue attributeValue = attributeValueService.getAttributeValueEntityById(requestDTO.getAttributeValueId())
-                    .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", requestDTO.getAttributeValueId()));
+        AttributeValue attributeValue = attributeValueService.getAttributeValueEntityById(requestDTO.getAttributeValueId())
+                .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", requestDTO.getAttributeValueId()));
 
-            if (!attributeValue.getAttribute().getId().equals(attribute.getId())) {
-                String message = String.format("Provided AttributeValue '%s' doest not belong to the specified Attribute '%s'\n", requestDTO.getAttributeValueId(), attribute.getId());
-                throw new IllegalArgumentException(message);
+        if (!attributeValue.getAttribute().getId().equals(attribute.getId())) {
+            String message = String.format("Provided AttributeValue '%s' doest not belong to the specified Attribute '%s'\n", requestDTO.getAttributeValueId(), attribute.getId());
+            throw new IllegalArgumentException(message);
 
-            }
-            return attributeValue;
         }
-        return null;
+        return attributeValue;
     }
 
-    /*
+    /**
         VariantAttribute represents a specific property of a variant (e.g., weight = 10kg).
         The value type can differ depending on the attribute: text, decimal, boolean, or date.
         This function validates the value type provided in the request and updates the entity accordingly.
+
+        It is possible to update only the field that matches datatype in Attribute table.
      */
     private VariantAttribute setVariantAttributeValueBasedOnType(
             VariantAttribute entity,
@@ -85,28 +81,36 @@ public class VariantAttributeService {
         entity.setValueBoolean(null);
         entity.setValueDate(null);
 
-        Attribute attribute = attributeService.getAttributeEntityById(requestDTO.getAttributeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Attribute", requestDTO.getAttributeId()));
+        Attribute attribute = entity.getAttribute();
+        if (attribute == null) {
+            attribute = attributeService.getAttributeEntityById(requestDTO.getAttributeId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Attribute", requestDTO.getAttributeId()));
+        }
 
         switch (attribute.getDataType()) {
-            case TEXT:
-                if (requestDTO.getValueText() == null) throw new IllegalArgumentException("Text value is required for TEXT data type.");
+            case TEXT -> {
+                if (requestDTO.getValueText() == null)
+                    throw new IllegalArgumentException("Text value is required for TEXT data type.");
                 entity.setValueText(requestDTO.getValueText());
-                break;
-            case NUMBER:
-                if (requestDTO.getValueDecimal() == null) throw new IllegalArgumentException("Decimal value is required for NUMBER data type.");
+            }
+            case NUMBER -> {
+                if (requestDTO.getValueDecimal() == null)
+                    throw new IllegalArgumentException("Decimal value is required for NUMBER data type.");
                 entity.setValueDecimal(requestDTO.getValueDecimal());
-                break;
-            case BOOLEAN:
-                if (requestDTO.getValueBoolean() == null) throw new IllegalArgumentException("Boolean value is required for BOOLEAN data type.");
+            }
+            case BOOLEAN -> {
+                if (requestDTO.getValueBoolean() == null)
+                    throw new IllegalArgumentException("Boolean value is required for BOOLEAN data type.");
                 entity.setValueBoolean(requestDTO.getValueBoolean());
-                break;
-            case DATE:
-                if (requestDTO.getValueDate() == null) throw new IllegalArgumentException("Date value is required for DATE data type.");
+            }
+            case DATE -> {
+                if (requestDTO.getValueDate() == null)
+                    throw new IllegalArgumentException("Date value is required for DATE data type.");
                 entity.setValueDate(requestDTO.getValueDate());
-                break;
-            default:
+            }
+            default -> {
                 throw new IllegalArgumentException("Unsupported attribute data type: " + attribute.getDataType());
+            }
         }
 
         return entity;
@@ -150,24 +154,31 @@ public class VariantAttributeService {
     private VariantAttribute convertToEntity(VariantAttributeRequestDTO requestDTO) {
 
         List<Function<VariantAttribute, VariantAttribute>> builder = Arrays.asList(
-                (variantAttribute) -> {
+                (variantAttributeOriginal) -> {
+                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
+
                     Variant variant = variantService.getVariantEntityById(requestDTO.getVariantId())
                             .orElseThrow(() -> new ResourceNotFoundException("Variant", requestDTO.getVariantId()));
                     variantAttribute.setVariant(variant);
                     return variantAttribute;
                 },
-                (variantAttribute) -> {
+                (variantAttributeOriginal) -> {
+                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
+
                     Attribute attribute = attributeService.getAttributeEntityById(requestDTO.getAttributeId())
                             .orElseThrow(() -> new ResourceNotFoundException("Attribute", requestDTO.getAttributeId()));
                     variantAttribute.setAttribute(attribute);
                     return variantAttribute;
                 },
-                (variantAttribute) -> {
+                (variantAttributeOriginal) -> {
+                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
+
                     AttributeValue attributeValue = getAttributeValueEntity(requestDTO);
                     variantAttribute.setAttributeValue(attributeValue);
                     return variantAttribute;
                 },
-                (variantAttribute) -> {
+                (variantAttributeOriginal) -> {
+                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
                     return setVariantAttributeValueBasedOnType(variantAttribute, requestDTO);
                 }
         );
@@ -191,6 +202,10 @@ public class VariantAttributeService {
         return convertToDto(variantAttribute);
     }
 
+    public Optional<VariantAttribute> getVariantAttributeEntityById(UUID id) {
+        return variantAttributeRepository.findById(id);
+    }
+
     @Transactional
     public VariantAttributeResponseDTO createVariantAttribute(VariantAttributeRequestDTO requestDTO) {
         VariantAttribute variantAttribute = convertToEntity(requestDTO);
@@ -199,48 +214,70 @@ public class VariantAttributeService {
     }
 
     @Transactional
-    public VariantAttributeResponseDTO updateVariantAttribute(UUID id, VariantAttributeRequestDTO requestDTO) {
-        VariantAttribute existingVariantAttribute = variantAttributeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("VariantAttribute", id));
+    public VariantAttributeResponseDTO updateVariantAttribute(UUID variantAttributeId, VariantAttributeRequestDTO requestDTO) {
+        List<Function<VariantAttribute, VariantAttribute>> builder = Arrays.asList(
+                // Update Variant entity
+                (variantAttributeOriginal) -> {
+                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
+                    Variant variant = variantAttribute.getVariant();
 
-        Attribute currentAttribute = existingVariantAttribute.getAttribute();
-        Variant currentVariant = existingVariantAttribute.getVariant();
+                    if (!variant.getId().equals(requestDTO.getVariantId())) {
+                        Variant newVariant = variantService.getVariantEntityById(requestDTO.getVariantId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Variant", requestDTO.getVariantId()));
+                        variantAttribute.setVariant(newVariant);
+                    }
+                    return variantAttribute;
+                },
+                // Update Attribute entity
+                (variantAttributeOriginal) -> {
+                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
+                    Attribute attribute = variantAttribute.getAttribute();
 
-        if (!currentVariant.getId().equals(requestDTO.getVariantId())) {
-            Variant newVariant = findVariantById(requestDTO.getVariantId());
-            existingVariantAttribute.setVariant(newVariant);
-        }
+                    if (!attribute.getId().equals(requestDTO.getAttributeId())) {
+                        Attribute newAttribute = attributeService.getAttributeEntityById(requestDTO.getAttributeId())
+                                .orElseThrow(() -> new ResourceNotFoundException("Attribute", requestDTO.getAttributeId()));
+                        variantAttribute.setAttribute(newAttribute);
+                    }
+                    return variantAttribute;
+                },
+                // Update Value of VariantAttribute and AttributeValue entity
+                (variantAttributeOriginal) -> {
+                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
 
-        if (!currentAttribute.getId().equals(requestDTO.getAttributeId())) {
-            Attribute newAttribute = findAttributeById(requestDTO.getAttributeId());
-            existingVariantAttribute.setAttribute(newAttribute);
-            currentAttribute = newAttribute;
-        }
+                    boolean isAttributeValueIdProvidedInRequest = requestDTO.getAttributeValueId() != null;
+                    boolean isDirectValueProvidedInRequest = (
+                            requestDTO.getValueText() != null ||
+                            requestDTO.getValueDecimal() != null ||
+                            requestDTO.getValueBoolean() != null ||
+                            requestDTO.getValueDate() != null
+                    );
 
-        boolean isAttributeValueIdProvidedInRequest = requestDTO.getAttributeValueId() != null;
-        boolean isDirectValueProvidedInRequest = requestDTO.getValueText() != null ||
-                requestDTO.getValueDecimal() != null ||
-                requestDTO.getValueBoolean() != null ||
-                requestDTO.getValueDate() != null;
+                    if (isDirectValueProvidedInRequest) {
+                        setVariantAttributeValueBasedOnType(variantAttribute, requestDTO);
+                    }
 
-        if (!isAttributeValueIdProvidedInRequest && !isDirectValueProvidedInRequest) {
-            VariantAttribute updatedVariantAttribute = variantAttributeRepository.save(existingVariantAttribute);
-            return convertToDto(updatedVariantAttribute);
-        }
+                    if (isAttributeValueIdProvidedInRequest) {
+                        AttributeValue attributeValue = attributeValueService.getAttributeValueEntityById(requestDTO.getAttributeValueId())
+                                .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", requestDTO.getAttributeValueId()));
+                        variantAttribute.setAttributeValue(attributeValue);
+                    }
+                    return variantAttribute;
+                }
+        );
 
-        boolean isAttributeValueIdProvided = validateAndDetermineValueSource(requestDTO);
-        setValueBasedOnAttributeType(existingVariantAttribute, currentAttribute, requestDTO, isAttributeValueIdProvided);
+        VariantAttribute variantAttribute = variantAttributeRepository.findById(variantAttributeId)
+                .orElseThrow(() -> new ResourceNotFoundException("VariantAttribute", variantAttributeId));
 
-        VariantAttribute updatedVariantAttribute = variantAttributeRepository.save(existingVariantAttribute);
-        return convertToDto(updatedVariantAttribute);
+        VariantAttribute updatedVariantAttribute = builder.stream()
+                .reduce(Function.identity(), Function::andThen)
+                .apply(variantAttribute);
+
+        return convertToDto(variantAttributeRepository.save(updatedVariantAttribute));
     }
 
     @Transactional
     public void deleteVariantAttribute(UUID id) {
-        // let's make delete idempotent
-//        if (!variantAttributeRepository.existsById(id)) {
-//            throw new ResourceNotFoundException("VariantAttribute", id);
-//        }
+        // let's make delete idempotent and not throw exception if the record does not exist in DB
         variantAttributeRepository.deleteById(id);
     }
 }

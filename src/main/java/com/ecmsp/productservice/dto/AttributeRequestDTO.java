@@ -17,6 +17,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class AttributeRequestDTO {
+    @NotNull(message = "AttributeID is required")
+    private UUID id;
+
     @NotBlank(message = "Attribute name cannot be blank")
     @Size(max = 255, message = "Attribute name cannot exceed 255 characters")
     private String name;
