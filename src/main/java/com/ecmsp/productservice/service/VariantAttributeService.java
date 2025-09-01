@@ -151,7 +151,7 @@ public class VariantAttributeService {
     }
 
 
-    private VariantAttribute convertToEntity(VariantAttributeRequestDTO requestDTO) {
+    public VariantAttribute convertToEntity(VariantAttributeRequestDTO requestDTO) {
 
         List<Function<VariantAttribute, VariantAttribute>> builder = Arrays.asList(
                 (variantAttributeOriginal) -> {

@@ -6,7 +6,7 @@
 CREATE TABLE attribute_values (
                                   id uuid  NOT NULL,
                                   attribute_id uuid  NOT NULL,
-                                  value text  NOT NULL,
+                                  attribute_value text  NOT NULL,
                                   CONSTRAINT attribute_values_pk PRIMARY KEY (id)
 );
 

@@ -19,35 +19,35 @@ import java.util.UUID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.Mockito.when;
 
-//@Component
-//@ExtendWith(MockitoExtension.class)
-//public class ProductServiceTest {
-//
-//    @InjectMocks
-//    @Autowired
-//    private ProductService productService;
-//
-//    @Mock
-//    private ProductRepository productRepository;
-//
-//    @Test
-//    public void shouldReturnProductById() {
-//
-//        UUID goodId = UUID.randomUUID();
-//        UUID badId = UUID.randomUUID();
-//
-//        when(productRepository.findById(goodId))
-//                .thenReturn(Optional.of(TestEntitiesGenerator.randomProduct()));
-//        when(productRepository.findById(badId))
-//                .thenReturn(Optional.empty());
-//
-//        assertThatThrownBy(() -> {
-//            productService.getProductById(badId);
-//        }).isInstanceOf(ResourceNotFoundException.class);
-//
-//        assertThat(productService.getProductById(goodId))
-//                .isNotNull()
-//                .extracting(ProductResponseDTO::getId)
-//                .isNotNull();
-//    }
-//}
+@Component
+@ExtendWith(MockitoExtension.class)
+public class ProductServiceTest {
+
+    @InjectMocks
+    @Autowired
+    private ProductService productService;
+
+    @Mock
+    private ProductRepository productRepository;
+
+    @Test
+    public void shouldReturnProductById() {
+
+        UUID goodId = UUID.randomUUID();
+        UUID badId = UUID.randomUUID();
+
+        when(productRepository.findById(goodId))
+                .thenReturn(Optional.of(TestEntitiesGenerator.randomProduct()));
+        when(productRepository.findById(badId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> {
+            productService.getProductById(badId);
+        }).isInstanceOf(ResourceNotFoundException.class);
+
+        assertThat(productService.getProductById(goodId))
+                .isNotNull()
+                .extracting(ProductResponseDTO::getId)
+                .isNotNull();
+    }
+}

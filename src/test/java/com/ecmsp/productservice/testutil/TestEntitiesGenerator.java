@@ -1,8 +1,6 @@
 package com.ecmsp.productservice.testutil;
 
-import com.ecmsp.productservice.domain.Category;
-import com.ecmsp.productservice.domain.Product;
-import com.ecmsp.productservice.domain.Variant;
+import com.ecmsp.productservice.domain.*;
 import com.ecmsp.productservice.repository.CategoryRepository;
 import com.ecmsp.productservice.repository.VariantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +46,38 @@ public class TestEntitiesGenerator {
                 .description(TestDataGenerator.randomDescription())
                 .info(TestDataGenerator.randomInfo())
                 .build();
+    }
+
+    public static Attribute randomAttribute() {
+        return Attribute
+                .builder()
+                .id(UUID.randomUUID())
+                .category(randomCategory())
+                .name(TestDataGenerator.randomString(5))
+                .unit(TestDataGenerator.randomString(2))
+                .dataType(AttributeDataType.TEXT) // TODO: make it universal
+                .filterable(false)
+                .build();
+    }
+
+    public static AttributeValue randomAttributeValue() {
+        return AttributeValue
+                .builder()
+                .id(UUID.randomUUID())
+                .attribute(randomAttribute())
+                .attributeValue(TestDataGenerator.randomString(5))
+                .build();
+    }
+
+    public static VariantAttribute randomVariantAttribute() {
+        return VariantAttribute
+                .builder()
+                .id(UUID.randomUUID())
+                .variant(randomVariant())
+                .attribute(randomAttribute())
+                .attributeValue(randomAttributeValue())
+                .valueText(TestDataGenerator.randomString(5)) // TODO: make it universal
+                .build();
+
     }
 }
