@@ -16,6 +16,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class VariantAttributeRequestDTO {
+
+    @NotNull(message = "VariantAttribute ID is required")
+    private UUID id;
+
     @NotNull(message = "Variant ID is required")
     private UUID variantId;
 

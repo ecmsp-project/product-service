@@ -4,6 +4,7 @@ import com.ecmsp.productservice.domain.Attribute;
 import com.ecmsp.productservice.domain.Category;
 import com.ecmsp.productservice.dto.AttributeRequestDTO;
 import com.ecmsp.productservice.dto.AttributeResponseDTO;
+import com.ecmsp.productservice.dto.AttributeUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.AttributeRepository;
 import com.ecmsp.productservice.repository.CategoryRepository;
@@ -11,6 +12,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -70,6 +72,10 @@ public class AttributeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
     }
 
+    public Optional<Attribute> getAttributeEntityById(UUID id) {
+        return attributeRepository.findById(id);
+    }
+
     @Transactional
     public AttributeResponseDTO createAttribute(AttributeRequestDTO attributeRequestDTO) {
         Attribute attribute = convertToEntity(attributeRequestDTO);
@@ -78,22 +84,28 @@ public class AttributeService {
     }
 
     @Transactional
-    public AttributeResponseDTO updateAttribute(UUID id, AttributeRequestDTO attributeRequestDTO) {
+    public AttributeResponseDTO updateAttribute(UUID id, AttributeUpdateRequestDTO requestDTO) {
         Attribute existingAttribute = attributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
 
-        existingAttribute.setName(attributeRequestDTO.getName());
-        existingAttribute.setUnit(attributeRequestDTO.getUnit());
-        existingAttribute.setDataType(attributeRequestDTO.getDataType());
-        existingAttribute.setFilterable(attributeRequestDTO.getFilterable());
+        if (requestDTO.getName() != null) {
+            existingAttribute.setName(requestDTO.getName());
+        }
+        if (requestDTO.getUnit() != null) {
+            existingAttribute.setUnit(requestDTO.getUnit());
+        }
+        if (requestDTO.getFilterable() != null) {
+            existingAttribute.setFilterable(requestDTO.getFilterable());
+        }
 
-        UUID newCategoryId = attributeRequestDTO.getCategoryId();
-        UUID currentCategoryId = existingAttribute.getCategory().getId();
-
-        if (!newCategoryId.equals(currentCategoryId)) {
-            Category category = categoryRepository.findById(attributeRequestDTO.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category", attributeRequestDTO.getCategoryId()));
-            existingAttribute.setCategory(category);
+        if (requestDTO.getCategoryId() != null) {
+            UUID newCategoryId = requestDTO.getCategoryId();
+            UUID currentCategoryId = existingAttribute.getCategory().getId();
+            if (!newCategoryId.equals(currentCategoryId)) {
+                Category category = categoryRepository.findById(newCategoryId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Category", newCategoryId));
+                existingAttribute.setCategory(category);
+            }
         }
 
         Attribute updatedAttribute = attributeRepository.save(existingAttribute);

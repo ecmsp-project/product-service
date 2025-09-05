@@ -1,5 +1,7 @@
 package com.ecmsp.productservice.testutil;
 
+import com.ecmsp.productservice.domain.AttributeDataType;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -55,5 +57,14 @@ public class TestDataGenerator {
                 Map.entry("quality", "GOOD"),
                 Map.entry("satisfactionRate", "5")
         );
+    }
+
+    public static AttributeDataType randomDataType() {
+        AttributeDataType[] values = AttributeDataType.values();
+        return values[RANDOM.nextInt(values.length)];
+    }
+
+    public static UUID randomUUID() {
+        return UUID.randomUUID();
     }
 }

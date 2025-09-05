@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class AttributeValueService {
     private AttributeValueResponseDTO convertToDto(AttributeValue attributeValue) {
         return AttributeValueResponseDTO.builder()
                 .id(attributeValue.getId())
-                .value(attributeValue.getValue())
+                .value(attributeValue.getAttributeValue())
                 .attributeId(attributeValue.getAttribute().getId())
                 .build();
     }
@@ -40,7 +41,7 @@ public class AttributeValueService {
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", attributeValueRequestDTO.getAttributeId()));
 
         return AttributeValue.builder()
-                .value(attributeValueRequestDTO.getValue())
+                .attributeValue(attributeValueRequestDTO.getValue())
                 .attribute(attribute)
                 .build();
     }
@@ -57,6 +58,10 @@ public class AttributeValueService {
                 .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", id));
     }
 
+    public Optional<AttributeValue> getAttributeValueEntityById(UUID id) {
+        return attributeValueRepository.findById(id);
+    }
+
     @Transactional
     public AttributeValueResponseDTO createAttributeValue(AttributeValueRequestDTO attributeValueRequestDTO) {
         AttributeValue attributeValue = convertToEntity(attributeValueRequestDTO);
@@ -69,7 +74,7 @@ public class AttributeValueService {
         AttributeValue existingAttributeValue = attributeValueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", id));
 
-        existingAttributeValue.setValue(attributeValueRequestDTO.getValue());
+        existingAttributeValue.setAttributeValue(attributeValueRequestDTO.getValue());
 
         UUID newAttributeId = attributeValueRequestDTO.getAttributeId();
         UUID currentAttributeId = existingAttributeValue.getAttribute().getId();
