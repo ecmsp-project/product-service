@@ -10,6 +10,7 @@ import com.ecmsp.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +80,33 @@ public class VariantService {
 
     @Transactional
     public VariantResponseDTO createVariant(VariantRequestDTO variantRequestDTO) {
+        if (variantRequestDTO.getProductId() == null) {
+            throw new IllegalArgumentException("Product ID is required.");
+        }
+        if (variantRequestDTO.getSku() == null || variantRequestDTO.getSku().isBlank()) {
+            throw new IllegalArgumentException("SKU cannot be blank.");
+        }
+        if (variantRequestDTO.getSku().length() > 12) {
+            throw new IllegalArgumentException("SKU cannot exceed 12 characters.");
+        }
+        if (variantRequestDTO.getPrice() == null) {
+            throw new IllegalArgumentException("Price is required.");
+        }
+        if (variantRequestDTO.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Price must be positive.");
+        }
+        if (variantRequestDTO.getStockQuantity() == null || variantRequestDTO.getStockQuantity() < 0) {
+            throw new IllegalArgumentException("Stock quantity cannot be negative.");
+        }
+        if (variantRequestDTO.getImageUrl() == null || variantRequestDTO.getImageUrl().isBlank()) {
+            throw new IllegalArgumentException("Image URL cannot be blank.");
+        }
+        if (variantRequestDTO.getAdditionalAttributes() == null) {
+            throw new IllegalArgumentException("Additional attributes are required.");
+        }
+        if (variantRequestDTO.getDescription() == null || variantRequestDTO.getDescription().isBlank()) {
+            throw new IllegalArgumentException("Description cannot be blank.");
+        }
         Variant variant = convertToEntity(variantRequestDTO);
         Variant savedVariant = variantRepository.save(variant);
         return convertToDto(savedVariant);
@@ -89,23 +117,59 @@ public class VariantService {
         Variant existingVariant = variantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Variant", id));
 
-        existingVariant.setSku(variantRequestDTO.getSku());
-        existingVariant.setPrice(variantRequestDTO.getPrice());
-        existingVariant.setStockQuantity(variantRequestDTO.getStockQuantity());
-        existingVariant.setImageUrl(variantRequestDTO.getImageUrl());
-        existingVariant.setAdditionalAttributes(variantRequestDTO.getAdditionalAttributes());
-        existingVariant.setDescription(variantRequestDTO.getDescription());
-        existingVariant.setUpdatedAt(LocalDateTime.now());
-
-        UUID newProductId = variantRequestDTO.getProductId();
-        UUID currentProductId = existingVariant.getProduct().getId();
-
-        if (!newProductId.equals(currentProductId)) {
-            Product newProduct = productRepository.findById(variantRequestDTO.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product", variantRequestDTO.getProductId()));
-            existingVariant.setProduct(newProduct);
+        if (variantRequestDTO.getSku() != null) {
+            if (variantRequestDTO.getSku().isBlank()) {
+                throw new IllegalArgumentException("SKU cannot be blank.");
+            }
+            if (variantRequestDTO.getSku().length() > 12) {
+                throw new IllegalArgumentException("SKU cannot exceed 12 characters.");
+            }
+            existingVariant.setSku(variantRequestDTO.getSku());
         }
 
+        if (variantRequestDTO.getPrice() != null) {
+            if (variantRequestDTO.getPrice().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Price must be positive.");
+            }
+            existingVariant.setPrice(variantRequestDTO.getPrice());
+        }
+
+        if (variantRequestDTO.getStockQuantity() != null) {
+            if (variantRequestDTO.getStockQuantity() < 0) {
+                throw new IllegalArgumentException("Stock quantity cannot be negative.");
+            }
+            existingVariant.setStockQuantity(variantRequestDTO.getStockQuantity());
+        }
+
+        if (variantRequestDTO.getImageUrl() != null) {
+            if (variantRequestDTO.getImageUrl().isBlank()) {
+                throw new IllegalArgumentException("Image URL cannot be blank.");
+            }
+            existingVariant.setImageUrl(variantRequestDTO.getImageUrl());
+        }
+
+        if (variantRequestDTO.getAdditionalAttributes() != null) {
+            existingVariant.setAdditionalAttributes(variantRequestDTO.getAdditionalAttributes());
+        }
+
+        if (variantRequestDTO.getDescription() != null) {
+            if (variantRequestDTO.getDescription().isBlank()) {
+                throw new IllegalArgumentException("Description cannot be blank.");
+            }
+            existingVariant.setDescription(variantRequestDTO.getDescription());
+        }
+
+        if (variantRequestDTO.getProductId() != null) {
+            UUID newProductId = variantRequestDTO.getProductId();
+            UUID currentProductId = existingVariant.getProduct().getId();
+            if (!newProductId.equals(currentProductId)) {
+                Product newProduct = productRepository.findById(newProductId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Product", newProductId));
+                existingVariant.setProduct(newProduct);
+            }
+        }
+
+        existingVariant.setUpdatedAt(LocalDateTime.now());
         Variant updatedVariant = variantRepository.save(existingVariant);
         return convertToDto(updatedVariant);
     }

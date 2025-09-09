@@ -71,6 +71,12 @@ public class CategoryService {
 
     @Transactional
     public CategoryResponseDTO createCategory(CategoryRequestDTO categoryRequestDTO) {
+        if (categoryRequestDTO.getName() == null || categoryRequestDTO.getName().isBlank()) {
+            throw new IllegalArgumentException("Category name cannot be blank.");
+        }
+        if (categoryRequestDTO.getName().length() > 255) {
+            throw new IllegalArgumentException("Category name cannot exceed 255 characters.");
+        }
         Category category = convertToEntity(categoryRequestDTO);
         Category savedCategory = categoryRepository.save(category);
         return convertToDto(savedCategory);
@@ -81,7 +87,15 @@ public class CategoryService {
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", id));
 
-        existingCategory.setName(categoryRequestDTO.getName());
+        if (categoryRequestDTO.getName() != null) {
+            if (categoryRequestDTO.getName().isBlank()) {
+                throw new IllegalArgumentException("Category name cannot be blank.");
+            }
+            if (categoryRequestDTO.getName().length() > 255) {
+                throw new IllegalArgumentException("Category name cannot exceed 255 characters.");
+            }
+            existingCategory.setName(categoryRequestDTO.getName());
+        }
 
         if ((categoryRequestDTO.getParentCategoryId() == null && existingCategory.getParentCategory() != null) ||
                 (categoryRequestDTO.getParentCategoryId() != null && (existingCategory.getParentCategory() == null ||

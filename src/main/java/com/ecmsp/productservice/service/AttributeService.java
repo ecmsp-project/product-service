@@ -4,7 +4,6 @@ import com.ecmsp.productservice.domain.Attribute;
 import com.ecmsp.productservice.domain.Category;
 import com.ecmsp.productservice.dto.AttributeRequestDTO;
 import com.ecmsp.productservice.dto.AttributeResponseDTO;
-import com.ecmsp.productservice.dto.AttributeUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.AttributeRepository;
 import com.ecmsp.productservice.repository.CategoryRepository;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class AttributeService {
@@ -78,20 +76,48 @@ public class AttributeService {
 
     @Transactional
     public AttributeResponseDTO createAttribute(AttributeRequestDTO attributeRequestDTO) {
+        if (attributeRequestDTO.getName() == null || attributeRequestDTO.getName().isBlank()) {
+            throw new IllegalArgumentException("Attribute name cannot be blank.");
+        }
+        if (attributeRequestDTO.getDataType() == null) {
+            throw new IllegalArgumentException("Data type is required.");
+        }
+        if (attributeRequestDTO.getFilterable() == null) {
+            throw new IllegalArgumentException("Filterable status is required.");
+        }
+        if (attributeRequestDTO.getCategoryId() == null) {
+            throw new IllegalArgumentException("Category ID is required.");
+        }
+        if (attributeRequestDTO.getName().length() > 255) {
+            throw new IllegalArgumentException("Attribute name cannot exceed 255 characters.");
+        }
+        if (attributeRequestDTO.getUnit() != null && attributeRequestDTO.getUnit().length() > 50) {
+            throw new IllegalArgumentException("Unit cannot exceed 50 characters.");
+        }
+
         Attribute attribute = convertToEntity(attributeRequestDTO);
         Attribute savedAttribute = attributeRepository.save(attribute);
         return convertToDto(savedAttribute);
     }
 
     @Transactional
-    public AttributeResponseDTO updateAttribute(UUID id, AttributeUpdateRequestDTO requestDTO) {
+    public AttributeResponseDTO updateAttribute(UUID id, AttributeRequestDTO requestDTO) {
         Attribute existingAttribute = attributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
 
         if (requestDTO.getName() != null) {
+            if (requestDTO.getName().isBlank()) {
+                throw new IllegalArgumentException("Attribute name cannot be blank.");
+            }
+            if (requestDTO.getName().length() > 255) {
+                throw new IllegalArgumentException("Attribute name cannot exceed 255 characters.");
+            }
             existingAttribute.setName(requestDTO.getName());
         }
         if (requestDTO.getUnit() != null) {
+            if (requestDTO.getUnit().length() > 50) {
+                throw new IllegalArgumentException("Unit cannot exceed 50 characters.");
+            }
             existingAttribute.setUnit(requestDTO.getUnit());
         }
         if (requestDTO.getFilterable() != null) {

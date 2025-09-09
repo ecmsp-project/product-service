@@ -208,6 +208,16 @@ public class VariantAttributeService {
 
     @Transactional
     public VariantAttributeResponseDTO createVariantAttribute(VariantAttributeRequestDTO requestDTO) {
+        if (requestDTO.getVariantId() == null) {
+            throw new IllegalArgumentException("Variant ID is required.");
+        }
+        if (requestDTO.getAttributeId() == null) {
+            throw new IllegalArgumentException("Attribute ID is required.");
+        }
+
+        if (requestDTO.getValueText() != null && requestDTO.getValueText().length() > 255) {
+            throw new IllegalArgumentException("Text value cannot exceed 255 characters.");
+        }
         VariantAttribute variantAttribute = convertToEntity(requestDTO);
         VariantAttribute savedVariantAttribute = variantAttributeRepository.save(variantAttribute);
         return convertToDto(savedVariantAttribute);
@@ -215,64 +225,51 @@ public class VariantAttributeService {
 
     @Transactional
     public VariantAttributeResponseDTO updateVariantAttribute(UUID variantAttributeId, VariantAttributeRequestDTO requestDTO) {
-        List<Function<VariantAttribute, VariantAttribute>> builder = Arrays.asList(
-                // Update Variant entity
-                (variantAttributeOriginal) -> {
-                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
-                    Variant variant = variantAttribute.getVariant();
-
-                    if (!variant.getId().equals(requestDTO.getVariantId())) {
-                        Variant newVariant = variantService.getVariantEntityById(requestDTO.getVariantId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Variant", requestDTO.getVariantId()));
-                        variantAttribute.setVariant(newVariant);
-                    }
-                    return variantAttribute;
-                },
-                // Update Attribute entity
-                (variantAttributeOriginal) -> {
-                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
-                    Attribute attribute = variantAttribute.getAttribute();
-
-                    if (!attribute.getId().equals(requestDTO.getAttributeId())) {
-                        Attribute newAttribute = attributeService.getAttributeEntityById(requestDTO.getAttributeId())
-                                .orElseThrow(() -> new ResourceNotFoundException("Attribute", requestDTO.getAttributeId()));
-                        variantAttribute.setAttribute(newAttribute);
-                    }
-                    return variantAttribute;
-                },
-                // Update Value of VariantAttribute and AttributeValue entity
-                (variantAttributeOriginal) -> {
-                    VariantAttribute variantAttribute = variantAttributeOriginal.toBuilder().build();
-
-                    boolean isAttributeValueIdProvidedInRequest = requestDTO.getAttributeValueId() != null;
-                    boolean isDirectValueProvidedInRequest = (
-                            requestDTO.getValueText() != null ||
-                            requestDTO.getValueDecimal() != null ||
-                            requestDTO.getValueBoolean() != null ||
-                            requestDTO.getValueDate() != null
-                    );
-
-                    if (isDirectValueProvidedInRequest) {
-                        setVariantAttributeValueBasedOnType(variantAttribute, requestDTO);
-                    }
-
-                    if (isAttributeValueIdProvidedInRequest) {
-                        AttributeValue attributeValue = attributeValueService.getAttributeValueEntityById(requestDTO.getAttributeValueId())
-                                .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", requestDTO.getAttributeValueId()));
-                        variantAttribute.setAttributeValue(attributeValue);
-                    }
-                    return variantAttribute;
-                }
-        );
-
-        VariantAttribute variantAttribute = variantAttributeRepository.findById(variantAttributeId)
+        VariantAttribute existingVariantAttribute = variantAttributeRepository.findById(variantAttributeId)
                 .orElseThrow(() -> new ResourceNotFoundException("VariantAttribute", variantAttributeId));
 
-        VariantAttribute updatedVariantAttribute = builder.stream()
-                .reduce(Function.identity(), Function::andThen)
-                .apply(variantAttribute);
+        if (requestDTO.getVariantId() != null) {
+            if (!existingVariantAttribute.getVariant().getId().equals(requestDTO.getVariantId())) {
+                Variant newVariant = variantService.getVariantEntityById(requestDTO.getVariantId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Variant", requestDTO.getVariantId()));
+                existingVariantAttribute.setVariant(newVariant);
+            }
+        }
 
-        return convertToDto(variantAttributeRepository.save(updatedVariantAttribute));
+        if (requestDTO.getAttributeId() != null) {
+            if (!existingVariantAttribute.getAttribute().getId().equals(requestDTO.getAttributeId())) {
+                Attribute newAttribute = attributeService.getAttributeEntityById(requestDTO.getAttributeId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Attribute", requestDTO.getAttributeId()));
+                existingVariantAttribute.setAttribute(newAttribute);
+            }
+        }
+
+        if (requestDTO.getAttributeValueId() != null) {
+            AttributeValue attributeValue = attributeValueService.getAttributeValueEntityById(requestDTO.getAttributeValueId())
+                    .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", requestDTO.getAttributeValueId()));
+            if (!attributeValue.getAttribute().getId().equals(requestDTO.getAttributeId())) {
+                String message = String.format("Provided AttributeValue '%s' does not belong to the specified Attribute '%s'.", requestDTO.getAttributeValueId(), requestDTO.getAttributeId());
+                throw new IllegalArgumentException(message);
+            }
+            existingVariantAttribute.setAttributeValue(attributeValue);
+        }
+        if (requestDTO.getValueText() != null) {
+            if (requestDTO.getValueText().length() > 255) {
+                throw new IllegalArgumentException("Text value cannot exceed 255 characters.");
+            }
+            existingVariantAttribute.setValueText(requestDTO.getValueText());
+        }
+        if (requestDTO.getValueDecimal() != null) {
+            existingVariantAttribute.setValueDecimal(requestDTO.getValueDecimal());
+        }
+        if (requestDTO.getValueBoolean() != null) {
+            existingVariantAttribute.setValueBoolean(requestDTO.getValueBoolean());
+        }
+        if (requestDTO.getValueDate() != null) {
+            existingVariantAttribute.setValueDate(requestDTO.getValueDate());
+        }
+        VariantAttribute updatedVariantAttribute = variantAttributeRepository.save(existingVariantAttribute);
+        return convertToDto(updatedVariantAttribute);
     }
 
     @Transactional

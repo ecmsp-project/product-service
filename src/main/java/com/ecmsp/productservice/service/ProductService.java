@@ -10,6 +10,7 @@ import com.ecmsp.productservice.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -66,6 +67,30 @@ public class ProductService {
 
     @Transactional
     public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
+        if (productRequestDTO.getName() == null || productRequestDTO.getName().isBlank()) {
+            throw new IllegalArgumentException("Product name cannot be blank.");
+        }
+        if (productRequestDTO.getApproximatePrice() == null) {
+            throw new IllegalArgumentException("Approximate price is required.");
+        }
+        if (productRequestDTO.getApproximatePrice().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Approximate price must be positive.");
+        }
+        if (productRequestDTO.getDeliveryPrice() == null) {
+            throw new IllegalArgumentException("Delivery price is required.");
+        }
+        if (productRequestDTO.getDeliveryPrice().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Delivery price cannot be negative.");
+        }
+        if (productRequestDTO.getDescription() == null || productRequestDTO.getDescription().isBlank()) {
+            throw new IllegalArgumentException("Description cannot be blank.");
+        }
+        if (productRequestDTO.getInfo() == null) {
+            throw new IllegalArgumentException("Info JSON is required.");
+        }
+        if (productRequestDTO.getCategoryId() == null) {
+            throw new IllegalArgumentException("Category ID is required.");
+        }
         Product product = convertToEntity(productRequestDTO);
         Product savedProduct = productRepository.save(product);
         return convertToDto(savedProduct);
@@ -76,19 +101,47 @@ public class ProductService {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
 
-        existingProduct.setName(productRequestDTO.getName());
-        existingProduct.setApproximatePrice(productRequestDTO.getApproximatePrice());
-        existingProduct.setDeliveryPrice(productRequestDTO.getDeliveryPrice());
-        existingProduct.setDescription(productRequestDTO.getDescription());
-        existingProduct.setInfo(productRequestDTO.getInfo());
+        if (productRequestDTO.getName() != null) {
+            if (productRequestDTO.getName().isBlank()) {
+                throw new IllegalArgumentException("Product name cannot be blank.");
+            }
+            existingProduct.setName(productRequestDTO.getName());
+        }
 
-        UUID newCategoryId = productRequestDTO.getCategoryId();
-        UUID currentCategoryId = existingProduct.getCategory().getId();
+        if (productRequestDTO.getApproximatePrice() != null) {
+            if (productRequestDTO.getApproximatePrice().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Approximate price must be positive.");
+            }
+            existingProduct.setApproximatePrice(productRequestDTO.getApproximatePrice());
+        }
 
-        if (!newCategoryId.equals(currentCategoryId)) {
-            Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category", productRequestDTO.getCategoryId()));
-            existingProduct.setCategory(category);
+        if (productRequestDTO.getDeliveryPrice() != null) {
+            if (productRequestDTO.getDeliveryPrice().compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("Delivery price cannot be negative.");
+            }
+            existingProduct.setDeliveryPrice(productRequestDTO.getDeliveryPrice());
+        }
+
+        if (productRequestDTO.getDescription() != null) {
+            if (productRequestDTO.getDescription().isBlank()) {
+                throw new IllegalArgumentException("Description cannot be blank.");
+            }
+            existingProduct.setDescription(productRequestDTO.getDescription());
+        }
+
+        if (productRequestDTO.getInfo() != null) {
+            existingProduct.setInfo(productRequestDTO.getInfo());
+        }
+
+        if (productRequestDTO.getCategoryId() != null) {
+            UUID newCategoryId = productRequestDTO.getCategoryId();
+            UUID currentCategoryId = existingProduct.getCategory().getId();
+
+            if (!newCategoryId.equals(currentCategoryId)) {
+                Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Category", productRequestDTO.getCategoryId()));
+                existingProduct.setCategory(category);
+            }
         }
 
         Product updatedProduct = productRepository.save(existingProduct);

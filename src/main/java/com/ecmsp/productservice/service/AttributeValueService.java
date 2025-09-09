@@ -64,6 +64,15 @@ public class AttributeValueService {
 
     @Transactional
     public AttributeValueResponseDTO createAttributeValue(AttributeValueRequestDTO attributeValueRequestDTO) {
+        if (attributeValueRequestDTO.getValue() == null || attributeValueRequestDTO.getValue().isBlank()) {
+            throw new IllegalArgumentException("Value cannot be blank.");
+        }
+        if (attributeValueRequestDTO.getValue().length() > 255) {
+            throw new IllegalArgumentException("Value cannot exceed 255 characters.");
+        }
+        if (attributeValueRequestDTO.getAttributeId() == null) {
+            throw new IllegalArgumentException("Attribute ID is required.");
+        }
         AttributeValue attributeValue = convertToEntity(attributeValueRequestDTO);
         AttributeValue savedAttributeValue = attributeValueRepository.save(attributeValue);
         return convertToDto(savedAttributeValue);
@@ -74,15 +83,25 @@ public class AttributeValueService {
         AttributeValue existingAttributeValue = attributeValueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", id));
 
-        existingAttributeValue.setAttributeValue(attributeValueRequestDTO.getValue());
+        if (attributeValueRequestDTO.getValue() != null) {
+            if (attributeValueRequestDTO.getValue().isBlank()) {
+                throw new IllegalArgumentException("Value cannot be blank.");
+            }
+            if (attributeValueRequestDTO.getValue().length() > 255) {
+                throw new IllegalArgumentException("Value cannot exceed 255 characters.");
+            }
+            existingAttributeValue.setAttributeValue(attributeValueRequestDTO.getValue());
+        }
 
-        UUID newAttributeId = attributeValueRequestDTO.getAttributeId();
-        UUID currentAttributeId = existingAttributeValue.getAttribute().getId();
+        if (attributeValueRequestDTO.getAttributeId() != null) {
+            UUID newAttributeId = attributeValueRequestDTO.getAttributeId();
+            UUID currentAttributeId = existingAttributeValue.getAttribute().getId();
 
-        if (!newAttributeId.equals(currentAttributeId)) {
-            Attribute newAttribute = attributeRepository.findById(attributeValueRequestDTO.getAttributeId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Attribute", attributeValueRequestDTO.getAttributeId()));
-            existingAttributeValue.setAttribute(newAttribute);
+            if (!newAttributeId.equals(currentAttributeId)) {
+                Attribute newAttribute = attributeRepository.findById(newAttributeId)
+                        .orElseThrow(() -> new ResourceNotFoundException("Attribute", newAttributeId));
+                existingAttributeValue.setAttribute(newAttribute);
+            }
         }
 
         AttributeValue updatedAttributeValue = attributeValueRepository.save(existingAttributeValue);
