@@ -32,6 +32,7 @@ CREATE TABLE categories (
 -- Table: products
 CREATE TABLE products (
                           id uuid  NOT NULL,
+                          product_id integer  NOT NULL UNIQUE,
                           category_id uuid  NOT NULL,
                           name varchar(255)  NOT NULL,
                           approximate_price decimal(12,2)  NOT NULL,
@@ -40,6 +41,9 @@ CREATE TABLE products (
                           info jsonb  NULL,
                           CONSTRAINT products_pk PRIMARY KEY (id)
 );
+
+-- Create sequence for product_id
+CREATE SEQUENCE product_id_seq START 1;
 
 -- Table: variant_attributes
 CREATE TABLE variant_attributes (
@@ -61,6 +65,7 @@ CREATE TABLE variants (
                           sku char(10)  NOT NULL,
                           price decimal(12,2)  NOT NULL,
                           stock_quantity int  NOT NULL,
+                          reserved_quantity int  NOT NULL DEFAULT 0,
                           image_url varchar(255)  NOT NULL,
                           additional_attributes jsonb  NULL,
                           description text  NULL,
@@ -133,6 +138,29 @@ ALTER TABLE variants ADD CONSTRAINT variant_product
         NOT DEFERRABLE
             INITIALLY IMMEDIATE
 ;
+
+-- Create variant_reservations table for managing product reservations
+CREATE TABLE variant_reservations (
+                                      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                                      variant_id UUID NOT NULL,
+                                      reserved_quantity INTEGER NOT NULL CHECK (reserved_quantity > 0),
+                                      reservation_id VARCHAR(255) NOT NULL,
+                                      created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                      expires_at TIMESTAMP WITHOUT TIME ZONE,
+                                      status VARCHAR(20) NOT NULL CHECK (status IN ('ACTIVE', 'RELEASED', 'EXPIRED')) DEFAULT 'ACTIVE'
+);
+
+-- Create indexes for better query performance
+CREATE INDEX idx_variant_reservations_variant_id ON variant_reservations(variant_id);
+CREATE INDEX idx_variant_reservations_reservation_id ON variant_reservations(reservation_id);
+CREATE INDEX idx_variant_reservations_status ON variant_reservations(status);
+CREATE INDEX idx_variant_reservations_expires_at ON variant_reservations(expires_at);
+CREATE INDEX idx_variant_reservations_variant_status ON variant_reservations(variant_id, status);
+
+-- Add foreign key constraint to variants table
+ALTER TABLE variant_reservations
+    ADD CONSTRAINT fk_variant_reservations_variant_id
+        FOREIGN KEY (variant_id) REFERENCES variants(id) ON DELETE CASCADE;
 
 -- End of file.
 

@@ -37,6 +37,10 @@ public class Variant {
     @Column(name = "stock_quantity", nullable = false)
     private int stockQuantity;
 
+    @Column(name = "reserved_quantity", nullable = false)
+    @Builder.Default
+    private int reservedQuantity = 0;
+
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
@@ -57,4 +61,28 @@ public class Variant {
     @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<VariantAttribute> variantAttributes  = new HashSet<>();
+
+    public int getAvailableQuantity() {
+        return stockQuantity - reservedQuantity;
+    }
+
+    public boolean canReserve(int quantity) {
+        return getAvailableQuantity() >= quantity;
+    }
+
+    public void reserveQuantity(int quantity) {
+        if (!canReserve(quantity)) {
+            throw new IllegalArgumentException("Insufficient available quantity. Available: " +
+                getAvailableQuantity() + ", requested: " + quantity);
+        }
+        this.reservedQuantity += quantity;
+    }
+
+    public void releaseReservation(int quantity) {
+        if (quantity > this.reservedQuantity) {
+            throw new IllegalArgumentException("Cannot release more than reserved. Reserved: " +
+                this.reservedQuantity + ", requested: " + quantity);
+        }
+        this.reservedQuantity -= quantity;
+    }
 }

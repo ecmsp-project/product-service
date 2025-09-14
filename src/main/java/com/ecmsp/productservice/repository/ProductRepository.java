@@ -43,4 +43,8 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     List<Product> findByApproximatePriceBetween(BigDecimal min, BigDecimal max);
 
     List<Product> findByDeliveryPriceBetween(BigDecimal deliveryPriceAfter, BigDecimal deliveryPriceBefore);
+
+    Optional<Product> findByProductId(Integer productId);
+
+    boolean existsByProductId(Integer productId);
 }

@@ -23,6 +23,9 @@ public class Product {
     @EqualsAndHashCode.Include
     private UUID id;
 
+    @Column(name = "product_id", nullable = false, unique = true)
+    private Integer productId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
