@@ -39,7 +39,7 @@ public class Category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<Attribute> attributes = new HashSet<>();
+    private Set<Property> properties = new HashSet<>();
 
     @Override
     public String toString() {

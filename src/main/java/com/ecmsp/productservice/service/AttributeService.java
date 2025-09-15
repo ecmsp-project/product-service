@@ -1,31 +1,30 @@
 package com.ecmsp.productservice.service;
 
-import com.ecmsp.productservice.domain.Attribute;
+import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.domain.Category;
 import com.ecmsp.productservice.dto.AttributeRequestDTO;
 import com.ecmsp.productservice.dto.AttributeResponseDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
-import com.ecmsp.productservice.repository.AttributeRepository;
+import com.ecmsp.productservice.repository.PropertyRepository;
 import com.ecmsp.productservice.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class AttributeService {
 
-    private final AttributeRepository attributeRepository;
+    private final PropertyRepository attributeRepository;
     private final CategoryRepository categoryRepository;
 
-    public AttributeService(AttributeRepository attributeRepository, CategoryRepository categoryRepository) {
+    public AttributeService(PropertyRepository attributeRepository, CategoryRepository categoryRepository) {
         this.attributeRepository = attributeRepository;
         this.categoryRepository = categoryRepository;
     }
 
-    private AttributeResponseDTO convertToDto(Attribute attribute) {
+    private AttributeResponseDTO convertToDto(Property attribute) {
         return AttributeResponseDTO.builder()
                 .id(attribute.getId())
                 .name(attribute.getName())
@@ -45,11 +44,11 @@ public class AttributeService {
 
     }
 
-    private Attribute convertToEntity(AttributeRequestDTO attributeRequestDTO) {
+    private Property convertToEntity(AttributeRequestDTO attributeRequestDTO) {
         Category category = categoryRepository.findById(attributeRequestDTO.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category", attributeRequestDTO.getCategoryId()));
 
-        return Attribute.builder()
+        return Property.builder()
                 .name(attributeRequestDTO.getName())
                 .unit(attributeRequestDTO.getUnit())
                 .dataType(attributeRequestDTO.getDataType())
@@ -72,14 +71,14 @@ public class AttributeService {
 
     @Transactional
     public AttributeResponseDTO createAttribute(AttributeRequestDTO attributeRequestDTO) {
-        Attribute attribute = convertToEntity(attributeRequestDTO);
-        Attribute savedAttribute = attributeRepository.save(attribute);
+        Property attribute = convertToEntity(attributeRequestDTO);
+        Property savedAttribute = attributeRepository.save(attribute);
         return convertToDto(savedAttribute);
     }
 
     @Transactional
     public AttributeResponseDTO updateAttribute(UUID id, AttributeRequestDTO attributeRequestDTO) {
-        Attribute existingAttribute = attributeRepository.findById(id)
+        Property existingAttribute = attributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
 
         existingAttribute.setName(attributeRequestDTO.getName());
@@ -96,13 +95,13 @@ public class AttributeService {
             existingAttribute.setCategory(category);
         }
 
-        Attribute updatedAttribute = attributeRepository.save(existingAttribute);
+        Property updatedAttribute = attributeRepository.save(existingAttribute);
         return convertToDto(updatedAttribute);
     }
 
     @Transactional
     public void deleteAttribute(UUID id) {
-        Attribute attribute = attributeRepository.findById(id)
+        Property attribute = attributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", id));
         attributeRepository.delete(attribute);
     }

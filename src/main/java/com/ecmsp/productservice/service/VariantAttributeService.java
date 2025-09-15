@@ -1,15 +1,15 @@
 package com.ecmsp.productservice.service;
 
-import com.ecmsp.productservice.domain.Attribute;
-import com.ecmsp.productservice.domain.AttributeValue;
+import com.ecmsp.productservice.domain.Property;
+import com.ecmsp.productservice.domain.PropertyOption;
 import com.ecmsp.productservice.domain.Variant;
-import com.ecmsp.productservice.domain.VariantAttribute;
+import com.ecmsp.productservice.domain.VariantProperty;
 import com.ecmsp.productservice.dto.VariantAttributeRequestDTO;
 import com.ecmsp.productservice.dto.VariantAttributeResponseDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
-import com.ecmsp.productservice.repository.AttributeRepository;
-import com.ecmsp.productservice.repository.AttributeValueRepository;
-import com.ecmsp.productservice.repository.VariantAttributeRepository;
+import com.ecmsp.productservice.repository.PropertyRepository;
+import com.ecmsp.productservice.repository.PropertyOptionRepository;
+import com.ecmsp.productservice.repository.VariantPropertyRepository;
 import com.ecmsp.productservice.repository.VariantRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -21,17 +21,17 @@ import java.util.stream.Collectors;
 @Service
 public class VariantAttributeService {
 
-    private final VariantAttributeRepository variantAttributeRepository;
-    private final AttributeValueRepository attributeValueRepository;
+    private final VariantPropertyRepository variantAttributeRepository;
+    private final PropertyOptionRepository attributeValueRepository;
 
     private final VariantRepository variantRepository;
-    private final AttributeRepository attributeRepository;
+    private final PropertyRepository attributeRepository;
 
     public VariantAttributeService(
-            VariantAttributeRepository variantAttributeRepository,
+            VariantPropertyRepository variantAttributeRepository,
             VariantRepository variantRepository,
-            AttributeRepository attributeRepository,
-            AttributeValueRepository attributeValueRepository) {
+            PropertyRepository attributeRepository,
+            PropertyOptionRepository attributeValueRepository) {
         this.variantAttributeRepository = variantAttributeRepository;
         this.variantRepository = variantRepository;
         this.attributeRepository = attributeRepository;
@@ -57,8 +57,8 @@ public class VariantAttributeService {
     }
 
     private void setValueBasedOnAttributeType(
-            VariantAttribute entity,
-            Attribute attribute,
+            VariantProperty entity,
+            Property attribute,
             VariantAttributeRequestDTO requestDTO,
             boolean isAttributeValueIdProvided
     ) {
@@ -70,7 +70,7 @@ public class VariantAttributeService {
 
 
         if (isAttributeValueIdProvided) {
-            AttributeValue attributeValue = attributeValueRepository.findById(requestDTO.getAttributeValueId())
+            PropertyOption attributeValue = attributeValueRepository.findById(requestDTO.getAttributeValueId())
                     .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", requestDTO.getAttributeValueId()));
 
             if (!attributeValue.getAttribute().getId().equals(attribute.getId())) {
@@ -109,12 +109,12 @@ public class VariantAttributeService {
     }
 
     // TODO: move this function to attribute service
-    private Attribute findAttributeById(UUID attributeId) {
+    private Property findAttributeById(UUID attributeId) {
         return attributeRepository.findById(attributeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", attributeId));
     }
 
-    private VariantAttributeResponseDTO convertToDto(VariantAttribute variantAttribute) {
+    private VariantAttributeResponseDTO convertToDto(VariantProperty variantAttribute) {
         VariantAttributeResponseDTO.VariantAttributeResponseDTOBuilder dtoBuilder = VariantAttributeResponseDTO.builder()
                 .id(variantAttribute.getId());
 
@@ -122,7 +122,7 @@ public class VariantAttributeService {
             dtoBuilder.variantId(variantAttribute.getVariant().getId());
         }
 
-        Attribute attribute = variantAttribute.getAttribute();
+        Property attribute = variantAttribute.getAttribute();
         // TODO: is putting all that information in DTO response a good choice? Shall we send just attribute id?
         // TODO: On the other hand, in microservices, maybe it is a good approach
         if (attribute != null) {
@@ -160,11 +160,11 @@ public class VariantAttributeService {
         return dtoBuilder.build();
     }
 
-    private VariantAttribute convertToEntity(VariantAttributeRequestDTO requestDTO) {
+    private VariantProperty convertToEntity(VariantAttributeRequestDTO requestDTO) {
         Variant variant = findVariantById(requestDTO.getVariantId());
-        Attribute attribute = findAttributeById(requestDTO.getAttributeId());
+        Property attribute = findAttributeById(requestDTO.getAttributeId());
 
-        VariantAttribute newVariantAttribute = VariantAttribute.builder()
+        VariantProperty newVariantAttribute = VariantProperty.builder()
                 .variant(variant)
                 .attribute(attribute)
                 .build();
@@ -182,24 +182,24 @@ public class VariantAttributeService {
     }
 
     public VariantAttributeResponseDTO getVariantAttributeById(UUID id) {
-        VariantAttribute variantAttribute = variantAttributeRepository.findById(id)
+        VariantProperty variantAttribute = variantAttributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("VariantAttribute", id));
         return convertToDto(variantAttribute);
     }
 
     @Transactional
     public VariantAttributeResponseDTO createVariantAttribute(VariantAttributeRequestDTO requestDTO) {
-        VariantAttribute variantAttribute = convertToEntity(requestDTO);
-        VariantAttribute savedVariantAttribute = variantAttributeRepository.save(variantAttribute);
+        VariantProperty variantAttribute = convertToEntity(requestDTO);
+        VariantProperty savedVariantAttribute = variantAttributeRepository.save(variantAttribute);
         return convertToDto(savedVariantAttribute);
     }
 
     @Transactional
     public VariantAttributeResponseDTO updateVariantAttribute(UUID id, VariantAttributeRequestDTO requestDTO) {
-        VariantAttribute existingVariantAttribute = variantAttributeRepository.findById(id)
+        VariantProperty existingVariantAttribute = variantAttributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("VariantAttribute", id));
 
-        Attribute currentAttribute = existingVariantAttribute.getAttribute();
+        Property currentAttribute = existingVariantAttribute.getAttribute();
         Variant currentVariant = existingVariantAttribute.getVariant();
 
         if (!currentVariant.getId().equals(requestDTO.getVariantId())) {
@@ -208,7 +208,7 @@ public class VariantAttributeService {
         }
 
         if (!currentAttribute.getId().equals(requestDTO.getAttributeId())) {
-            Attribute newAttribute = findAttributeById(requestDTO.getAttributeId());
+            Property newAttribute = findAttributeById(requestDTO.getAttributeId());
             existingVariantAttribute.setAttribute(newAttribute);
             currentAttribute = newAttribute;
         }
@@ -220,14 +220,14 @@ public class VariantAttributeService {
                 requestDTO.getValueDate() != null;
 
         if (!isAttributeValueIdProvidedInRequest && !isDirectValueProvidedInRequest) {
-            VariantAttribute updatedVariantAttribute = variantAttributeRepository.save(existingVariantAttribute);
+            VariantProperty updatedVariantAttribute = variantAttributeRepository.save(existingVariantAttribute);
             return convertToDto(updatedVariantAttribute);
         }
 
         boolean isAttributeValueIdProvided = validateAndDetermineValueSource(requestDTO);
         setValueBasedOnAttributeType(existingVariantAttribute, currentAttribute, requestDTO, isAttributeValueIdProvided);
 
-        VariantAttribute updatedVariantAttribute = variantAttributeRepository.save(existingVariantAttribute);
+        VariantProperty updatedVariantAttribute = variantAttributeRepository.save(existingVariantAttribute);
         return convertToDto(updatedVariantAttribute);
     }
 

@@ -2,19 +2,20 @@ package com.ecmsp.productservice.domain;
 
 import lombok.*;
 import jakarta.persistence.*;
-import java.util.UUID;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
-@Table(name = "variant_attributes")
+@Table(name = "property_options")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class VariantAttribute {
+public class PropertyOption {
 
     @Id
     @GeneratedValue
@@ -23,16 +24,8 @@ public class VariantAttribute {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "variant_id", nullable = false)
-    private Variant variant;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attribute_id", nullable = false)
-    private Attribute attribute;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "attribute_value_id")
-    private AttributeValue attributeValue;
+    @JoinColumn(name = "property_id", nullable = false)
+    private Property property;
 
     @Column(name = "value_text", columnDefinition = "text")
     private String valueText;
@@ -45,4 +38,8 @@ public class VariantAttribute {
 
     @Column(name = "value_date")
     private LocalDate valueDate;
+
+    @Column(name = "display_text", nullable = false, columnDefinition = "text")
+    private String displayText;
+
 }

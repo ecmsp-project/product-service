@@ -1,12 +1,12 @@
 package com.ecmsp.productservice.service;
 
-import com.ecmsp.productservice.domain.Attribute;
-import com.ecmsp.productservice.domain.AttributeValue;
+import com.ecmsp.productservice.domain.Property;
+import com.ecmsp.productservice.domain.PropertyOption;
 import com.ecmsp.productservice.dto.AttributeValueRequestDTO;
 import com.ecmsp.productservice.dto.AttributeValueResponseDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
-import com.ecmsp.productservice.repository.AttributeRepository;
-import com.ecmsp.productservice.repository.AttributeValueRepository;
+import com.ecmsp.productservice.repository.PropertyRepository;
+import com.ecmsp.productservice.repository.PropertyOptionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -17,17 +17,17 @@ import java.util.stream.Collectors;
 @Service
 public class AttributeValueService {
 
-    private final AttributeValueRepository attributeValueRepository;
-    private final AttributeRepository attributeRepository;
+    private final PropertyOptionRepository attributeValueRepository;
+    private final PropertyRepository attributeRepository;
 
     public AttributeValueService(
-            AttributeValueRepository attributeValueRepository,
-            AttributeRepository attributeRepository) {
+            PropertyOptionRepository attributeValueRepository,
+            PropertyRepository attributeRepository) {
         this.attributeValueRepository = attributeValueRepository;
         this.attributeRepository = attributeRepository;
     }
 
-    private AttributeValueResponseDTO convertToDto(AttributeValue attributeValue) {
+    private AttributeValueResponseDTO convertToDto(PropertyOption attributeValue) {
         return AttributeValueResponseDTO.builder()
                 .id(attributeValue.getId())
                 .value(attributeValue.getValue())
@@ -35,11 +35,11 @@ public class AttributeValueService {
                 .build();
     }
 
-    private AttributeValue convertToEntity(AttributeValueRequestDTO attributeValueRequestDTO) {
-        Attribute attribute = attributeRepository.findById(attributeValueRequestDTO.getAttributeId())
+    private PropertyOption convertToEntity(AttributeValueRequestDTO attributeValueRequestDTO) {
+        Property attribute = attributeRepository.findById(attributeValueRequestDTO.getAttributeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", attributeValueRequestDTO.getAttributeId()));
 
-        return AttributeValue.builder()
+        return PropertyOption.builder()
                 .value(attributeValueRequestDTO.getValue())
                 .attribute(attribute)
                 .build();
@@ -59,14 +59,14 @@ public class AttributeValueService {
 
     @Transactional
     public AttributeValueResponseDTO createAttributeValue(AttributeValueRequestDTO attributeValueRequestDTO) {
-        AttributeValue attributeValue = convertToEntity(attributeValueRequestDTO);
-        AttributeValue savedAttributeValue = attributeValueRepository.save(attributeValue);
+        PropertyOption attributeValue = convertToEntity(attributeValueRequestDTO);
+        PropertyOption savedAttributeValue = attributeValueRepository.save(attributeValue);
         return convertToDto(savedAttributeValue);
     }
 
     @Transactional
     public AttributeValueResponseDTO updateAttributeValue(UUID id, AttributeValueRequestDTO attributeValueRequestDTO) {
-        AttributeValue existingAttributeValue = attributeValueRepository.findById(id)
+        PropertyOption existingAttributeValue = attributeValueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", id));
 
         existingAttributeValue.setValue(attributeValueRequestDTO.getValue());
@@ -75,18 +75,18 @@ public class AttributeValueService {
         UUID currentAttributeId = existingAttributeValue.getAttribute().getId();
 
         if (!newAttributeId.equals(currentAttributeId)) {
-            Attribute newAttribute = attributeRepository.findById(attributeValueRequestDTO.getAttributeId())
+            Property newAttribute = attributeRepository.findById(attributeValueRequestDTO.getAttributeId())
                     .orElseThrow(() -> new ResourceNotFoundException("Attribute", attributeValueRequestDTO.getAttributeId()));
             existingAttributeValue.setAttribute(newAttribute);
         }
 
-        AttributeValue updatedAttributeValue = attributeValueRepository.save(existingAttributeValue);
+        PropertyOption updatedAttributeValue = attributeValueRepository.save(existingAttributeValue);
         return convertToDto(updatedAttributeValue);
     }
 
     @Transactional
     public void deleteAttributeValue(UUID id) {
-        AttributeValue attributeValue = attributeValueRepository.findById(id)
+        PropertyOption attributeValue = attributeValueRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", id));
         attributeValueRepository.delete(attributeValue);
     }

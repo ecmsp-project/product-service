@@ -7,14 +7,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "attributes")
+@Table(name = "properties")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Attribute {
+public class Property {
 
     @Id
     @GeneratedValue
@@ -39,12 +39,15 @@ public class Attribute {
     @Column(name = "filterable", nullable = false)
     private boolean filterable;
 
-    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private Set<AttributeValue> attributeValues = new HashSet<>();
+    @Column(name = "required", nullable = false)
+    private boolean required;
 
-    @OneToMany(mappedBy = "attribute", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<VariantAttribute> variantAttributes = new HashSet<>();
+    private Set<PropertyOption> propertyOptions = new HashSet<>();
+
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<VariantProperty> variantProperties = new HashSet<>();
 
 }

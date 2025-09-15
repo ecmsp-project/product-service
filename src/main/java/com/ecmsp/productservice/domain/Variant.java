@@ -41,9 +41,9 @@ public class Variant {
     private String imageUrl;
 
     @Type(io.hypersistence.utils.hibernate.type.json.JsonType.class)
-    @Column(name = "additional_attributes", columnDefinition = "jsonb")
+    @Column(name = "additional_properties", columnDefinition = "jsonb")
     @Builder.Default
-    private Map<String, Object> additionalAttributes = new HashMap<>();
+    private Map<String, Object> additionalProperties = new HashMap<>();
 
     @Column(name="description", columnDefinition = "text")
     private String description;
@@ -56,5 +56,17 @@ public class Variant {
 
     @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<VariantAttribute> variantAttributes  = new HashSet<>();
+    private Set<VariantProperty> variantProperties  = new HashSet<>();
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
 }
