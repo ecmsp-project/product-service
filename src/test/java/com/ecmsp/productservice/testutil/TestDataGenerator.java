@@ -38,7 +38,12 @@ public class TestDataGenerator {
     }
 
     public static BigDecimal randomPrice() {
-        return BigDecimal.valueOf(RANDOM.nextDouble());
+        return BigDecimal.valueOf(RANDOM.nextDouble() * 1000 + 10)
+                .setScale(2, java.math.RoundingMode.HALF_UP);
+    }
+
+    public static int randomInt(int min, int max) {
+        return RANDOM.nextInt(max - min + 1) + min;
     }
 
     public static String randomDescription() {

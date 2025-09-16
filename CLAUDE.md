@@ -56,6 +56,15 @@ mvn test
 # Run specific test class
 mvn test -Dtest=ProductServiceTest
 
+# Run tests by pattern
+mvn test -Dtest=*EntityTest
+
+# Run tests with SQL logging
+mvn test -Dspring.jpa.show-sql=true
+
+# Run integration tests only
+mvn test -Dtest=**/*IntegrationTest
+
 # Run tests with coverage
 mvn clean test jacoco:report
 ```
@@ -110,9 +119,18 @@ Uses custom Nexus repositories for internal artifacts:
 ## Development Workflow
 
 ### Testing Strategy
-- Unit tests use H2 in-memory database
-- Integration tests use `@SpringBootTest`
-- Test utilities in `testutil` package for data generation
+- **H2 Database**: All tests use H2 in-memory database configured in `src/test/resources/application.properties`
+- **Unit Tests**: Simple POJO tests for entity logic (equals, hashCode, validation)
+- **Integration Tests**: `@DataJpaTest` for repository and entity persistence testing
+- **Test Utilities**:
+  - `TestDataGenerator`: Generates random primitives (names, prices, descriptions)
+  - `TestEntitiesGenerator`: Creates entity instances with realistic test data
+  - `TestEntityManager`: For JPA integration tests with proper flush/clear cycles
+
+### Test Categories
+- **Entity Tests**: Test JPA mapping, relationships, and constraints
+- **Repository Tests**: Test custom queries and data access patterns
+- **Service Tests**: Test business logic with mocked dependencies
 
 ### CI/CD
 GitHub Actions workflow runs:
