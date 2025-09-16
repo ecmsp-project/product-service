@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto;
+package com.ecmsp.productservice.dto.category;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +11,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AttributeValueResponseDTO {
+public class CategoryCreateResponseDTO {
     private UUID id;
-    private String value;
-    private UUID attributeId;
+
+    private UUID parentCategoryId;
+    private String parentCategoryName;
 }

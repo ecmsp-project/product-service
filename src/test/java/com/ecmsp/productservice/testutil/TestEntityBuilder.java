@@ -200,7 +200,7 @@ public class TestEntityBuilder {
         private Category category = TestEntityBuilder.category().build();
         private String name = "Property_" + TestDataGenerator.randomString(5);
         private String unit = null;
-        private AttributeDataType dataType = AttributeDataType.TEXT;
+        private PropertyDataType dataType = PropertyDataType.TEXT;
         private boolean filterable = true;
         private boolean required = false;
 
@@ -224,7 +224,7 @@ public class TestEntityBuilder {
             return this;
         }
 
-        public PropertyBuilder withDataType(AttributeDataType dataType) {
+        public PropertyBuilder withDataType(PropertyDataType dataType) {
             this.dataType = dataType;
             return this;
         }
@@ -250,23 +250,23 @@ public class TestEntityBuilder {
         }
 
         public PropertyBuilder asTextProperty() {
-            this.dataType = AttributeDataType.TEXT;
+            this.dataType = PropertyDataType.TEXT;
             return this;
         }
 
         public PropertyBuilder asNumberProperty() {
-            this.dataType = AttributeDataType.NUMBER;
+            this.dataType = PropertyDataType.NUMBER;
             this.unit = "pcs";
             return this;
         }
 
         public PropertyBuilder asBooleanProperty() {
-            this.dataType = AttributeDataType.BOOLEAN;
+            this.dataType = PropertyDataType.BOOLEAN;
             return this;
         }
 
         public PropertyBuilder asDateProperty() {
-            this.dataType = AttributeDataType.DATE;
+            this.dataType = PropertyDataType.DATE;
             return this;
         }
 

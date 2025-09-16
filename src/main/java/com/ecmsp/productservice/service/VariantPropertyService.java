@@ -4,97 +4,108 @@ import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.domain.PropertyOption;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.VariantProperty;
-import com.ecmsp.productservice.dto.VariantAttributeRequestDTO;
-import com.ecmsp.productservice.dto.VariantAttributeResponseDTO;
+import com.ecmsp.productservice.dto.variant_property.VariantPropertyCreateRequestDTO;
+import com.ecmsp.productservice.dto.variant_property.VariantPropertyRequestDTO;
+import com.ecmsp.productservice.dto.variant_property.VariantPropertyResponseDTO;
+import com.ecmsp.productservice.dto.variant_property.VariantPropertyUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.PropertyRepository;
 import com.ecmsp.productservice.repository.PropertyOptionRepository;
 import com.ecmsp.productservice.repository.VariantPropertyRepository;
 import com.ecmsp.productservice.repository.VariantRepository;
+import com.google.type.Decimal;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class VariantAttributeService {
+public class VariantPropertyService {
 
-    private final VariantPropertyRepository variantAttributeRepository;
-    private final PropertyOptionRepository attributeValueRepository;
+    private final VariantPropertyRepository variantPropertyRepository;
+    private final PropertyOptionRepository propertyOptionRepository;
 
     private final VariantRepository variantRepository;
-    private final PropertyRepository attributeRepository;
+    private final PropertyRepository propertyRepository;
 
-    public VariantAttributeService(
-            VariantPropertyRepository variantAttributeRepository,
+    public VariantPropertyService(
+            VariantPropertyRepository variantPropertyRepository,
             VariantRepository variantRepository,
-            PropertyRepository attributeRepository,
-            PropertyOptionRepository attributeValueRepository) {
-        this.variantAttributeRepository = variantAttributeRepository;
+            PropertyRepository propertyRepository,
+            PropertyOptionRepository propertyOptionRepository) {
+        this.variantPropertyRepository = variantPropertyRepository;
         this.variantRepository = variantRepository;
-        this.attributeRepository = attributeRepository;
-        this.attributeValueRepository = attributeValueRepository;
+        this.propertyRepository = propertyRepository;
+        this.propertyOptionRepository = propertyOptionRepository;
     }
 
-    private boolean validateAndDetermineValueSource(VariantAttributeRequestDTO requestDTO) {
-        boolean isAttributeValueIdProvided = requestDTO.getAttributeValueId() != null;
-        boolean isDirectValueProvided = requestDTO.getValueText() != null ||
-                requestDTO.getValueDecimal() != null ||
-                requestDTO.getValueBoolean() != null ||
-                requestDTO.getValueDate() != null;
-
-        // TODO: As far as I'm concerned, it is possible to have both attributeValueId and direct value field (valueText, valueDecimal, etc.)
-        // TODO: AttributeValues table is used to represent values at frontend (as text), but on backend, we would want to keep values of different types
-        if (isAttributeValueIdProvided && isDirectValueProvided) {
-            throw new IllegalArgumentException("Cannot provide both 'attributeValueId' and direct value fields (valueText, valueDecimal, etc.). Choose one.");
-        }
-        if (!isAttributeValueIdProvided && !isDirectValueProvided) {
-            throw new IllegalArgumentException("Either 'attributeValueId' or a direct value field (valueText, valueDecimal, etc.) must be provided.");
-        }
-        return isAttributeValueIdProvided;
+    public interface PropertyOptionRequest {
+        Boolean getCustomValueBoolean();
+        LocalDate getCustomValueDate();
+        BigDecimal getCustomValueDecimal();
+        String getCustomValueText();
+        UUID getPropertyOptionId();
     }
 
-    private void setValueBasedOnAttributeType(
+    private boolean validateMutuallyExclusiveCustomFieldsAndOption(PropertyOptionRequest request) {
+        boolean isPropertyOptionIdProvided = request.getPropertyOptionId() != null;
+        boolean isCustomValueProvided = request.getCustomValueText() != null ||
+                request.getCustomValueDecimal() != null ||
+                request.getCustomValueBoolean() != null ||
+                request.getCustomValueDate() != null;
+
+        if (isPropertyOptionIdProvided && isCustomValueProvided) {
+            throw new IllegalArgumentException("Cannot provide both 'propertyOptionId' and custom value fields (customValueText, customValueDecimal, etc.)");
+        }
+        if (!isPropertyOptionIdProvided && !isCustomValueProvided) {
+            throw new IllegalArgumentException("Either 'propertyOptionId' or a custom value field (valueText, valueDecimal, etc.) must be provided.");
+        }
+        return isPropertyOptionIdProvided;
+    }
+
+    private void setValueBasedOnPropertyDataType(
             VariantProperty entity,
             Property attribute,
-            VariantAttributeRequestDTO requestDTO,
+            VariantPropertyRequestDTO requestDTO,
             boolean isAttributeValueIdProvided
     ) {
-        entity.setAttributeValue(null);
-        entity.setValueText(null);
-        entity.setValueDecimal(null);
-        entity.setValueBoolean(null);
-        entity.setValueDate(null);
-
+        entity.setPropertyOption(null);
+        entity.setCustomValueText(null);
+        entity.setCustomValueDecimal(null);
+        entity.setCustomValueBoolean(null);
+        entity.setCustomValueDate(null);
 
         if (isAttributeValueIdProvided) {
             PropertyOption attributeValue = attributeValueRepository.findById(requestDTO.getAttributeValueId())
                     .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", requestDTO.getAttributeValueId()));
 
-            if (!attributeValue.getAttribute().getId().equals(attribute.getId())) {
+            if (!attributeValue.getProperty().getId().equals(attribute.getId())) {
                 throw new IllegalArgumentException("Provided AttributeValue '" + requestDTO.getAttributeValueId() +
                         "' does not belong to the specified Attribute '" + attribute.getId() + "'.");
             }
-            entity.setAttributeValue(attributeValue);
+            entity.setPropertyOption(attributeValue);
         } else {
             switch (attribute.getDataType()) {
                 case TEXT:
                     if (requestDTO.getValueText() == null) throw new IllegalArgumentException("Text value is required for TEXT data type.");
-                    entity.setValueText(requestDTO.getValueText());
+                    entity.setCustomValueText(requestDTO.getValueText());
                     break;
                 case NUMBER:
                     if (requestDTO.getValueDecimal() == null) throw new IllegalArgumentException("Decimal value is required for NUMBER data type.");
-                    entity.setValueDecimal(requestDTO.getValueDecimal());
+                    entity.setCustomValueDecimal(requestDTO.getValueDecimal());
                     break;
                 case BOOLEAN:
                     if (requestDTO.getValueBoolean() == null) throw new IllegalArgumentException("Boolean value is required for BOOLEAN data type.");
-                    entity.setValueBoolean(requestDTO.getValueBoolean());
+                    entity.setCustomValueBoolean(requestDTO.getValueBoolean());
                     break;
                 case DATE:
                     if (requestDTO.getValueDate() == null) throw new IllegalArgumentException("Date value is required for DATE data type.");
-                    entity.setValueDate(requestDTO.getValueDate());
+                    entity.setCustomValueDate(requestDTO.getValueDate());
                     break;
                 default:
                     throw new IllegalArgumentException("Unsupported attribute data type: " + attribute.getDataType());
@@ -114,15 +125,15 @@ public class VariantAttributeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Attribute", attributeId));
     }
 
-    private VariantAttributeResponseDTO convertToDto(VariantProperty variantAttribute) {
-        VariantAttributeResponseDTO.VariantAttributeResponseDTOBuilder dtoBuilder = VariantAttributeResponseDTO.builder()
+    private VariantPropertyResponseDTO convertToDto(VariantProperty variantAttribute) {
+        VariantPropertyResponseDTO.VariantAttributeResponseDTOBuilder dtoBuilder = VariantPropertyResponseDTO.builder()
                 .id(variantAttribute.getId());
 
         if (variantAttribute.getVariant() != null) {
             dtoBuilder.variantId(variantAttribute.getVariant().getId());
         }
 
-        Property attribute = variantAttribute.getAttribute();
+        Property attribute = variantAttribute.getProperty();
         // TODO: is putting all that information in DTO response a good choice? Shall we send just attribute id?
         // TODO: On the other hand, in microservices, maybe it is a good approach
         if (attribute != null) {
@@ -132,26 +143,26 @@ public class VariantAttributeService {
                     .attributeDataType(attribute.getDataType());
 
             String effectiveValue;
-            if (variantAttribute.getAttributeValue() != null) {
-                dtoBuilder.attributeValueId(variantAttribute.getAttributeValue().getId());
-                effectiveValue = variantAttribute.getAttributeValue().getValue();
+            if (variantAttribute.getPropertyOption() != null) {
+                dtoBuilder.attributeValueId(variantAttribute.getPropertyOption().getId());
+                effectiveValue = variantAttribute.getPropertyOption().getDisplayText();
             } else {
                 effectiveValue = switch (attribute.getDataType()) {
                     case TEXT -> {
-                        dtoBuilder.valueText(variantAttribute.getValueText());
-                        yield variantAttribute.getValueText();
+                        dtoBuilder.valueText(variantAttribute.getCustomValueText());
+                        yield variantAttribute.getCustomValueText();
                     }
                     case NUMBER -> {
-                        dtoBuilder.valueDecimal(variantAttribute.getValueDecimal());
-                        yield variantAttribute.getValueDecimal() != null ? variantAttribute.getValueDecimal().toPlainString() : null;
+                        dtoBuilder.valueDecimal(variantAttribute.getCustomValueDecimal());
+                        yield variantAttribute.getCustomValueDecimal() != null ? variantAttribute.getCustomValueDecimal().toPlainString() : null;
                     }
                     case BOOLEAN -> {
-                        dtoBuilder.valueBoolean(variantAttribute.getValueBoolean());
-                        yield variantAttribute.getValueBoolean() != null ? variantAttribute.getValueBoolean().toString() : null;
+                        dtoBuilder.valueBoolean(variantAttribute.getCustomValueBoolean());
+                        yield variantAttribute.getCustomValueBoolean() != null ? variantAttribute.getCustomValueBoolean().toString() : null;
                     }
                     case DATE -> {
-                        dtoBuilder.valueDate(variantAttribute.getValueDate());
-                        yield variantAttribute.getValueDate() != null ? variantAttribute.getValueDate().toString() : null;
+                        dtoBuilder.valueDate(variantAttribute.getCustomValueDate());
+                        yield variantAttribute.getCustomValueDate() != null ? variantAttribute.getCustomValueDate().toString() : null;
                     }
                 };
             }
@@ -160,46 +171,46 @@ public class VariantAttributeService {
         return dtoBuilder.build();
     }
 
-    private VariantProperty convertToEntity(VariantAttributeRequestDTO requestDTO) {
-        Variant variant = findVariantById(requestDTO.getVariantId());
-        Property attribute = findAttributeById(requestDTO.getAttributeId());
+    private VariantProperty convertToEntity(VariantPropertyCreateRequestDTO request) {
+        Variant variant = findVariantById(request.getVariantId());
+        Property property = findAttributeById(request.getVariantId());
 
-        VariantProperty newVariantAttribute = VariantProperty.builder()
+        VariantProperty newVariantProperty = VariantProperty.builder()
                 .variant(variant)
-                .attribute(attribute)
+                .property(property)
                 .build();
 
-        boolean isAttributeValueIdProvided = validateAndDetermineValueSource(requestDTO);
+        boolean isAttributeValueIdProvided = validateMutuallyExclusiveCustomFieldsAndOption(request);
         setValueBasedOnAttributeType(newVariantAttribute, attribute, requestDTO, isAttributeValueIdProvided);
 
         return newVariantAttribute;
     }
 
-    public List<VariantAttributeResponseDTO> getAllVariantAttributes() {
+    public List<VariantPropertyResponseDTO> getAllVariantAttributes() {
         return variantAttributeRepository.findAll().stream()
                 .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-    public VariantAttributeResponseDTO getVariantAttributeById(UUID id) {
+    public VariantPropertyResponseDTO getVariantAttributeById(UUID id) {
         VariantProperty variantAttribute = variantAttributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("VariantAttribute", id));
         return convertToDto(variantAttribute);
     }
 
     @Transactional
-    public VariantAttributeResponseDTO createVariantAttribute(VariantAttributeRequestDTO requestDTO) {
-        VariantProperty variantAttribute = convertToEntity(requestDTO);
-        VariantProperty savedVariantAttribute = variantAttributeRepository.save(variantAttribute);
-        return convertToDto(savedVariantAttribute);
+    public VariantPropertyResponseDTO createVariantProperty(VariantPropertyCreateRequestDTO request) {
+        VariantProperty variantProperty = convertToEntity(request);
+        VariantProperty savedVariantProperty = variantPropertyRepository.save(variantProperty);
+        return convertToDto(savedVariantProperty);
     }
 
     @Transactional
-    public VariantAttributeResponseDTO updateVariantAttribute(UUID id, VariantAttributeRequestDTO requestDTO) {
+    public VariantPropertyResponseDTO updateVariantAttribute(UUID id, VariantPropertyUpdateRequestDTO request) {
         VariantProperty existingVariantAttribute = variantAttributeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("VariantAttribute", id));
 
-        Property currentAttribute = existingVariantAttribute.getAttribute();
+        Property currentAttribute = existingVariantAttribute.getProperty();
         Variant currentVariant = existingVariantAttribute.getVariant();
 
         if (!currentVariant.getId().equals(requestDTO.getVariantId())) {
@@ -209,7 +220,7 @@ public class VariantAttributeService {
 
         if (!currentAttribute.getId().equals(requestDTO.getAttributeId())) {
             Property newAttribute = findAttributeById(requestDTO.getAttributeId());
-            existingVariantAttribute.setAttribute(newAttribute);
+            existingVariantAttribute.setProperty(newAttribute);
             currentAttribute = newAttribute;
         }
 
@@ -223,8 +234,8 @@ public class VariantAttributeService {
             VariantProperty updatedVariantAttribute = variantAttributeRepository.save(existingVariantAttribute);
             return convertToDto(updatedVariantAttribute);
         }
-
-        boolean isAttributeValueIdProvided = validateAndDetermineValueSource(requestDTO);
+        request.get
+        boolean isAttributeValueIdProvided = validateMutuallyExclusiveCustomFieldsAndOption(request);
         setValueBasedOnAttributeType(existingVariantAttribute, currentAttribute, requestDTO, isAttributeValueIdProvided);
 
         VariantProperty updatedVariantAttribute = variantAttributeRepository.save(existingVariantAttribute);

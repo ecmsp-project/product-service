@@ -2,8 +2,8 @@ package com.ecmsp.productservice.service;
 
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.Product;
-import com.ecmsp.productservice.dto.VariantRequestDTO;
-import com.ecmsp.productservice.dto.VariantResponseDTO;
+import com.ecmsp.productservice.dto.variant.VariantRequestDTO;
+import com.ecmsp.productservice.dto.variant.VariantResponseDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.repository.ProductRepository;
@@ -33,10 +33,10 @@ public class VariantService {
                 .price(variant.getPrice())
                 .stockQuantity(variant.getStockQuantity())
                 .imageUrl(variant.getImageUrl())
-                .additionalAttributes(variant.getAdditionalAttributes())
+                .additionalAttributes(variant.getAdditionalProperties())
                 .description(variant.getDescription())
                 .productId(variant.getProduct().getId())
-                .variantAttributeCount(variant.getVariantAttributes().size())
+                .variantAttributeCount(variant.getVariantProperties().size())
                 .updatedAt(variant.getUpdatedAt())
                 .build();
     }
@@ -52,7 +52,7 @@ public class VariantService {
                 .price(variantRequestDTO.getPrice())
                 .stockQuantity(variantRequestDTO.getStockQuantity())
                 .imageUrl(variantRequestDTO.getImageUrl())
-                .additionalAttributes(variantRequestDTO.getAdditionalAttributes())
+                .additionalProperties(variantRequestDTO.getAdditionalAttributes())
                 .description(variantRequestDTO.getDescription())
                 .product(product)
                 .createdAt(now) // TODO: ->
@@ -88,7 +88,7 @@ public class VariantService {
         existingVariant.setPrice(variantRequestDTO.getPrice());
         existingVariant.setStockQuantity(variantRequestDTO.getStockQuantity());
         existingVariant.setImageUrl(variantRequestDTO.getImageUrl());
-        existingVariant.setAdditionalAttributes(variantRequestDTO.getAdditionalAttributes());
+        existingVariant.setAdditionalProperties(variantRequestDTO.getAdditionalAttributes());
         existingVariant.setDescription(variantRequestDTO.getDescription());
         existingVariant.setUpdatedAt(LocalDateTime.now());
 

@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto;
+package com.ecmsp.productservice.dto.property;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,14 +9,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import com.ecmsp.productservice.domain.AttributeDataType;
+import com.ecmsp.productservice.domain.PropertyDataType;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AttributeRequestDTO {
+public class PropertyRequestDTO {
     @NotBlank(message = "Attribute name cannot be blank")
     @Size(max = 255, message = "Attribute name cannot exceed 255 characters")
     private String name;
@@ -25,7 +25,7 @@ public class AttributeRequestDTO {
     private String unit;
 
     @NotNull(message = "Data type is required")
-    private AttributeDataType dataType;
+    private PropertyDataType dataType;
 
     @NotNull(message = "Filterable status is required")
     private Boolean filterable;

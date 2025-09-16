@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto;
+package com.ecmsp.productservice.dto.category;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,9 +14,11 @@ import java.util.UUID;
 public class CategoryResponseDTO {
     private UUID id;
     private String name;
+
     private UUID parentCategoryId;
     private String parentCategoryName;
+
     private int subCategoryCount;
     private int productCount;
-    private int attributeCount;
+    private int propertyCount;
 }

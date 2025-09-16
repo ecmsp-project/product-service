@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto;
+package com.ecmsp.productservice.dto.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,11 +15,14 @@ import java.util.UUID;
 @Builder
 public class ProductResponseDTO {
     private UUID id;
+
     private String name;
     private BigDecimal approximatePrice;
     private BigDecimal deliveryPrice;
     private String description;
+
     private Map<String, Object> info;
+
     private UUID categoryId;
     private String categoryName;
 }

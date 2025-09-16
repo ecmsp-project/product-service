@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto;
+package com.ecmsp.productservice.dto.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

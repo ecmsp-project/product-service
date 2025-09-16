@@ -1,7 +1,7 @@
 package com.ecmsp.productservice.repository;
 
 import com.ecmsp.productservice.domain.Property;
-import com.ecmsp.productservice.domain.AttributeDataType;
+import com.ecmsp.productservice.domain.PropertyDataType;
 import com.ecmsp.productservice.domain.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -32,5 +32,5 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
      * @param dataType property's data type
      * @return list of properties of specific data type
      */
-    List<Property> findByDataType(AttributeDataType dataType);
+    List<Property> findByDataType(PropertyDataType dataType);
 }

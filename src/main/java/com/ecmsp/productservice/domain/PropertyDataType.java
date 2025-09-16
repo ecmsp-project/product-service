@@ -1,5 +1,5 @@
 package com.ecmsp.productservice.domain;
 
-public enum AttributeDataType {
+public enum PropertyDataType {
     TEXT, NUMBER, BOOLEAN, DATE
 }

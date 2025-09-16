@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto;
+package com.ecmsp.productservice.dto.variant_property;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,21 +15,21 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VariantAttributeRequestDTO {
+public class VariantPropertyRequestDTO {
     @NotNull(message = "Variant ID is required")
     private UUID variantId;
 
-    @NotNull(message = "Attribute ID is required")
-    private UUID attributeId;
+    @NotNull(message = "Property ID is required")
+    private UUID propertyId;
 
-    private UUID attributeValueId;
+    private UUID propertyOptionId;
 
     @Size(max = 255, message = "Text value cannot exceed 255 characters")
-    private String valueText;
+    private String customValueText;
 
-    private BigDecimal valueDecimal;
+    private BigDecimal customValueDecimal;
 
-    private Boolean valueBoolean;
+    private Boolean customValueBoolean;
 
-    private LocalDate valueDate;
+    private LocalDate customValueDate;
 }

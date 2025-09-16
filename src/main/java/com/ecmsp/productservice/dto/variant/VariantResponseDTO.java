@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto;
+package com.ecmsp.productservice.dto.variant;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,16 +15,19 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class VariantResponseDTO {
+
     private UUID id;
+    private UUID productId;
+
     private String sku;
     private BigDecimal price;
     private int stockQuantity;
     private String imageUrl;
-    private Map<String, Object> additionalAttributes;
+    private Map<String, Object> additionalProperties;
     private String description;
+
+    private String productName;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-    private UUID productId;
-    private String productName;
-    private int variantAttributeCount;
 }

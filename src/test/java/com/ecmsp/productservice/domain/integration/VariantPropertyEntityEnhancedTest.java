@@ -6,7 +6,6 @@ import com.ecmsp.productservice.testutil.TestEntityBuilder;
 import com.ecmsp.productservice.testutil.TestScenarios;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -108,7 +107,7 @@ class VariantPropertyEntityEnhancedTest {
             VariantProperty found = variantPropertyRepository.findById(saved.getId()).orElseThrow();
             assertThat(found.getCustomValueText()).isEqualTo("Red");
             assertThat(found.getProperty().getName()).isEqualTo("Color");
-            assertThat(found.getProperty().getDataType()).isEqualTo(AttributeDataType.TEXT);
+            assertThat(found.getProperty().getDataType()).isEqualTo(PropertyDataType.TEXT);
         }
 
         @Test
@@ -139,7 +138,7 @@ class VariantPropertyEntityEnhancedTest {
             assertThat(found.getCustomValueDecimal()).isEqualTo(weight);
             assertThat(found.getProperty().getName()).isEqualTo("Weight");
             assertThat(found.getProperty().getUnit()).isEqualTo("kg");
-            assertThat(found.getProperty().getDataType()).isEqualTo(AttributeDataType.NUMBER);
+            assertThat(found.getProperty().getDataType()).isEqualTo(PropertyDataType.NUMBER);
         }
 
         @Test

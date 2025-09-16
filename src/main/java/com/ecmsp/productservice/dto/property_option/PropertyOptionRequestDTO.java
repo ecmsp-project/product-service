@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto;
+package com.ecmsp.productservice.dto.property_option;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,18 +8,25 @@ import lombok.NoArgsConstructor;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AttributeValueRequestDTO {
-    @NotBlank(message = "Value cannot be blank")
-    @Size(max = 255, message = "Value cannot exceed 255 characters")
-    private String value;
+public class PropertyOptionRequestDTO {
 
     @NotNull(message = "Attribute ID is required")
-    private UUID attributeId;
-    // TODO: is this field required in DTOs? What if we want just to change AttributeValue's value? Check in other DTOs.
+    private UUID propertyId;
+
+    private String valueText;
+
+    private BigDecimal valueDecimal;
+
+    private LocalDate valueDate;
+
+    private String displayText;
 }

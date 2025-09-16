@@ -34,7 +34,7 @@ public class Property {
 
     @Column(name = "data_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private AttributeDataType dataType;
+    private PropertyDataType dataType;
 
     @Column(name = "filterable", nullable = false)
     private boolean filterable;

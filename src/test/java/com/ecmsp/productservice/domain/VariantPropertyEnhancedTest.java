@@ -63,7 +63,7 @@ class VariantPropertyEnhancedTest {
             // Then
             assertThat(colorProperty.getCustomValueText()).isEqualTo("Midnight Blue");
             assertThat(colorProperty.getProperty().getName()).isEqualTo("Color");
-            assertThat(colorProperty.getProperty().getDataType()).isEqualTo(AttributeDataType.TEXT);
+            assertThat(colorProperty.getProperty().getDataType()).isEqualTo(PropertyDataType.TEXT);
 
             assertThat(sizeProperty.getCustomValueText()).isEqualTo("Large");
             assertThat(sizeProperty.getProperty().getName()).isEqualTo("Size");
@@ -71,7 +71,7 @@ class VariantPropertyEnhancedTest {
             assertThat(weightProperty.getCustomValueDecimal()).isEqualTo(new BigDecimal("2.5"));
             assertThat(weightProperty.getProperty().getName()).isEqualTo("Weight");
             assertThat(weightProperty.getProperty().getUnit()).isEqualTo("kg");
-            assertThat(weightProperty.getProperty().getDataType()).isEqualTo(AttributeDataType.NUMBER);
+            assertThat(weightProperty.getProperty().getDataType()).isEqualTo(PropertyDataType.NUMBER);
         }
 
         @Test
