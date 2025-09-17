@@ -2,8 +2,10 @@ package com.ecmsp.productservice.service;
 
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.Product;
+import com.ecmsp.productservice.dto.variant.VariantCreateRequestDTO;
 import com.ecmsp.productservice.dto.variant.VariantRequestDTO;
 import com.ecmsp.productservice.dto.variant.VariantResponseDTO;
+import com.ecmsp.productservice.dto.variant.VariantUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.repository.ProductRepository;
@@ -29,34 +31,31 @@ public class VariantService {
     private VariantResponseDTO convertToDto(Variant variant) {
         return VariantResponseDTO.builder()
                 .id(variant.getId())
-                .sku(variant.getSku())
+
                 .price(variant.getPrice())
                 .stockQuantity(variant.getStockQuantity())
                 .imageUrl(variant.getImageUrl())
-                .additionalAttributes(variant.getAdditionalProperties())
+                .additionalProperties(variant.getAdditionalProperties())
                 .description(variant.getDescription())
                 .productId(variant.getProduct().getId())
-                .variantAttributeCount(variant.getVariantProperties().size())
+
+                .createdAt(variant.getCreatedAt())
                 .updatedAt(variant.getUpdatedAt())
+
                 .build();
     }
 
-    private Variant convertToEntity(VariantRequestDTO variantRequestDTO) {
-        Product product = productRepository.findById(variantRequestDTO.getProductId())
-                .orElseThrow(() -> new ResourceNotFoundException("Product", variantRequestDTO.getProductId()));
-
-        LocalDateTime now = LocalDateTime.now();
+    private Variant convertToEntity(VariantCreateRequestDTO request) {
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product", request.getProductId()));
 
         return Variant.builder()
-                .sku(variantRequestDTO.getSku())
-                .price(variantRequestDTO.getPrice())
-                .stockQuantity(variantRequestDTO.getStockQuantity())
-                .imageUrl(variantRequestDTO.getImageUrl())
-                .additionalProperties(variantRequestDTO.getAdditionalAttributes())
-                .description(variantRequestDTO.getDescription())
+                .price(request.getPrice())
+                .stockQuantity(request.getStockQuantity())
+                .imageUrl(request.getImageUrl())
+                .additionalProperties(request.getAdditionalProperties())
+                .description(request.getDescription())
                 .product(product)
-                .createdAt(now) // TODO: ->
-                .updatedAt(now) // TODO: it is possible for Spring to automatically update times during creation or update
                 .build();
     }
 
@@ -73,32 +72,42 @@ public class VariantService {
     }
 
     @Transactional
-    public VariantResponseDTO createVariant(VariantRequestDTO variantRequestDTO) {
-        Variant variant = convertToEntity(variantRequestDTO);
+    public VariantResponseDTO createVariant(VariantCreateRequestDTO request) {
+        Variant variant = convertToEntity(request);
         Variant savedVariant = variantRepository.save(variant);
         return convertToDto(savedVariant);
     }
 
     @Transactional
-    public VariantResponseDTO updateVariant(UUID id, VariantRequestDTO variantRequestDTO) {
+    public VariantResponseDTO updateVariant(UUID id, VariantUpdateRequestDTO request) {
         Variant existingVariant = variantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Variant", id));
 
-        existingVariant.setSku(variantRequestDTO.getSku());
-        existingVariant.setPrice(variantRequestDTO.getPrice());
-        existingVariant.setStockQuantity(variantRequestDTO.getStockQuantity());
-        existingVariant.setImageUrl(variantRequestDTO.getImageUrl());
-        existingVariant.setAdditionalProperties(variantRequestDTO.getAdditionalAttributes());
-        existingVariant.setDescription(variantRequestDTO.getDescription());
-        existingVariant.setUpdatedAt(LocalDateTime.now());
+        if (request.getPrice() != null) {
+            existingVariant.setPrice(request.getPrice());
+        }
+        if (request.getStockQuantity() != null) {
+            existingVariant.setStockQuantity(request.getStockQuantity());
+        }
+        if (request.getImageUrl() != null) {
+            existingVariant.setImageUrl(request.getImageUrl());
+        }
+        if (request.getAdditionalProperties() != null) {
+            existingVariant.setAdditionalProperties(request.getAdditionalProperties());
+        }
+        if (request.getDescription() != null) {
+            existingVariant.setDescription(request.getDescription());
+        }
 
-        UUID newProductId = variantRequestDTO.getProductId();
-        UUID currentProductId = existingVariant.getProduct().getId();
+        if (request.getProductId() != null) {
+            UUID newProductId = request.getProductId();
+            UUID currentProductId = existingVariant.getProduct().getId();
 
-        if (!newProductId.equals(currentProductId)) {
-            Product newProduct = productRepository.findById(variantRequestDTO.getProductId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Product", variantRequestDTO.getProductId()));
-            existingVariant.setProduct(newProduct);
+            if (!newProductId.equals(currentProductId)) {
+                Product newProduct = productRepository.findById(request.getProductId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Product", request.getProductId()));
+                existingVariant.setProduct(newProduct);
+            }
         }
 
         Variant updatedVariant = variantRepository.save(existingVariant);

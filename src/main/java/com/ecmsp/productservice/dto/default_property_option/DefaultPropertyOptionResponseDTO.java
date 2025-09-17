@@ -1,13 +1,10 @@
-package com.ecmsp.productservice.dto.property_option;
+package com.ecmsp.productservice.dto.default_property_option;
 
+import com.ecmsp.productservice.domain.PropertyDataType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -17,15 +14,15 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PropertyOptionRequestDTO {
+public class DefaultPropertyOptionResponseDTO {
+    private UUID id;
 
-    @NotNull(message = "Attribute ID is required")
     private UUID propertyId;
+    private PropertyDataType propertyDataType;
 
     private String valueText;
-
     private BigDecimal valueDecimal;
-
+    private Boolean valueBoolean;
     private LocalDate valueDate;
 
     private String displayText;

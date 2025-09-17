@@ -36,18 +36,22 @@ public class Property {
     @Enumerated(EnumType.STRING)
     private PropertyDataType dataType;
 
-    @Column(name = "filterable", nullable = false)
-    private boolean filterable;
-
     @Column(name = "required", nullable = false)
     private boolean required;
 
+    @Column(name = "has_default_options", nullable = false)
+    private boolean hasDefaultOptions;
+
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private Set<PropertyOption> propertyOptions = new HashSet<>();
+    private Set<DefaultPropertyOption> defaultPropertyOptions = new HashSet<>();
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<VariantProperty> variantProperties = new HashSet<>();
 
+    @Override
+    public String toString() {
+        return String.format("Property{id = %s, name = %s}", id, name);
+    }
 }

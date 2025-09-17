@@ -8,14 +8,14 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "property_options")
+@Table(name = "default_property_options")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class PropertyOption {
+public class DefaultPropertyOption {
 
     @Id
     @GeneratedValue
@@ -42,4 +42,8 @@ public class PropertyOption {
     @Column(name = "display_text", nullable = false, columnDefinition = "text")
     private String displayText;
 
+    @Override
+    public String toString() {
+        return String.format("DefaultPropertyOptions{id = %s}", id);
+    }
 }

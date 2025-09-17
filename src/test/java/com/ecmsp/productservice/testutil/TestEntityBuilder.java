@@ -336,8 +336,8 @@ public class TestEntityBuilder {
             return this;
         }
 
-        public PropertyOption build() {
-            return PropertyOption.builder()
+        public DefaultPropertyOption build() {
+            return DefaultPropertyOption.builder()
                     .id(id)
                     .property(property)
                     .valueText(valueText)
@@ -358,7 +358,7 @@ public class TestEntityBuilder {
         private UUID id = UUID.randomUUID();
         private Variant variant = TestEntityBuilder.variant().build();
         private Property property = TestEntityBuilder.property().build();
-        private PropertyOption propertyOption = null;
+        private DefaultPropertyOption propertyOption = null;
         private String customValueText = null;
         private BigDecimal customValueDecimal = null;
         private Boolean customValueBoolean = null;
@@ -379,7 +379,7 @@ public class TestEntityBuilder {
             return this;
         }
 
-        public VariantPropertyBuilder withPropertyOption(PropertyOption propertyOption) {
+        public VariantPropertyBuilder withPropertyOption(DefaultPropertyOption propertyOption) {
             this.propertyOption = propertyOption;
             return this;
         }

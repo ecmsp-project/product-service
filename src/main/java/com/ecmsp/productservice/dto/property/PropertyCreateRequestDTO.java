@@ -20,18 +20,18 @@ public class PropertyCreateRequestDTO {
     @Size(max = 255, message = "Property name cannot exceed 255 characters")
     private String name;
 
+    @NotNull(message = "Category ID is required")
+    private UUID categoryId;
+
     @Size(max = 50, message = "Unit cannot exceed 50 characters")
     private String unit;
 
     @NotNull(message = "Data type is required")
     private PropertyDataType dataType;
 
-    @NotNull(message = "Filterable status is required")
-    private Boolean filterable;
-
     @NotNull(message = "Required field cannot be empty")
     private Boolean required;
 
-    @NotNull(message = "Category ID is required")
-    private UUID categoryId;
+//    @NotNull(message = "HasDefaultOptions field cannot be empty")
+//    private Boolean hasDefaultOptions;
 }

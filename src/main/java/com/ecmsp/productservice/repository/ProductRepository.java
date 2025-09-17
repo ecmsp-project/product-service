@@ -40,7 +40,6 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     @Query(value = "SELECT * FROM products p WHERE p.category_id = :categoryId AND jsonb_exists(p.info, :key)", nativeQuery = true)
     List<Product> findByCategoryAndInfoKey(@Param("categoryId") UUID categoryId, @Param("key") String key);
 
-
     List<Product> findByApproximatePriceBetween(BigDecimal min, BigDecimal max);
 
     List<Product> findByDeliveryPriceBetween(BigDecimal deliveryPriceAfter, BigDecimal deliveryPriceBefore);

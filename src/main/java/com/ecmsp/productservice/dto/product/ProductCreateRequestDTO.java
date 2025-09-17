@@ -31,10 +31,8 @@ public class ProductCreateRequestDTO {
     @DecimalMin(value = "0.0", message = "Delivery price cannot be negative")
     private BigDecimal deliveryPrice;
 
-    @NotBlank(message = "Description cannot be blank")
     private String description;
 
-    @NotNull(message = "Info JSON is required")
     private Map<String, Object> info;
 
 

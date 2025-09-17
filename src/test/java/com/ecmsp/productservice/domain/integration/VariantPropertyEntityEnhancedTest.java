@@ -358,7 +358,7 @@ class VariantPropertyEntityEnhancedTest {
                     .build();
             entityManager.persistAndFlush(sizeProperty);
 
-            PropertyOption mediumOption = TestEntityBuilder.propertyOption()
+            DefaultPropertyOption mediumOption = TestEntityBuilder.propertyOption()
                     .withProperty(sizeProperty)
                     .withTextValue("M")
                     .withDisplayText("Medium")

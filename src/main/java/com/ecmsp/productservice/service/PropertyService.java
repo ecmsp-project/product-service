@@ -26,12 +26,16 @@ public class PropertyService {
     private PropertyResponseDTO convertToDto(Property property) {
         return PropertyResponseDTO.builder()
                 .id(property.getId())
+
                 .name(property.getName())
                 .unit(property.getUnit())
                 .dataType(property.getDataType())
-                .filterable(property.isFilterable())
                 .categoryId(property.getCategory().getId())
-                .propertyValueCount(property.getPropertyOptions().size())
+
+                .required(property.isRequired())
+                .hasDefaultOptions(property.isHasDefaultOptions())
+
+                .propertyValueCount(property.getDefaultPropertyOptions().size())
                 .variantPropertyCount(property.getVariantProperties().size())
                 .build();
     }
@@ -44,7 +48,6 @@ public class PropertyService {
                 .name(request.getName())
                 .unit(request.getUnit())
                 .dataType(request.getDataType())
-                .filterable(request.getFilterable())
                 .required(request.getRequired())
                 .category(category)
                 .build();
@@ -84,23 +87,8 @@ public class PropertyService {
         if (request.getUnit() != null) {
             existingProperty.setUnit(request.getUnit());
         }
-        if (request.getDataType() != null) {
-            existingProperty.setDataType(request.getDataType());
-        }
         if (request.getRequired() != null) {
             existingProperty.setRequired(request.getRequired());
-        }
-        if (request.getFilterable() != null) {
-            existingProperty.setFilterable(request.getFilterable());
-        }
-
-        UUID newCategoryId = request.getCategoryId();
-        UUID currentCategoryId = existingProperty.getCategory().getId();
-
-        if (!newCategoryId.equals(currentCategoryId)) {
-            Category category = categoryRepository.findById(newCategoryId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Category", newCategoryId));
-            existingProperty.setCategory(category);
         }
 
         Property updatedProperty = propertyRepository.save(existingProperty);

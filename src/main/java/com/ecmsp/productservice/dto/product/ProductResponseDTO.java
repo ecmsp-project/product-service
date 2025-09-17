@@ -25,4 +25,5 @@ public class ProductResponseDTO {
 
     private UUID categoryId;
     private String categoryName;
+
 }

@@ -21,11 +21,7 @@ public class PropertyUpdateRequestDTO {
     @Size(max = 50, message = "Unit cannot exceed 50 characters")
     private String unit;
 
-    private PropertyDataType dataType;
-
     private Boolean required;
 
-    private Boolean filterable;
 
-    private UUID categoryId;
 }

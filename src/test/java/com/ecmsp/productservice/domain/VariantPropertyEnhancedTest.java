@@ -83,7 +83,7 @@ class VariantPropertyEnhancedTest {
                     .asTextProperty()
                     .build();
 
-            PropertyOption redOption = TestEntityBuilder.propertyOption()
+            DefaultPropertyOption redOption = TestEntityBuilder.propertyOption()
                     .withProperty(colorProperty)
                     .withTextValue("Red")
                     .withDisplayText("Bright Red")

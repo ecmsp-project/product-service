@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto.property_option;
+package com.ecmsp.productservice.dto.default_property_option;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PropertyOptionCreateResponseDTO {
+public class DefaultPropertyOptionCreateResponseDTO {
     private UUID id;
 }

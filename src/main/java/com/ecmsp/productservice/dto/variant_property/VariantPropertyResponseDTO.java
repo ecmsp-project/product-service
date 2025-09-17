@@ -18,18 +18,14 @@ public class VariantPropertyResponseDTO {
     private UUID id;
 
     private UUID variantId;
-
     private UUID propertyId;
-    private String propertyName;
-    private String propertyUnit;
+
     private PropertyDataType propertyDataType;
 
-    private UUID propertyOptionId;
+    private String valueText;
+    private BigDecimal valueDecimal;
+    private Boolean valueBoolean;
+    private LocalDate valueDate;
+
     private String displayText;
-
-    private String customValueText;
-    private BigDecimal customValueDecimal;
-    private Boolean customValueBoolean;
-    private LocalDate customValueDate;
-
 }

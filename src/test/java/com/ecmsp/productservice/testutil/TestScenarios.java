@@ -3,7 +3,6 @@ package com.ecmsp.productservice.testutil;
 import com.ecmsp.productservice.domain.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 /**
  * Pre-built test scenarios for common business cases.
@@ -34,10 +33,10 @@ public class TestScenarios {
         public final Variant iPhone256GB;
         public final Property storageProperty;
         public final Property colorProperty;
-        public final PropertyOption storage128GB;
-        public final PropertyOption storage256GB;
-        public final PropertyOption colorBlack;
-        public final PropertyOption colorWhite;
+        public final DefaultPropertyOption storage128GB;
+        public final DefaultPropertyOption storage256GB;
+        public final DefaultPropertyOption colorBlack;
+        public final DefaultPropertyOption colorWhite;
         public final VariantProperty iPhone128GBStorage;
         public final VariantProperty iPhone128GBColor;
         public final VariantProperty iPhone256GBStorage;
@@ -157,8 +156,8 @@ public class TestScenarios {
         public final Variant tShirtLargeBlue;
         public final Property sizeProperty;
         public final Property colorProperty;
-        public final PropertyOption sizeSmall;
-        public final PropertyOption sizeLarge;
+        public final DefaultPropertyOption sizeSmall;
+        public final DefaultPropertyOption sizeLarge;
         public final VariantProperty tShirtSmallSize;
         public final VariantProperty tShirtSmallColor;
         public final VariantProperty tShirtLargeSize;

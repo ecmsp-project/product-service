@@ -20,9 +20,6 @@ import java.util.UUID;
 public class VariantUpdateRequestDTO {
     private UUID productId;
 
-    @Size(max = 12, message = "SKU cannot exceed 12 characters")
-    private String sku;
-
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be positive")
     private BigDecimal price;
 

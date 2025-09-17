@@ -1,12 +1,10 @@
-package com.ecmsp.productservice.dto.variant_property;
+package com.ecmsp.productservice.dto.default_property_option;
 
-import com.ecmsp.productservice.service.VariantPropertyService;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
@@ -15,19 +13,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VariantPropertyUpdateRequestDTO implements VariantPropertyService.PropertyOptionRequest {
-    private UUID variantId;
+public class DefaultPropertyOptionUpdateRequestDTO {
 
     private UUID propertyId;
 
-    @Size(max = 255, message = "Text value cannot exceed 255 characters")
     private String valueText;
-
     private BigDecimal valueDecimal;
-
-    private Boolean valueBoolean;
-
     private LocalDate valueDate;
+    private Boolean valueBoolean;
 
     private String displayText;
 }

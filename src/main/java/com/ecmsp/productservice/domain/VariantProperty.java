@@ -30,19 +30,23 @@ public class VariantProperty {
     @JoinColumn(name = "property_id", nullable = false)
     private Property property;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "property_option_id")
-    private PropertyOption propertyOption;
+    @Column(name = "value_text", columnDefinition = "text")
+    private String valueText;
 
-    @Column(name = "custom_value_text", columnDefinition = "text")
-    private String customValueText;
+    @Column(name = "value_decimal", precision = 10, scale = 2)
+    private BigDecimal valueDecimal;
 
-    @Column(name = "custom_value_decimal", precision = 10, scale = 2)
-    private BigDecimal customValueDecimal;
+    @Column(name = "value_boolean")
+    private Boolean valueBoolean;
 
-    @Column(name = "custom_value_boolean")
-    private Boolean customValueBoolean;
+    @Column(name = "value_date")
+    private LocalDate valueDate;
 
-    @Column(name = "custom_value_date")
-    private LocalDate customValueDate;
+    @Column(name = "display_text", nullable = false)
+    private String displayText;
+
+    @Override
+    public String toString() {
+        return String.format("VariantProperty{id = %s}", id);
+    }
 }

@@ -1,6 +1,9 @@
-package com.ecmsp.productservice.dto.property_option;
+package com.ecmsp.productservice.dto.default_property_option;
 
 
+import com.ecmsp.productservice.domain.DefaultPropertyOption;
+import com.ecmsp.productservice.domain.Property;
+import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PropertyOptionCreateRequestDTO {
+public class DefaultPropertyOptionCreateRequestDTO {
     @NotNull(message = "Property ID is required")
     private UUID propertyId;
 
@@ -25,4 +28,6 @@ public class PropertyOptionCreateRequestDTO {
     private LocalDate valueDate;
 
     private String displayText;
+
+
 }

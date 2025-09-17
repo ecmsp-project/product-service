@@ -27,8 +27,8 @@ public class PropertyRequestDTO {
     @NotNull(message = "Data type is required")
     private PropertyDataType dataType;
 
-    @NotNull(message = "Filterable status is required")
-    private Boolean filterable;
+    @NotNull(message = "HasDefaultOptions field cannot be empty")
+    private Boolean hasDefaultOptions;
 
     @NotNull(message = "Category ID is required")
     private UUID categoryId;

@@ -23,14 +23,14 @@ public class VariantPropertyCreateRequestDTO implements VariantPropertyService.P
     @NotNull(message = "Property ID is required")
     private UUID propertyId;
 
-    private UUID propertyOptionId;
-
     @Size(max = 255, message = "Text value cannot exceed 255 characters")
-    private String customValueText;
+    private String valueText;
 
-    private BigDecimal customValueDecimal;
+    private BigDecimal valueDecimal;
 
-    private Boolean customValueBoolean;
+    private Boolean valueBoolean;
 
-    private LocalDate customValueDate;
+    private LocalDate valueDate;
+
+    private String displayText;
 }

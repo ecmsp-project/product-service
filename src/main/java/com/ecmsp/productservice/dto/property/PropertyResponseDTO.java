@@ -14,12 +14,14 @@ import java.util.UUID;
 @Builder
 public class PropertyResponseDTO {
     private UUID id;
+    private UUID categoryId;
+
     private String name;
     private String unit;
     private PropertyDataType dataType;
-    private boolean filterable;
-    private UUID categoryId;
-    private String categoryName;
+
+    private boolean required;
+    private boolean hasDefaultOptions;
 
     private int propertyValueCount;
     private int variantPropertyCount;

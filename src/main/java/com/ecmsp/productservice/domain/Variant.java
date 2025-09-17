@@ -28,9 +28,6 @@ public class Variant {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    @Column(name = "sku", nullable = false, length = 10)
-    private String sku;
-
     @Column(name = "price", nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
@@ -69,4 +66,8 @@ public class Variant {
         updatedAt = LocalDateTime.now();
     }
 
+    @Override
+    public String toString() {
+        return String.format("Variant{id = %s}", id);
+    }
 }

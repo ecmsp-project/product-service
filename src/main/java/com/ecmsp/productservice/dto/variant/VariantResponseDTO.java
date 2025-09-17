@@ -19,7 +19,6 @@ public class VariantResponseDTO {
     private UUID id;
     private UUID productId;
 
-    private String sku;
     private BigDecimal price;
     private int stockQuantity;
     private String imageUrl;

@@ -21,21 +21,21 @@ public class CategoryService {
     }
 
     private CategoryResponseDTO convertToDto(Category category) {
-        CategoryResponseDTO.CategoryResponseDTOBuilder dtoBuilder = CategoryResponseDTO.builder()
+        CategoryResponseDTO response = CategoryResponseDTO.builder()
                 .id(category.getId())
-                .name(category.getName());
+                .name(category.getName())
+                .build();
 
         if (category.getParentCategory() != null) {
-            dtoBuilder
-                    .parentCategoryId(category.getParentCategory().getId())
-                    .parentCategoryName(category.getParentCategory().getName());
+            response.setParentCategoryId(category.getParentCategory().getId());
+            response.setParentCategoryName(category.getParentCategory().getName());
         }
 
-        dtoBuilder.subCategoryCount(category.getSubCategories().size());
-        dtoBuilder.productCount(category.getProducts().size());
-        dtoBuilder.propertyCount(category.getProperties().size());
+        response.setSubCategoryCount(category.getSubCategories().size());
+        response.setProductCount(category.getProducts().size());
+        response.setPropertyCount(category.getProperties().size());
 
-        return dtoBuilder.build();
+        return response;
     }
 
     private Category convertToEntity(CategoryCreateRequestDTO request) {

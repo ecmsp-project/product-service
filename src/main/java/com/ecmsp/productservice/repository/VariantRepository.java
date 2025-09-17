@@ -16,9 +16,6 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
     List<Variant> findByProduct(Product product);
     List<Variant> findByProductId(UUID productId);
 
-    Optional<Variant> findBySku(String sku);
-    boolean existsBySku(String sku);
-
     List<Variant> findByStockQuantityGreaterThan(int quantity);
 
     List<Variant> findByPriceBetween(BigDecimal min, BigDecimal max);

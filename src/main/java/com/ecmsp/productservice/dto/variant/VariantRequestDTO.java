@@ -23,10 +23,6 @@ public class VariantRequestDTO {
     @NotNull(message = "Product ID is required")
     private UUID productId;
 
-    @NotBlank(message = "SKU cannot be blank")
-    @Size(max = 12, message = "SKU cannot exceed 12 characters")
-    private String sku;
-
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be positive")
     private BigDecimal price;
@@ -40,6 +36,5 @@ public class VariantRequestDTO {
     @NotNull(message = "Additional attributes are required")
     private Map<String, Object> additionalProperties;
 
-    @NotBlank(message = "Description cannot be blank")
     private String description;
 }
