@@ -101,7 +101,7 @@ public class CategoryService {
         if (request.getParentCategoryId() != null) {
 
             if (request.getParentCategoryId().equals(existingCategory.getId())) {
-                throw new IllegalArgumentException("A category category cannot be its own parent");
+                throw new IllegalArgumentException("A category cannot be its own parent");
             }
 
             Category parentCategory = categoryRepository.findById(request.getParentCategoryId())
@@ -115,9 +115,6 @@ public class CategoryService {
 
     @Transactional
     public void deleteCategory(UUID id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Category not found", id);
-        }
 
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", id));

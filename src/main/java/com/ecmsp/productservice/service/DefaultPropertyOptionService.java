@@ -29,7 +29,6 @@ public class DefaultPropertyOptionService {
     }
 
     private DefaultPropertyOptionResponseDTO convertToDto(DefaultPropertyOption defaultPropertyOption) {
-        // TODO: check if all these fields are required
         return DefaultPropertyOptionResponseDTO.builder()
                 .id(defaultPropertyOption.getId())
                 .displayText(defaultPropertyOption.getDisplayText())
@@ -160,9 +159,9 @@ public class DefaultPropertyOptionService {
     }
 
     @Transactional
-    public void deleteAttributeValue(UUID id) {
+    public void deleteDefaultPropertyOption(UUID id) {
         DefaultPropertyOption defaultPropertyOption = defaultPropertyOptionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("AttributeValue", id));
+                .orElseThrow(() -> new ResourceNotFoundException("DefaultPropertyOption", id));
         defaultPropertyOptionRepository.delete(defaultPropertyOption);
     }
 }

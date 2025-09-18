@@ -12,20 +12,9 @@ import java.util.UUID;
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, UUID> {
 
-    /**
-     * Finds properties that are filterable, representing general properties not tied to any specific product.
-     * @param filterable whether properties is generic
-     * @return list of filterable, generic properties
-     */
-    List<Property> findByFilterable(boolean filterable);
+    List<Property> findByIdAndRequired(UUID id, boolean required);
 
-    /**
-     * Finds properties, that are not specific, based on category
-     * @param category category entity
-     * @param filterable whether property is generic
-     * @return list of filterable properties of category
-     */
-    List<Property> findByCategoryAndFilterable(Category category, boolean filterable);
+    List<Property> findByIdAndCategory(UUID id, Category category);
 
     /**
      * Find properties by data-type, for example: TEXT, NUMBER, BOOLEAN, DATE

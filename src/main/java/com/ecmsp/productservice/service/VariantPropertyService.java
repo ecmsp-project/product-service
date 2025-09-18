@@ -1,9 +1,11 @@
 package com.ecmsp.productservice.service;
 
+import com.ecmsp.productservice.domain.DefaultPropertyOption;
 import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.VariantProperty;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyCreateRequestDTO;
+import com.ecmsp.productservice.dto.variant_property.VariantPropertyCreateResponseDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyResponseDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -27,14 +30,16 @@ public class VariantPropertyService {
     private final VariantRepository variantRepository;
     private final PropertyRepository propertyRepository;
 
+    private final DefaultPropertyOptionRepository defaultPropertyOptionRepository;
     public VariantPropertyService(
             VariantPropertyRepository variantPropertyRepository,
             VariantRepository variantRepository,
             PropertyRepository propertyRepository,
-            DefaultPropertyOptionRepository propertyOptionRepository) {
+            DefaultPropertyOptionRepository defaultPropertyOptionRepository) {
         this.variantPropertyRepository = variantPropertyRepository;
         this.variantRepository = variantRepository;
         this.propertyRepository = propertyRepository;
+        this.defaultPropertyOptionRepository = defaultPropertyOptionRepository;
     }
 
     public interface PropertyOptionRequest {
@@ -44,11 +49,12 @@ public class VariantPropertyService {
         String getValueText();
     }
 
-    private void setValueBasedOnPropertyDataType(
-            VariantProperty variantProperty,
+    private VariantProperty setValueBasedOnPropertyDataType(
+            VariantProperty variantPropertyOriginal,
             Property property,
             PropertyOptionRequest request
     ) {
+        VariantProperty variantProperty = variantPropertyOriginal.toBuilder().build();
 
         switch (property.getDataType()) {
             case TEXT -> {
@@ -76,8 +82,18 @@ public class VariantPropertyService {
                 variantProperty.setValueDate(request.getValueDate());
             }
         }
+
+        return variantProperty;
     }
 
+    private String getDisplayTextBasedOnPropertyDataType(VariantPropertyUpdateRequestDTO request, Property property) {
+        return switch(property.getDataType()) {
+            case TEXT -> request.getDisplayText();
+            case NUMBER -> request.getValueDecimal().toString();
+            case BOOLEAN -> request.getValueBoolean().toString();
+            case DATE -> request.getValueDate().toString();
+        };
+    }
 
     private VariantPropertyResponseDTO convertToDto(VariantProperty variantProperty) {
 
@@ -90,20 +106,27 @@ public class VariantPropertyService {
         response.setPropertyId(property.getId());
         response.setPropertyDataType(property.getDataType());
 
-        switch (property.getDataType()) {
-            case TEXT -> {
-                response.setValueText(variantProperty.getValueText());
-            }
-            case NUMBER -> {
-                response.setValueDecimal(variantProperty.getValueDecimal());
-            }
-            case BOOLEAN -> {
-                response.setValueBoolean(variantProperty.getValueBoolean());
-            }
-            case DATE -> {
-                response.setValueDate(variantProperty.getValueDate());
-            }
-        };
+//        switch (property.getDataType()) {
+//            case TEXT -> {
+//                response.setValueText(variantProperty.getValueText());
+//            }
+//            case NUMBER -> {
+//                response.setValueDecimal(variantProperty.getValueDecimal());
+//            }
+//            case BOOLEAN -> {
+//                response.setValueBoolean(variantProperty.getValueBoolean());
+//            }
+//            case DATE -> {
+//                response.setValueDate(variantProperty.getValueDate());
+//            }
+//        };
+
+        response.setValueBoolean(variantProperty.getValueBoolean());
+        response.setValueDate(variantProperty.getValueDate());
+        response.setValueDecimal(variantProperty.getValueDecimal());
+        response.setValueText(variantProperty.getValueText());
+
+        response.setDisplayText(variantProperty.getDisplayText());
 
         return response;
     }
@@ -134,10 +157,14 @@ public class VariantPropertyService {
     }
 
     @Transactional
-    public VariantPropertyResponseDTO createVariantProperty(VariantPropertyCreateRequestDTO request) {
+    public VariantPropertyCreateResponseDTO createVariantProperty(VariantPropertyCreateRequestDTO request) {
         VariantProperty variantProperty = convertToEntity(request);
         VariantProperty savedVariantProperty = variantPropertyRepository.save(variantProperty);
-        return convertToDto(savedVariantProperty);
+
+        return VariantPropertyCreateResponseDTO
+                .builder()
+                .id(savedVariantProperty.getId())
+                .build();
     }
 
     @Transactional
@@ -145,34 +172,29 @@ public class VariantPropertyService {
         VariantProperty existingVariantProperty = variantPropertyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("VariantProperty", id));
 
-        Property currentProperty = existingVariantProperty.getProperty();
-        Variant currentVariant = existingVariantProperty.getVariant();
+        Property property = existingVariantProperty.getProperty();
+        Variant variant = existingVariantProperty.getVariant();
 
-        if (request.getVariantId() != null && !currentVariant.getId().equals(request.getVariantId())) {
-            Variant newVariant = findVariantById(request.getVariantId());
-            existingVariantProperty.setVariant(newVariant);
+        VariantProperty variantProperty;
+
+        if (property.isHasDefaultOptions()) {
+//            List<DefaultPropertyOption> options = defaultPropertyOptionRepository.findByPropertyId(property.getId());
+//            if (!isValidDefaultOptionProvided(request, property, options)) {
+//                throw new IllegalArgumentException("Default option provided for property " + property.getId() + " is not valid.");
+//            }
+            variantProperty = setValueBasedOnPropertyDataType(existingVariantProperty, property, request);
+            variantProperty.setDisplayText(request.getDisplayText());
+        } else {
+            variantProperty = setValueBasedOnPropertyDataType(existingVariantProperty, property, request);
+
+            if (request.getDisplayText() != null) {
+                variantProperty.setDisplayText(request.getDisplayText());
+            } else {
+                variantProperty.setDisplayText(getDisplayTextBasedOnPropertyDataType(request, property));
+            }
         }
 
-        if (request.getPropertyId() != null && !currentProperty.getId().equals(request.getPropertyId())) {
-            Property newProperty = findPropertyById(request.getPropertyId());
-            existingVariantProperty.setProperty(newProperty);
-            currentProperty = newProperty;
-        }
-
-        boolean isDirectValueProvidedInRequest = request.getCustomValueText() != null ||
-                request.getCustomValueDecimal() != null ||
-                request.getCustomValueBoolean() != null ||
-                request.getCustomValueDate() != null;
-
-        if (!isPropertyOptionIdProvidedInRequest && !isDirectValueProvidedInRequest) {
-            VariantProperty updatedVariantProperty = variantPropertyRepository.save(existingVariantProperty);
-            return convertToDto(updatedVariantProperty);
-        }
-
-        boolean isPropertyOptionIdProvided = validateMutuallyExclusiveCustomFieldsAndOption(request);
-        setValueBasedOnPropertyDataType(existingVariantProperty, currentProperty, request, isPropertyOptionIdProvided);
-
-        VariantProperty updatedVariantProperty = variantPropertyRepository.save(existingVariantProperty);
+        VariantProperty updatedVariantProperty = variantPropertyRepository.save(variantProperty);
         return convertToDto(updatedVariantProperty);
     }
 
@@ -183,4 +205,22 @@ public class VariantPropertyService {
         }
         variantPropertyRepository.deleteById(id);
     }
+
+    private boolean isValidDefaultOptionProvided(
+            VariantPropertyUpdateRequestDTO request,
+            Property property,
+            List<DefaultPropertyOption> options) {
+
+        return switch (property.getDataType()) {
+            case TEXT -> options.stream()
+                    .anyMatch(option -> Objects.equals(option.getValueText(), request.getValueText()));
+            case NUMBER -> options.stream()
+                    .anyMatch(option -> Objects.equals(option.getValueDecimal(), request.getValueDecimal()));
+            case BOOLEAN -> options.stream()
+                    .anyMatch(option -> Objects.equals(option.getValueBoolean(), request.getValueBoolean()));
+            case DATE -> options.stream()
+                    .anyMatch(option -> Objects.equals(option.getValueDate(), request.getValueDate()));
+        };
+    }
+
 }

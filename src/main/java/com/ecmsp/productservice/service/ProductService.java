@@ -1,15 +1,19 @@
 package com.ecmsp.productservice.service;
 
-import com.ecmsp.productservice.domain.Product;
 import com.ecmsp.productservice.domain.Category;
-import com.ecmsp.productservice.dto.product.*;
+import com.ecmsp.productservice.domain.Product;
+import com.ecmsp.productservice.dto.product.ProductCreateRequestDTO;
+import com.ecmsp.productservice.dto.product.ProductCreateResponseDTO;
+import com.ecmsp.productservice.dto.product.ProductResponseDTO;
+import com.ecmsp.productservice.dto.product.ProductUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
-import com.ecmsp.productservice.repository.ProductRepository;
 import com.ecmsp.productservice.repository.CategoryRepository;
+import com.ecmsp.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -98,7 +102,7 @@ public class ProductService {
         UUID newCategoryId = request.getCategoryId();
         UUID currentCategoryId = existingProduct.getCategory().getId();
 
-        if (!newCategoryId.equals(currentCategoryId)) {
+        if (!Objects.equals(newCategoryId, currentCategoryId)) {
             Category category = categoryRepository.findById(newCategoryId)
                     .orElseThrow(() -> new ResourceNotFoundException("Category", newCategoryId));
             existingProduct.setCategory(category);

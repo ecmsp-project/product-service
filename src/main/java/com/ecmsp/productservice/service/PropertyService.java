@@ -62,7 +62,7 @@ public class PropertyService {
     public PropertyResponseDTO getPropertyById(UUID id) {
         return propertyRepository.findById(id)
                 .map(this::convertToDto)
-                .orElseThrow(() -> new ResourceNotFoundException("AProperty", id));
+                .orElseThrow(() -> new ResourceNotFoundException("Property", id));
     }
 
     @Transactional
