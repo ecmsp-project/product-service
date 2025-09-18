@@ -1,5 +1,6 @@
 package com.ecmsp.productservice.domain;
 
+import com.ecmsp.productservice.interfaces.AttributesAssignable;
 import lombok.*;
 import jakarta.persistence.*;
 import java.util.UUID;

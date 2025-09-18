@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,6 +62,10 @@ public class CategoryService {
         return categoryRepository.findById(id)
                 .map(this::convertToDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", id));
+    }
+
+    public Optional<Category> getCategoryEntityById(UUID id) {
+        return categoryRepository.findById(id);
     }
 
     @Transactional
