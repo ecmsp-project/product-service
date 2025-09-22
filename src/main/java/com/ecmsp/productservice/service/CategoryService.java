@@ -1,8 +1,7 @@
 package com.ecmsp.productservice.service;
 
 import com.ecmsp.productservice.domain.Category;
-import com.ecmsp.productservice.dto.CategoryRequestDTO;
-import com.ecmsp.productservice.dto.CategoryResponseDTO;
+import com.ecmsp.productservice.dto.category.*;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.CategoryRepository;
 import jakarta.transaction.Transactional;
@@ -23,31 +22,31 @@ public class CategoryService {
     }
 
     private CategoryResponseDTO convertToDto(Category category) {
-        CategoryResponseDTO.CategoryResponseDTOBuilder dtoBuilder = CategoryResponseDTO.builder()
+        CategoryResponseDTO response = CategoryResponseDTO.builder()
                 .id(category.getId())
-                .name(category.getName());
-
-        if (category.getParentCategory() != null) {
-            dtoBuilder.parentCategoryId(category.getParentCategory().getId())
-                    .parentCategoryName(category.getParentCategory().getName());
-        }
-
-        // TODO: let's check later if it is required
-        dtoBuilder.subCategoryCount(category.getSubCategories() != null ? category.getSubCategories().size() : 0);
-        dtoBuilder.productCount(category.getProducts() != null ? category.getProducts().size() : 0);
-        dtoBuilder.attributeCount(category.getAttributes() != null ? category.getAttributes().size() : 0);
-
-        return dtoBuilder.build();
-    }
-
-    private Category convertToEntity(CategoryRequestDTO categoryRequestDTO) {
-        Category category = Category.builder()
-                .name(categoryRequestDTO.getName())
+                .name(category.getName())
                 .build();
 
-        if (categoryRequestDTO.getParentCategoryId() != null) {
-            Category parentCategory = categoryRepository.findById(categoryRequestDTO.getParentCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Parent Category", categoryRequestDTO.getParentCategoryId()));
+        if (category.getParentCategory() != null) {
+            response.setParentCategoryId(category.getParentCategory().getId());
+            response.setParentCategoryName(category.getParentCategory().getName());
+        }
+
+        response.setSubCategoryCount(category.getSubCategories().size());
+        response.setProductCount(category.getProducts().size());
+        response.setPropertyCount(category.getProperties().size());
+
+        return response;
+    }
+
+    private Category convertToEntity(CategoryCreateRequestDTO request) {
+        Category category = Category.builder()
+                .name(request.getName())
+                .build();
+
+        if (request.getParentCategoryId() != null) {
+            Category parentCategory = categoryRepository.findById(request.getParentCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Parent category not found", request.getParentCategoryId()));
             category.setParentCategory(parentCategory);
         }
         return category;
@@ -70,33 +69,49 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryResponseDTO createCategory(CategoryRequestDTO categoryRequestDTO) {
-        Category category = convertToEntity(categoryRequestDTO);
+    public CategoryCreateResponseDTO createCategoryLeaf(CategoryCreateRequestDTO request) {
+        Category category = convertToEntity(request);
         Category savedCategory = categoryRepository.save(category);
-        return convertToDto(savedCategory);
+
+        return CategoryCreateResponseDTO
+                .builder()
+                .id(savedCategory.getId())
+                .build();
     }
 
     @Transactional
-    public CategoryResponseDTO updateCategory(UUID id, CategoryRequestDTO categoryRequestDTO) {
+    public CategoryCreateResponseDTO createCategorySplit(CategoryCreateRequestDTO request) {
+        Category category = convertToEntity(request);
+        Category savedCategory = categoryRepository.save(category);
+
+        for (Category childCategory : savedCategory.getParentCategory().getSubCategories()) {
+            childCategory.setParentCategory(savedCategory);
+            categoryRepository.save(childCategory);
+        }
+
+        return CategoryCreateResponseDTO.builder()
+                .id(savedCategory.getId())
+                .build();
+    }
+
+    @Transactional
+    public CategoryResponseDTO updateCategory(UUID id, CategoryUpdateRequestDTO request) {
         Category existingCategory = categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", id));
 
-        existingCategory.setName(categoryRequestDTO.getName());
+        if (request.getName() != null) {
+            existingCategory.setName(request.getName());
+        }
 
-        if ((categoryRequestDTO.getParentCategoryId() == null && existingCategory.getParentCategory() != null) ||
-                (categoryRequestDTO.getParentCategoryId() != null && (existingCategory.getParentCategory() == null ||
-                        !existingCategory.getParentCategory().getId().equals(categoryRequestDTO.getParentCategoryId())))) {
+        if (request.getParentCategoryId() != null) {
 
-            if (categoryRequestDTO.getParentCategoryId() != null) {
-                if (id.equals(categoryRequestDTO.getParentCategoryId())) {
-                    throw new IllegalArgumentException("A category cannot be its own parent.");
-                }
-                Category newParent = categoryRepository.findById(categoryRequestDTO.getParentCategoryId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Parent Category", categoryRequestDTO.getParentCategoryId()));
-                existingCategory.setParentCategory(newParent);
-            } else {
-                existingCategory.setParentCategory(null);
+            if (request.getParentCategoryId().equals(existingCategory.getId())) {
+                throw new IllegalArgumentException("A category cannot be its own parent");
             }
+
+            Category parentCategory = categoryRepository.findById(request.getParentCategoryId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Parent category not found", request.getParentCategoryId()));
+            existingCategory.setParentCategory(parentCategory);
         }
 
         Category updatedCategory = categoryRepository.save(existingCategory);
@@ -105,9 +120,15 @@ public class CategoryService {
 
     @Transactional
     public void deleteCategory(UUID id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Category", id);
+
+        Category category = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", id));
+
+        for (Category childCategory : category.getSubCategories()) {
+            childCategory.setParentCategory(category.getParentCategory());
+            categoryRepository.save(childCategory);
         }
+
         categoryRepository.deleteById(id);
     }
 }

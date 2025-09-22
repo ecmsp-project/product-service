@@ -1,16 +1,19 @@
 package com.ecmsp.productservice.service;
 
-import com.ecmsp.productservice.domain.Product;
 import com.ecmsp.productservice.domain.Category;
-import com.ecmsp.productservice.dto.ProductRequestDTO;
-import com.ecmsp.productservice.dto.ProductResponseDTO;
+import com.ecmsp.productservice.domain.Product;
+import com.ecmsp.productservice.dto.product.ProductCreateRequestDTO;
+import com.ecmsp.productservice.dto.product.ProductCreateResponseDTO;
+import com.ecmsp.productservice.dto.product.ProductResponseDTO;
+import com.ecmsp.productservice.dto.product.ProductUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
-import com.ecmsp.productservice.repository.ProductRepository;
 import com.ecmsp.productservice.repository.CategoryRepository;
+import com.ecmsp.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -37,16 +40,16 @@ public class ProductService {
 
     }
 
-    private Product convertToEntity(ProductRequestDTO productRequestDTO) {
-        Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
-                .orElseThrow(() -> new ResourceNotFoundException("Category", productRequestDTO.getCategoryId()));
+    private Product convertToEntity(ProductCreateRequestDTO request) {
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", request.getCategoryId()));
 
         return Product.builder()
-                .name(productRequestDTO.getName())
-                .approximatePrice(productRequestDTO.getApproximatePrice())
-                .deliveryPrice(productRequestDTO.getDeliveryPrice())
-                .description(productRequestDTO.getDescription())
-                .info(productRequestDTO.getInfo())
+                .name(request.getName())
+                .approximatePrice(request.getApproximatePrice())
+                .deliveryPrice(request.getDeliveryPrice())
+                .description(request.getDescription())
+                .info(request.getInfo())
                 .category(category)
                 .build();
     }
@@ -65,29 +68,43 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponseDTO createProduct(ProductRequestDTO productRequestDTO) {
-        Product product = convertToEntity(productRequestDTO);
+    public ProductCreateResponseDTO createProduct(ProductCreateRequestDTO request) {
+        Product product = convertToEntity(request);
         Product savedProduct = productRepository.save(product);
-        return convertToDto(savedProduct);
+
+        return ProductCreateResponseDTO
+                .builder()
+                .id(savedProduct.getId())
+                .build();
     }
 
     @Transactional
-    public ProductResponseDTO updateProduct(UUID id, ProductRequestDTO productRequestDTO) {
+    public ProductResponseDTO updateProduct(UUID id, ProductUpdateRequestDTO request) {
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", id));
 
-        existingProduct.setName(productRequestDTO.getName());
-        existingProduct.setApproximatePrice(productRequestDTO.getApproximatePrice());
-        existingProduct.setDeliveryPrice(productRequestDTO.getDeliveryPrice());
-        existingProduct.setDescription(productRequestDTO.getDescription());
-        existingProduct.setInfo(productRequestDTO.getInfo());
+        if (request.getName() != null) {
+            existingProduct.setName(request.getName());
+        }
+        if (request.getApproximatePrice() != null) {
+            existingProduct.setApproximatePrice(request.getApproximatePrice());
+        }
+        if (request.getDeliveryPrice() != null) {
+            existingProduct.setDeliveryPrice(request.getDeliveryPrice());
+        }
+        if (request.getDescription() != null) {
+            existingProduct.setDescription(request.getDescription());
+        }
+        if (request.getInfo() != null) {
+            existingProduct.setInfo(request.getInfo());
+        }
 
-        UUID newCategoryId = productRequestDTO.getCategoryId();
+        UUID newCategoryId = request.getCategoryId();
         UUID currentCategoryId = existingProduct.getCategory().getId();
 
-        if (!newCategoryId.equals(currentCategoryId)) {
-            Category category = categoryRepository.findById(productRequestDTO.getCategoryId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Category", productRequestDTO.getCategoryId()));
+        if (!Objects.equals(newCategoryId, currentCategoryId)) {
+            Category category = categoryRepository.findById(newCategoryId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Category", newCategoryId));
             existingProduct.setCategory(category);
         }
 

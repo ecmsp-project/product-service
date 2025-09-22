@@ -2,6 +2,7 @@ package com.ecmsp.productservice.repository;
 
 import com.ecmsp.productservice.domain.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     /**
      * Find categories that have the specified parent category
-     * @param parentCategory the parent category to filter by(can be null)
+     * @param parentCategory the parent category to filter by (can be null)
      * @return list of categories with the given parent
      */
     List<Category> findByParentCategory(Category parentCategory);
@@ -33,4 +34,7 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
      * @return an Optional containing the matching category if found, or empty if no match exists
      */
     Optional<Category> findByNameAndParentCategory(String name, Category parentCategory);
+
+    @Query("SELECT COUNT(c) FROM Category c WHERE c.parentCategory = :category")
+    boolean hasSubCategories(Category category);
 }
