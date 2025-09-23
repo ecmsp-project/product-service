@@ -76,6 +76,10 @@ public class VariantService {
         return variantRepository.findById(id);
     }
 
+    public List<Variant> getVariantsByProductId(UUID productId) {
+        return variantRepository.findByProductId(productId);
+    }
+
     @Transactional
     public VariantResponseDTO createVariant(VariantCreateRequestDTO request) {
         Variant variant = convertToEntity(request);
