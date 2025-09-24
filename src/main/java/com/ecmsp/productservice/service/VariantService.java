@@ -1,3 +1,4 @@
+
 package com.ecmsp.productservice.service;
 
 import com.ecmsp.productservice.domain.Variant;
@@ -74,6 +75,10 @@ public class VariantService {
 
     public Optional<Variant> getVariantEntityById(UUID id) {
         return variantRepository.findById(id);
+    }
+
+    public List<Variant> getVariantsByProductId(UUID productId) {
+        return variantRepository.findByProductId(productId);
     }
 
     @Transactional
