@@ -25,7 +25,7 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
     public void createVariantsReservation(CreateVariantsReservationRequest request, StreamObserver<CreateVariantsReservationResponse> responseObserver) {
         logger.info("got a create variant reservation request");
 
-        List<Variant> items = request.getItemsList();
+        List<ReservedVariant> items = request.getItemsList();
 
         // TODO: call a proper service method
 
