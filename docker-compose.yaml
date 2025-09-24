@@ -1,6 +1,59 @@
 name: ecmsp-full
 
 services:
+    gateway-service:
+        build:
+            context: ../gateway-service/
+            dockerfile: Dockerfile
+        container_name: gateway-service
+        ports:
+            - "${GATEWAY_SERVICE_PORT:?error}:8080"
+        env_file:
+            -
+                path: ../gateway-service/docker/app-env.txt
+                required: false
+        environment:
+            - SPRING_PROFILES_ACTIVE=${GATEWAY_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
+        profiles: [gateway-service]
+
+    user-service:
+        build:
+            context: ../user-service/
+            dockerfile: Dockerfile
+        container_name: user-service
+        ports:
+            - "${USER_SERVICE_PORT:?error}:8080"
+        env_file:
+            -
+                path: ../user-service/docker/app-env.txt
+                required: false
+        environment:
+            - SPRING_PROFILES_ACTIVE=${USER_SERVICE_SPRING_PROFILES_ACTIVE:-compose}
+        profiles: [user-service]
+    user-service-db:
+        image: postgres:15-alpine
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+            interval: 10s
+            retries: 5
+            start_period: 30s
+            timeout: 10s
+        ports:
+            - "${USER_SERVICE_DB_PORT:?error}:5432"
+        volumes:
+            - ../user-service/docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+            - user-service-db:/var/lib/postgresql/data
+        secrets:
+            - user-service-db-password
+        environment:
+            - POSTGRES_USER=admin
+            - POSTGRES_DB=user-service-db
+            - POSTGRES_PASSWORD_FILE=/run/secrets/user-service-db
+        env_file:
+            -
+                path: ../user-service-db/docker/database-env.txt
+                required: false
+        profiles: [user-service]
 
     product-service:
         build:
@@ -245,8 +298,11 @@ secrets:
         file: ../payment-service/docker/database-password.txt
     cart-service-db-password:
         file: ../cart-service/docker/database-password.txt
+    user-service-db-password:
+        file: ../user-service/docker/database-password.txt
 volumes:
     product-service-db:
     order-service-db:
     payment-service-db:
     cart-service-db:
+    user-service-db:
