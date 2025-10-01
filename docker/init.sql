@@ -62,6 +62,7 @@ CREATE TABLE variant_properties (
 -- Table: variant_reservations
 CREATE TABLE variant_reservations (
                                       id uuid  NOT NULL,
+                                      reservation_id uuid NOT NULL,
                                       variant_id uuid  NOT NULL,
                                       reserved_quantity int  NOT NULL,
                                       created_at timestamp  NOT NULL,

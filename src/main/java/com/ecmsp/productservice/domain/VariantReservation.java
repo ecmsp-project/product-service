@@ -1,13 +1,19 @@
 package com.ecmsp.productservice.domain;
 
 import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 import java.sql.Timestamp;
 import java.util.UUID;
 
 @Entity
 @Table(name = "variant_reservations")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class VariantReservation {
 
     @Id
@@ -15,6 +21,9 @@ public class VariantReservation {
     @Column(name = "id")
     @EqualsAndHashCode.Include
     private UUID id;
+
+    @Column(name = "reservation_id")
+    private UUID reservationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "variant_id", nullable = false)
@@ -36,4 +45,11 @@ public class VariantReservation {
     public String toString() {
         return String.format("VariantReservation{id = %s}", id);
     }
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = new Timestamp(System.currentTimeMillis());
+        expiresAt = new Timestamp(System.currentTimeMillis() + 1000 * 60 * 60 * 24);
+    }
+
 }

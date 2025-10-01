@@ -125,6 +125,11 @@ public class VariantService {
     }
 
     @Transactional
+    void reserveVariant(UUID variantId, int quantity) {
+        variantRepository.reserveVariant(variantId, quantity);
+    }
+
+    @Transactional
     public void deleteVariant(UUID id) {
         if (!variantRepository.existsById(id)) {
             throw new ResourceNotFoundException("Variant", id);
