@@ -1,3 +1,4 @@
+
 package com.ecmsp.productservice.service;
 
 import com.ecmsp.productservice.domain.Variant;
@@ -76,6 +77,10 @@ public class VariantService {
         return variantRepository.findById(id);
     }
 
+    public List<Variant> getVariantsByProductId(UUID productId) {
+        return variantRepository.findByProductId(productId);
+    }
+
     @Transactional
     public VariantResponseDTO createVariant(VariantCreateRequestDTO request) {
         Variant variant = convertToEntity(request);
@@ -117,6 +122,11 @@ public class VariantService {
 
         Variant updatedVariant = variantRepository.save(existingVariant);
         return convertToDto(updatedVariant);
+    }
+
+    @Transactional
+    void reserveVariant(UUID variantId, int quantity) {
+        variantRepository.reserveVariant(variantId, quantity);
     }
 
     @Transactional
