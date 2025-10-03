@@ -1,11 +1,14 @@
 package com.ecmsp.productservice.api.grpc;
 
 import com.ecmsp.product.v1.*;
+import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.service.ProductService;
 import com.ecmsp.productservice.service.VariantService;
+import com.google.protobuf.Struct;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -25,10 +28,22 @@ public class ProductDisplayGrpcService extends ProductServiceGrpc.ProductService
     public void getProductDetails(GetProductDetailsRequest request, StreamObserver<GetProductDetailsResponse> responseObserver) {
         logger.info("got a get product details request");
 
-        String productId = request.getProductId();
-        UUID productUUID = UUID.fromString(productId);
+        UUID productId = UUID.fromString(request.getProductId());
 
-        // TODO: implement
+        List<Variant> variants = variantService.getVariantsByProductId(productId);
+
+        List<VariantDetail> variantsDetails = variants.stream().map(item -> {
+            return VariantDetail.newBuilder()
+                    .setVariantId(item.getId().toString())
+
+                    .setPrice(item.getPrice().toString())
+                    .setStockQuantity(item.getStockQuantity())
+                    .setImageUrl(item.getImageUrl())
+                    .setDescription(item.getDescription())
+                    .setAdditionalProperties(Struct.newBuilder().build())
+
+                    .build();
+        }).toList();
 
         GetProductDetailsResponse response = GetProductDetailsResponse.newBuilder().build();
         responseObserver.onNext(response);
