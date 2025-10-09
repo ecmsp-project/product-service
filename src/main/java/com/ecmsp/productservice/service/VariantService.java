@@ -1,3 +1,4 @@
+
 package com.ecmsp.productservice.service;
 
 import com.ecmsp.productservice.domain.Variant;
@@ -10,6 +11,7 @@ import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -76,6 +78,14 @@ public class VariantService {
         return variantRepository.findById(id);
     }
 
+    public List<Variant> getVariantsByProductId(UUID productId) {
+        return variantRepository.findByProductId(productId);
+    }
+
+    public List<Variant> getOneVariantPerProductByCategoryId(UUID categoryId) {
+        return variantRepository.getOneVariantPerProductByCategoryId(categoryId);
+    }
+
     @Transactional
     public VariantResponseDTO createVariant(VariantCreateRequestDTO request) {
         Variant variant = convertToEntity(request);
@@ -117,6 +127,11 @@ public class VariantService {
 
         Variant updatedVariant = variantRepository.save(existingVariant);
         return convertToDto(updatedVariant);
+    }
+
+    @Transactional
+    void reserveVariant(UUID variantId, int quantity) {
+        variantRepository.reserveVariant(variantId, quantity);
     }
 
     @Transactional

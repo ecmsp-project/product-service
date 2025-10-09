@@ -1,5 +1,5 @@
 -- Created by Vertabelo (http://vertabelo.com)
--- Last modification date: 2025-09-17 15:48:39.434
+-- Last modification date: 2025-09-23 18:49:25.885
 
 -- tables
 -- Table: categories
@@ -40,10 +40,10 @@ CREATE TABLE properties (
                             category_id uuid  NOT NULL,
                             name varchar(255)  NOT NULL,
                             unit varchar(50)  NULL,
-                            data_type TEXT NOT NULL CHECK (data_type IN ('TEXT', 'NUMBER', 'BOOLEAN', 'DATE')),
-    required boolean  NOT NULL,
-    has_default_options boolean  NOT NULL DEFAULT FALSE,
-    CONSTRAINT properties_pk PRIMARY KEY (id)
+                            data_type text  NOT NULL CHECK (data_type IN ('TEXT', 'NUMBER', 'BOOLEAN', 'DATE')),
+                            required boolean  NOT NULL,
+                            has_default_options boolean  NOT NULL,
+                            CONSTRAINT properties_pk PRIMARY KEY (id)
 );
 
 -- Table: variant_properties
@@ -55,8 +55,20 @@ CREATE TABLE variant_properties (
                                     value_decimal decimal(10,2)  NULL,
                                     value_boolean boolean  NULL,
                                     value_date date  NULL,
-                                    display_text text  NOT NULL,
+                                    display_text text  NULL,
                                     CONSTRAINT variant_properties_pk PRIMARY KEY (id)
+);
+
+-- Table: variant_reservations
+CREATE TABLE variant_reservations (
+                                      id uuid  NOT NULL,
+                                      reservation_id uuid NOT NULL,
+                                      variant_id uuid  NOT NULL,
+                                      reserved_quantity int  NOT NULL,
+                                      created_at timestamp  NOT NULL,
+                                      expires_at timestamp  NOT NULL,
+                                      status text  NOT NULL CHECK (status IN ('ACTIVE','CANCELLED','EXPIRED')),
+                                      CONSTRAINT variant_reservations_pk PRIMARY KEY (id)
 );
 
 -- Table: variants
@@ -130,5 +142,12 @@ ALTER TABLE variants ADD CONSTRAINT variant_product
             INITIALLY IMMEDIATE
 ;
 
--- End of file.
+-- Reference: variant_reservations_variants (table: variant_reservations)
+ALTER TABLE variant_reservations ADD CONSTRAINT variant_reservations_variants
+    FOREIGN KEY (variant_id)
+        REFERENCES variants (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
 
+-- End of file.
