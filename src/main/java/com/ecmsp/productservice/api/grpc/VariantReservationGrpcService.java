@@ -2,6 +2,8 @@ package com.ecmsp.productservice.api.grpc;
 
 import com.ecmsp.product.v1.reservation.v1.*;
 import com.ecmsp.productservice.domain.VariantReservation;
+import com.ecmsp.productservice.dto.variant_reservation.VariantReservationCreateRequestDTO;
+import com.ecmsp.productservice.dto.variant_reservation.VariantsReservationCreateRequestDTO;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.service.ProductService;
 import com.ecmsp.productservice.service.VariantReservationService;
@@ -10,8 +12,10 @@ import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 @GrpcService
 public class VariantReservationGrpcService extends VariantReservationServiceGrpc.VariantReservationServiceImplBase {
@@ -42,12 +46,24 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
         UUID reservationId = UUID.randomUUID();
         List<ReservedVariant> reservedVariants = request.getItemsList();
 
-        variantReservationService.createVariantsReservation(reservedVariants, reservationId);
+        Map<UUID, Integer> variants = request.getItemsList().stream()
+                .collect(Collectors.toMap(
+                        item -> UUID.fromString(item.getVariantId()),
+                        ReservedVariant::getQuantity
+                ));
+
+        VariantsReservationCreateRequestDTO bRequest = VariantsReservationCreateRequestDTO.builder()
+                .reservationId(reservationId)
+                .variants(variants)
+                .build();
+        variantReservationService.createVariantsReservation(bRequest);
 
         CreateVariantsReservationResponse response = CreateVariantsReservationResponse
                 .newBuilder()
                 .setReservationId(reservationId.toString())
                 .build();
+                // TODO: add fields for succeeded and failed reservation variants
+
         responseObserver.onNext(response);
         responseObserver.onCompleted();
 

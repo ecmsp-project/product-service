@@ -11,6 +11,7 @@ import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -79,6 +80,10 @@ public class VariantService {
 
     public List<Variant> getVariantsByProductId(UUID productId) {
         return variantRepository.findByProductId(productId);
+    }
+
+    public List<Variant> getOneVariantPerProductByCategoryId(UUID categoryId) {
+        return variantRepository.getOneVariantPerProductByCategoryId(categoryId);
     }
 
     @Transactional

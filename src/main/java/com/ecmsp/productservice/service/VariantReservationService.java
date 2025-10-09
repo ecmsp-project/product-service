@@ -1,11 +1,11 @@
 package com.ecmsp.productservice.service;
 
-import com.ecmsp.product.v1.reservation.v1.CreateVariantsReservationRequest;
 import com.ecmsp.product.v1.reservation.v1.ReservedVariant;
 import com.ecmsp.productservice.domain.ReservationStatus;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.VariantReservation;
-import com.ecmsp.productservice.repository.VariantRepository;
+import com.ecmsp.productservice.dto.variant_reservation.VariantReservationCreateRequestDTO;
+import com.ecmsp.productservice.dto.variant_reservation.VariantsReservationCreateRequestDTO;
 import com.ecmsp.productservice.repository.VariantReservationRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -25,33 +25,36 @@ public class VariantReservationService {
         this.variantService = variantService;
     }
 
-    private VariantReservation convertToEntity(ReservedVariant reservedVariant, UUID reservationId) {
-        UUID variantId = UUID.fromString(reservedVariant.getVariantId());
+    private VariantReservation convertToEntity(VariantReservationCreateRequestDTO request) {
 
-        Variant variant = variantService.getVariantEntityById(variantId)
+        Variant variant = variantService.getVariantEntityById(request.getVariantId())
                 .orElseThrow(() -> new IllegalArgumentException("Variant not found"));
 
         return VariantReservation.builder()
-                .reservationId(reservationId)
+                .reservationId(request.getReservationId())
                 .variant(variant)
-                .reservedQuantity(reservedVariant.getQuantity())
+                .reservedQuantity(request.getQuantity())
                 .status(ReservationStatus.ACTIVE)
                 .build();
     }
 
-    @Transactional
-    public VariantReservation createVariantReservation(ReservedVariant reservedVariant, UUID reservationId) {
-        UUID variantId = UUID.fromString(reservedVariant.getVariantId());
+    private VariantReservation createVariantReservation(VariantReservationCreateRequestDTO request) {
 
-        variantService.reserveVariant(variantId, reservedVariant.getQuantity());
+        variantService.reserveVariant(request.getVariantId(), request.getQuantity());
 
-        VariantReservation variantReservation = convertToEntity(reservedVariant, reservationId);
+        VariantReservation variantReservation = convertToEntity(request);
         return variantReservationRepository.save(variantReservation);
     }
 
     @Transactional
-    public void createVariantsReservation(List<ReservedVariant> reservedVariants, UUID reservationId) {
-        reservedVariants.forEach(reservedVariant -> createVariantReservation(reservedVariant, reservationId));
+    public void createVariantsReservation(VariantsReservationCreateRequestDTO request) {
+        request.getVariants().forEach((variantId, quantity) -> {
+                VariantReservationCreateRequestDTO bRequest = VariantReservationCreateRequestDTO.builder()
+                        .variantId(variantId)
+                        .quantity(quantity)
+                        .build();
+                createVariantReservation(bRequest);
+        });
     }
 
     @Transactional

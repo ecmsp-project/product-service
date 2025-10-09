@@ -1,10 +1,12 @@
 package com.ecmsp.productservice.api.grpc;
 
 import com.ecmsp.product.v1.*;
+import com.ecmsp.product.v1.reservation.v1.GetVariantsReservationResponse;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.service.ProductService;
 import com.ecmsp.productservice.service.VariantService;
 import com.google.protobuf.Struct;
+import com.google.type.Decimal;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 
@@ -25,8 +27,8 @@ public class ProductDisplayGrpcService extends ProductServiceGrpc.ProductService
     }
 
     @Override
-    public void getProductDetails(GetProductDetailsRequest request, StreamObserver<GetProductDetailsResponse> responseObserver) {
-        logger.info("got a get product details request");
+    public void getVariantsDetails(GetVariantsDetailsRequest request, StreamObserver<GetVariantsDetailsResponse> responseObserver) {
+        logger.info("variant details request received");
 
         UUID productId = UUID.fromString(request.getProductId());
 
@@ -36,7 +38,7 @@ public class ProductDisplayGrpcService extends ProductServiceGrpc.ProductService
             return VariantDetail.newBuilder()
                     .setVariantId(item.getId().toString())
 
-                    .setPrice(item.getPrice().toString())
+                    .setPrice(Decimal.newBuilder().setValue(item.getPrice().toString()).build())
                     .setStockQuantity(item.getStockQuantity())
                     .setImageUrl(item.getImageUrl())
                     .setDescription(item.getDescription())
@@ -45,19 +47,55 @@ public class ProductDisplayGrpcService extends ProductServiceGrpc.ProductService
                     .build();
         }).toList();
 
-        GetProductDetailsResponse response = GetProductDetailsResponse.newBuilder().build();
+        GetVariantsDetailsResponse response = GetVariantsDetailsResponse.newBuilder()
+                .addAllVariants(variantsDetails)
+                .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
 
-        logger.info("sent a get product details response");
+        logger.info("variant details response sent");
     }
 
     @Override
     public void getProductsByQuery(GetProductsByQueryRequest request, StreamObserver<GetProductsByQueryResponse> responseObserver) {
-        super.getProductsByQuery(request, responseObserver);
+        // TODO: implement when ElasticSearch is configured
     }
 
     @Override
     public void getProducts(GetProductsRequest request, StreamObserver<GetProductsResponse> responseObserver) {
+        // TODO: implement pagination
+
+        logger.info("get products (variants to display) request received");
+
+        UUID categoryId = UUID.fromString(request.getCategoryId());
+        List<Variant> variants = variantService.getOneVariantPerProductByCategoryId(categoryId);
+
+        List<VariantDetail> variantsDetails = variants.stream().map(item -> {
+            return VariantDetail.newBuilder()
+                    .setVariantId(item.getId().toString())
+
+                    .setStockQuantity(item.getStockQuantity())
+                    .setImageUrl(item.getImageUrl())
+                    .setDescription(item.getDescription())
+                    .setPrice(Decimal.newBuilder().setValue(item.getPrice().toString()).build())
+                    .setAdditionalProperties(Struct.newBuilder().build())
+
+                    .build();
+        }).toList();
+
+        List<ProductRepresentation> productsRepresentation = variantsDetails.stream().map(item -> {
+            return ProductRepresentation.newBuilder()
+                    .setProductId("TODO / Change proto definition")
+                    .setVariant(item)
+                    .build();
+        }).toList();
+
+        GetProductsResponse response = GetProductsResponse.newBuilder()
+                .addAllProductsRepresentation(productsRepresentation)
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+
+        logger.info("get products (variants to display) response sent");
     }
 }
