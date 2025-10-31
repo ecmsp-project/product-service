@@ -1,6 +1,5 @@
 package com.ecmsp.productservice.repository;
 
-import com.ecmsp.product.v1.reservation.v1.ReservedVariant;
 import com.ecmsp.productservice.domain.VariantReservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -11,5 +10,7 @@ public interface VariantReservationRepository extends JpaRepository<VariantReser
     void deleteVariantReservationByReservationId(UUID reservationId);
 
     List<VariantReservation> getAllByReservationId(UUID reservationId);
+
+
 
 }

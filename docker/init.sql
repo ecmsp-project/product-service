@@ -67,7 +67,7 @@ CREATE TABLE variant_reservations (
                                       reserved_quantity int  NOT NULL,
                                       created_at timestamp  NOT NULL,
                                       expires_at timestamp  NOT NULL,
-                                      status text  NOT NULL CHECK (status IN ('ACTIVE','CANCELLED','EXPIRED')),
+                                      status text  NOT NULL CHECK (status IN ('ACTIVE','CANCELLED','EXPIRED', 'PAYMENT_COMPLETED', 'PAYMENT_FAILED')),
                                       CONSTRAINT variant_reservations_pk PRIMARY KEY (id)
 );
 
@@ -149,5 +149,11 @@ ALTER TABLE variant_reservations ADD CONSTRAINT variant_reservations_variants
         NOT DEFERRABLE
             INITIALLY IMMEDIATE
 ;
+
+-- Insert example data
+INSERT INTO categories (id, name) VALUES ('c4a7e8f0-42b1-4f59-b8e3-426655440000', 'Electronics');
+INSERT INTO products (id, category_id, name, approximate_price, delivery_price) VALUES ('a1a7e8f0-42b1-4f59-b8e3-426655440001', 'c4a7e8f0-42b1-4f59-b8e3-426655440000', 'Laptop', 1200.00, 25.00);
+INSERT INTO variants (id, product_id, price, stock_quantity, image_url, created_at, updated_at) VALUES ('b1a7e8f0-42b1-4f59-b8e3-426655440002', 'a1a7e8f0-42b1-4f59-b8e3-426655440001', 1250.00, 10, 'http://example.com/laptop.jpg', NOW(), NOW());
+INSERT INTO variant_reservations (id, reservation_id, variant_id, reserved_quantity, created_at, expires_at, status) VALUES ('d1a7e8f0-42b1-4f59-b8e3-426655440003', '550e8400-e29b-41d4-a716-446655440001', 'b1a7e8f0-42b1-4f59-b8e3-426655440002', 1, NOW(), NOW() + interval '1 hour', 'ACTIVE');
 
 -- End of file.

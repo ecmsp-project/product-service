@@ -12,7 +12,7 @@ services:
             timeout: 10s
 
         ports:
-            - "5432:5432"
+            - "9400:5432"
         volumes:
             - product-service-db-dev:/var/lib/postgresql/data
             - ./init.sql:/docker-entrypoint-initdb.d/init.sql

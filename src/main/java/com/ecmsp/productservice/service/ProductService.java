@@ -18,7 +18,6 @@ import java.util.UUID;
 
 @Service
 public class ProductService {
-
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
 

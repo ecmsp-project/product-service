@@ -4,6 +4,7 @@ import com.ecmsp.product.v1.reservation.v1.ReservedVariant;
 import com.ecmsp.productservice.domain.ReservationStatus;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.VariantReservation;
+import com.ecmsp.productservice.dto.variant_reservation.ReservationUpdateRequestDTO;
 import com.ecmsp.productservice.dto.variant_reservation.VariantReservationCreateRequestDTO;
 import com.ecmsp.productservice.dto.variant_reservation.VariantsReservationCreateRequestDTO;
 import com.ecmsp.productservice.repository.VariantReservationRepository;
@@ -56,6 +57,20 @@ public class VariantReservationService {
                 createVariantReservation(bRequest);
         });
     }
+
+    @Transactional
+    public void updateVariantsReservation(ReservationUpdateRequestDTO request){
+        UUID reservationId = request.getReservationId();
+        List<VariantReservation> reservedVariants = variantReservationRepository.getAllByReservationId(reservationId);
+
+        reservedVariants.forEach(reservedVariant -> {
+            reservedVariant.setStatus(request.getStatus());
+            variantReservationRepository.save(reservedVariant);
+        });
+
+
+    }
+
 
     @Transactional
     public void deleteVariantsReservation(UUID reservationId) {
