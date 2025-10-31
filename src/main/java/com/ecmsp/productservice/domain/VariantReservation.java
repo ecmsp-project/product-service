@@ -38,6 +38,7 @@ public class VariantReservation {
     @Column(name = "expires_at")
     private Timestamp expiresAt;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", columnDefinition = "text")
     private ReservationStatus status;
 
