@@ -37,4 +37,6 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     @Query("SELECT COUNT(c) FROM Category c WHERE c.parentCategory = :category")
     boolean hasSubCategories(Category category);
+
+    Optional<Category> getCategoryByName(String name);
 }

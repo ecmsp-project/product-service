@@ -12,6 +12,8 @@ import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.aspectj.weaver.ast.Var;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -82,8 +84,8 @@ public class VariantService {
         return variantRepository.findByProductId(productId);
     }
 
-    public List<Variant> getOneVariantPerProductByCategoryId(UUID categoryId) {
-        return variantRepository.getOneVariantPerProductByCategoryId(categoryId);
+    public Page<Variant> getOneVariantPerProductByCategoryId(UUID categoryId, Pageable pageable) {
+        return variantRepository.getOneVariantPerProductByCategoryId(categoryId, pageable);
     }
 
     @Transactional

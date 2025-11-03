@@ -2,6 +2,8 @@ package com.ecmsp.productservice.repository;
 
 import com.ecmsp.productservice.domain.Product;
 import com.ecmsp.productservice.domain.Variant;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -36,5 +38,5 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
                 WHERE v2.product.id = v.product.id
             )
     """)
-    List<Variant> getOneVariantPerProductByCategoryId(UUID categoryId);
+    Page<Variant> getOneVariantPerProductByCategoryId(UUID categoryId, Pageable pageable);
 }

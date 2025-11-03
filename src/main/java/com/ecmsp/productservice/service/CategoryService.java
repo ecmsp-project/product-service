@@ -131,4 +131,10 @@ public class CategoryService {
 
         categoryRepository.deleteById(id);
     }
+
+    public CategoryResponseDTO getCategoryByName(String name) {
+        return categoryRepository.getCategoryByName(name)
+                .map(this::convertToDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Category of such a name no found"));
+    }
 }
