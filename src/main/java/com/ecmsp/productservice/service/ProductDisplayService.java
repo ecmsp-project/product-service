@@ -1,0 +1,71 @@
+package com.ecmsp.productservice.service;
+
+import com.ecmsp.productservice.domain.Variant;
+import com.ecmsp.productservice.dto.category.CategoryResponseDTO;
+import com.ecmsp.productservice.dto.rest.GetProductsRequestDTO;
+import com.ecmsp.productservice.dto.rest.GetProductsResponseDTO;
+import com.ecmsp.productservice.dto.rest.ProductRepresentationDTO;
+import com.ecmsp.productservice.dto.rest.VariantDetailDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+
+@Component
+public class ProductDisplayService {
+    private final ProductService productService;
+    private final VariantService variantService;
+    private final CategoryService categoryService;
+
+    public ProductDisplayService(
+            ProductService productService,
+            VariantService variantService,
+            CategoryService categoryService
+    ) {
+        this.productService = productService;
+        this.variantService = variantService;
+        this.categoryService = categoryService;
+    }
+
+    public GetProductsResponseDTO getProducts(GetProductsRequestDTO request) {
+        int pageSize = request.pageSize() != null ? request.pageSize() : 10;
+        int pageNumber = request.pageNumber() != null ? request.pageNumber() : 0;
+
+        if (request.categoryId() == null && request.categoryName() == null) {
+            throw new IllegalArgumentException("Category ID and Category Name cannot both be null");
+        }
+
+        CategoryResponseDTO category;
+        if (request.categoryId() != null) {
+            category = categoryService.getCategoryById(request.categoryId());
+        } else {
+            category = categoryService.getCategoryByName(request.categoryName());
+        }
+
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        Page<Variant> page = variantService.getOneVariantPerProductByCategoryId(category.getId(), pageable);
+
+        List<ProductRepresentationDTO> productRepresentationsDTO = page.map(item ->
+                ProductRepresentationDTO.builder()
+                        .productId(item.getProduct().getId())
+                        .variantDetail(
+                                VariantDetailDTO.builder()
+                                        .variant_id(item.getId())
+                                        .price(item.getPrice())
+                                        .stockQuantity(item.getStockQuantity())
+                                        .imageUrl(item.getImageUrl())
+                                        .description(item.getDescription())
+                                        .additionalProperties(item.getAdditionalProperties())
+                                        .build()
+                        )
+                        .build()
+        ).toList();
+
+        return GetProductsResponseDTO.builder()
+                .productsRepresentation(productRepresentationsDTO)
+                .nextPageNumber(pageNumber + 1)
+                .build();
+    }
+}

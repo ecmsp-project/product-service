@@ -7,7 +7,7 @@ import java.util.List;
 @Builder
 public record GetProductsResponseDTO(
         List<ProductRepresentationDTO> productsRepresentation,
-        String nextPageToken
+        Integer nextPageNumber
 ) {
 
 }

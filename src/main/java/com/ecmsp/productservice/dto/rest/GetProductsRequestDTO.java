@@ -5,8 +5,8 @@ import java.util.UUID;
 public record GetProductsRequestDTO(
         UUID categoryId,
         String categoryName,
-        String pageToken,
 
+        Integer pageNumber,
         Integer pageSize
 ) {
 }
