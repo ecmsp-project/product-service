@@ -9,6 +9,7 @@ import com.google.protobuf.Struct;
 import com.google.type.Decimal;
 import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
@@ -68,7 +69,7 @@ public class ProductDisplayGrpcService extends ProductServiceGrpc.ProductService
         logger.info("get products (variants to display) request received");
 
         UUID categoryId = UUID.fromString(request.getCategoryId());
-        List<Variant> variants = variantService.getOneVariantPerProductByCategoryId(categoryId);
+        Page<Variant> variants = variantService.getOneVariantPerProductByCategoryId(categoryId, null);
 
         List<VariantDetail> variantsDetails = variants.stream().map(item -> {
             return VariantDetail.newBuilder()
