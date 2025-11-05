@@ -7,6 +7,7 @@ import com.ecmsp.productservice.dto.variant.VariantCreateRequestDTO;
 import com.ecmsp.productservice.dto.variant.VariantRequestDTO;
 import com.ecmsp.productservice.dto.variant.VariantResponseDTO;
 import com.ecmsp.productservice.dto.variant.VariantUpdateRequestDTO;
+import com.ecmsp.productservice.exception.InsufficientStockException;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.repository.ProductRepository;
@@ -133,7 +134,10 @@ public class VariantService {
 
     @Transactional
     void reserveVariant(UUID variantId, int quantity) {
-        variantRepository.reserveVariant(variantId, quantity);
+        int rowsAffected = variantRepository.reserveVariant(variantId, quantity);
+        if (rowsAffected == 0) {
+            throw new InsufficientStockException(variantId, quantity);
+        }
     }
 
     @Transactional

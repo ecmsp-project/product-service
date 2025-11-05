@@ -43,7 +43,7 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
     public void createVariantsReservation(CreateVariantsReservationRequest request, StreamObserver<CreateVariantsReservationResponse> responseObserver) {
         logger.info("got a create variant reservation request");
 
-        UUID reservationId = UUID.randomUUID();
+        UUID reservationId = UUID.fromString(request.getOrderId());
         List<ReservedVariant> reservedVariants = request.getItemsList();
 
         Map<UUID, Integer> variants = request.getItemsList().stream()
@@ -58,11 +58,10 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
                 .build();
         variantReservationService.createVariantsReservation(bRequest);
 
+        //TODO: add fields for succeeded and failed reservation variants
         CreateVariantsReservationResponse response = CreateVariantsReservationResponse
                 .newBuilder()
-                .setReservationId(reservationId.toString())
                 .build();
-                // TODO: add fields for succeeded and failed reservation variants
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -74,7 +73,7 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
     public void removeVariantsReservation(RemoveVariantsReservationRequest request, StreamObserver<RemoveVariantsReservationResponse> responseObserver) {
         logger.info("got a remove variant reservation request");
 
-        UUID reservationId = UUID.fromString(request.getReservationId());
+        UUID reservationId = UUID.fromString(request.getOrderId());
         variantReservationService.deleteVariantsReservation(reservationId);
 
         RemoveVariantsReservationResponse response = RemoveVariantsReservationResponse
@@ -91,7 +90,7 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
     public void getVariantsReservation(GetVariantsReservationRequest request, StreamObserver<GetVariantsReservationResponse> responseObserver) {
         logger.info("got a get variant reservation request");
 
-        UUID reservationId = UUID.fromString(request.getReservationId());
+        UUID reservationId = UUID.fromString(request.getOrderId());
 
         List<VariantReservation> variantReservations = variantReservationService.getReservation(reservationId);
 

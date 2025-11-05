@@ -47,6 +47,8 @@ public class VariantReservationService {
         return variantReservationRepository.save(variantReservation);
     }
 
+
+    //TODO: should return custom exception when can't reserve and should be caught by GrpcReservationService
     @Transactional
     public void createVariantsReservation(VariantsReservationCreateRequestDTO request) {
         request.getVariants().forEach((variantId, quantity) -> {

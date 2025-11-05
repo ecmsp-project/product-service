@@ -25,9 +25,10 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
 
     List<Variant> findByPriceBetween(BigDecimal min, BigDecimal max);
 
+
     @Modifying
     @Query("UPDATE Variant v SET v.stockQuantity = v.stockQuantity - :quantity WHERE v.id = :variantId AND v.stockQuantity >= :quantity")
-    void reserveVariant(@Param("variantId") UUID variantId, @Param("quantity") int quantity);
+    int reserveVariant(@Param("variantId") UUID variantId, @Param("quantity") int quantity);
 
 //    @Query("""
 //        SELECT v FROM Variant v
