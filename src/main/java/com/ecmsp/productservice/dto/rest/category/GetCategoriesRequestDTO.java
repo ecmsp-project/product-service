@@ -2,7 +2,9 @@ package com.ecmsp.productservice.dto.rest.category;
 
 import lombok.Builder;
 
-@Builder
-public class GetCategoriesRequestDTO {
+import java.util.UUID;
 
-}
+@Builder
+public record GetCategoriesRequestDTO(
+        UUID categoryId
+) {}

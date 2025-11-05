@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class ProductDisplayService {
@@ -29,23 +30,12 @@ public class ProductDisplayService {
         this.categoryService = categoryService;
     }
 
-    public GetProductsResponseDTO getProducts(GetProductsRequestDTO request) {
+    public GetProductsResponseDTO getProducts(GetProductsRequestDTO request, UUID categoryId) {
         int pageSize = request.pageSize() != null ? request.pageSize() : 10;
         int pageNumber = request.pageNumber() != null ? request.pageNumber() : 0;
 
-        if (request.categoryId() == null && request.categoryName() == null) {
-            throw new IllegalArgumentException("Category ID and Category Name cannot both be null");
-        }
-
-        CategoryResponseDTO category;
-        if (request.categoryId() != null) {
-            category = categoryService.getCategoryById(request.categoryId());
-        } else {
-            category = categoryService.getCategoryByName(request.categoryName());
-        }
-
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Variant> page = variantService.getOneVariantPerProductByCategoryId(category.getId(), pageable);
+        Page<Variant> page = variantService.getOneVariantPerProductByCategoryId(categoryId, pageable);
 
         List<ProductRepresentationDTO> productRepresentationsDTO = page.map(item ->
                 ProductRepresentationDTO.builder()

@@ -6,6 +6,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public class GetCategoriesResponseDTO {
-    List<CategoryResponseDTO> categories;
+public record GetCategoriesResponseDTO(
+        List<CategoryResponseDTO> categories
+) {
 }

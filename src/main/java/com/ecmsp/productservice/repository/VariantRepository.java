@@ -29,14 +29,37 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
     @Query("UPDATE Variant v SET v.stockQuantity = v.stockQuantity - :quantity WHERE v.id = :variantId AND v.stockQuantity >= :quantity")
     void reserveVariant(@Param("variantId") UUID variantId, @Param("quantity") int quantity);
 
-    @Query("""
-        SELECT v FROM Variant v
-        WHERE v.product.category.id = :categoryId
-            AND v.createdAt = (
-                SELECT MAX(v2.createdAt)
-                FROM Variant v2
-                WHERE v2.product.id = v.product.id
-            )
-    """)
+//    @Query("""
+//        SELECT v FROM Variant v
+//        WHERE v.product.category.id = :categoryId
+//            AND v.createdAt = (
+//                SELECT MAX(v2.createdAt)
+//                FROM Variant v2
+//                WHERE v2.product.id = v.product.id
+//            )
+//    """)
+    @Query(
+            value = """
+            SELECT * FROM (
+                SELECT v.*,
+                       ROW_NUMBER() OVER (PARTITION BY v.product_id ORDER BY v.created_at DESC, v.id DESC) as rn
+                FROM variants v
+                JOIN products p ON p.id = v.product_id
+                WHERE p.category_id = :categoryId
+            ) t
+            WHERE t.rn = 1
+            """,
+            countQuery = """
+            SELECT COUNT(*) FROM (
+                SELECT 1
+                FROM variants v
+                JOIN products p ON p.id = v.product_id
+                WHERE p.category_id = :categoryId
+                GROUP BY v.product_id
+            ) t
+            """
+            ,
+            nativeQuery = true
+    )
     Page<Variant> getOneVariantPerProductByCategoryId(UUID categoryId, Pageable pageable);
 }

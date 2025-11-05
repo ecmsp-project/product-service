@@ -146,4 +146,12 @@ public class CategoryService {
                 .map(this::convertToDto)
                 .toList();
     }
+
+    public List<CategoryResponseDTO> getCategoriesByParentCategoryID(UUID parentCategoryId) {
+        List<Category> categories = categories = categoryRepository.findByParentCategory_Id(parentCategoryId);
+
+        return categories.stream()
+                .map(this::convertToDto)
+                .toList();
+    }
 }
