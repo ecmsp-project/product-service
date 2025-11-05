@@ -30,6 +30,9 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
     @Query("UPDATE Variant v SET v.stockQuantity = v.stockQuantity - :quantity WHERE v.id = :variantId AND v.stockQuantity >= :quantity")
     int reserveVariant(@Param("variantId") UUID variantId, @Param("quantity") int quantity);
 
+    @Query("SELECT v.stockQuantity FROM Variant v WHERE v.id = :id")
+    Optional<Integer> findStockQuantityById(@Param("id") UUID id);
+
 //    @Query("""
 //        SELECT v FROM Variant v
 //        WHERE v.product.category.id = :categoryId

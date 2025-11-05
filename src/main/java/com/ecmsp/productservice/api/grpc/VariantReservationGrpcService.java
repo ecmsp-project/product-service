@@ -3,6 +3,7 @@ package com.ecmsp.productservice.api.grpc;
 import com.ecmsp.product.v1.reservation.v1.*;
 import com.ecmsp.productservice.domain.VariantReservation;
 import com.ecmsp.productservice.dto.variant_reservation.VariantReservationCreateRequestDTO;
+import com.ecmsp.productservice.dto.variant_reservation.VariantReservationResultDTO;
 import com.ecmsp.productservice.dto.variant_reservation.VariantsReservationCreateRequestDTO;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.service.ProductService;
@@ -44,7 +45,6 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
         logger.info("got a create variant reservation request");
 
         UUID reservationId = UUID.fromString(request.getOrderId());
-        List<ReservedVariant> reservedVariants = request.getItemsList();
 
         Map<UUID, Integer> variants = request.getItemsList().stream()
                 .collect(Collectors.toMap(
@@ -56,11 +56,25 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
                 .reservationId(reservationId)
                 .variants(variants)
                 .build();
-        variantReservationService.createVariantsReservation(bRequest);
 
-        //TODO: add fields for succeeded and failed reservation variants
+        VariantReservationResultDTO result = variantReservationService.createVariantsReservation(bRequest);
+
+        List<String> reservedVariantIds = result.getReservedVariantIds().stream()
+                .map(UUID::toString)
+                .toList();
+
+        List<FailedReservationVariant> failedVariants = result.getFailedVariants().stream()
+                .map(failure -> FailedReservationVariant.newBuilder()
+                        .setVariantId(failure.getVariantId().toString())
+                        .setRequestedQuantity(failure.getRequestedQuantity())
+                        .setAvailableQuantity(failure.getAvailableQuantity())
+                        .build())
+                .toList();
+
         CreateVariantsReservationResponse response = CreateVariantsReservationResponse
                 .newBuilder()
+                .addAllReservedVariantIds(reservedVariantIds)
+                .addAllFailedVariants(failedVariants)
                 .build();
 
         responseObserver.onNext(response);

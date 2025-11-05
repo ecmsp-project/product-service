@@ -1,16 +1,14 @@
 package com.ecmsp.productservice.service;
 
-import com.ecmsp.product.v1.reservation.v1.ReservedVariant;
 import com.ecmsp.productservice.domain.ReservationStatus;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.VariantReservation;
-import com.ecmsp.productservice.dto.variant_reservation.ReservationUpdateRequestDTO;
-import com.ecmsp.productservice.dto.variant_reservation.VariantReservationCreateRequestDTO;
-import com.ecmsp.productservice.dto.variant_reservation.VariantsReservationCreateRequestDTO;
+import com.ecmsp.productservice.dto.variant_reservation.*;
 import com.ecmsp.productservice.repository.VariantReservationRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,25 +37,82 @@ public class VariantReservationService {
                 .build();
     }
 
-    private VariantReservation createVariantReservation(VariantReservationCreateRequestDTO request) {
+    @Transactional
+    protected VariantReservation createVariantReservation(VariantReservationCreateRequestDTO request) {
+        boolean reserved = variantService.reserveVariant(request.getVariantId(), request.getQuantity());
 
-        variantService.reserveVariant(request.getVariantId(), request.getQuantity());
+        if (!reserved) {
+            throw new IllegalStateException("Failed to reserve variant " + request.getVariantId() +
+                    " - insufficient stock (race condition detected)");
+        }
 
         VariantReservation variantReservation = convertToEntity(request);
         return variantReservationRepository.save(variantReservation);
     }
 
+    public VariantReservationResultDTO createVariantsReservation(VariantsReservationCreateRequestDTO request) {
+        List<FailedReservationVariantDTO> failedVariants = new ArrayList<>();
 
-    //TODO: should return custom exception when can't reserve and should be caught by GrpcReservationService
-    @Transactional
-    public void createVariantsReservation(VariantsReservationCreateRequestDTO request) {
-        request.getVariants().forEach((variantId, quantity) -> {
-                VariantReservationCreateRequestDTO bRequest = VariantReservationCreateRequestDTO.builder()
+        // Phase 1: Validation - check all variants have sufficient stock
+        for (var entry : request.getVariants().entrySet()) {
+            UUID variantId = entry.getKey();
+            int requestedQuantity = entry.getValue();
+
+            var availableStock = variantService.getAvailableStock(variantId);
+
+            if (availableStock.isEmpty()) {
+                // Variant doesn't exist
+                failedVariants.add(FailedReservationVariantDTO.builder()
                         .variantId(variantId)
-                        .quantity(quantity)
-                        .build();
-                createVariantReservation(bRequest);
-        });
+                        .requestedQuantity(requestedQuantity)
+                        .availableQuantity(0)
+                        .build());
+            } else if (availableStock.get() < requestedQuantity) {
+                // Insufficient stock
+                failedVariants.add(FailedReservationVariantDTO.builder()
+                        .variantId(variantId)
+                        .requestedQuantity(requestedQuantity)
+                        .availableQuantity(availableStock.get())
+                        .build());
+            }
+        }
+
+        // If any validation failed, return immediately without reserving
+        if (!failedVariants.isEmpty()) {
+            return VariantReservationResultDTO.builder()
+                    .reservedVariantIds(List.of())
+                    .failedVariants(failedVariants)
+                    .build();
+        }
+
+        // Phase 2: Atomic Reservation - all validations passed
+        List<UUID> reservedVariantIds = reserveAllVariantsAtomically(request);
+
+        return VariantReservationResultDTO.builder()
+                .reservedVariantIds(reservedVariantIds)
+                .failedVariants(List.of())
+                .build();
+    }
+
+    @Transactional
+    protected List<UUID> reserveAllVariantsAtomically(VariantsReservationCreateRequestDTO request) {
+        List<UUID> reservedIds = new ArrayList<>();
+
+        for (var entry : request.getVariants().entrySet()) {
+            UUID variantId = entry.getKey();
+            int quantity = entry.getValue();
+
+            VariantReservationCreateRequestDTO variantRequest = VariantReservationCreateRequestDTO.builder()
+                    .reservationId(request.getReservationId())
+                    .variantId(variantId)
+                    .quantity(quantity)
+                    .build();
+
+            createVariantReservation(variantRequest);
+            reservedIds.add(variantId);
+        }
+
+        return reservedIds;
     }
 
     @Transactional
