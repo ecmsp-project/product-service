@@ -2,7 +2,6 @@ package com.ecmsp.productservice.api.grpc;
 
 import com.ecmsp.product.v1.reservation.v1.*;
 import com.ecmsp.productservice.domain.VariantReservation;
-import com.ecmsp.productservice.dto.variant_reservation.VariantReservationCreateRequestDTO;
 import com.ecmsp.productservice.dto.variant_reservation.VariantReservationResultDTO;
 import com.ecmsp.productservice.dto.variant_reservation.VariantsReservationCreateRequestDTO;
 import com.ecmsp.productservice.repository.VariantRepository;
@@ -48,7 +47,7 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
 
         Map<UUID, Integer> variants = request.getItemsList().stream()
                 .collect(Collectors.toMap(
-                        item -> UUID.fromString(item.getVariantId()),
+                        item-> UUID.fromString(item.getVariantId()),
                         ReservedVariant::getQuantity
                 ));
 

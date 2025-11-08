@@ -5,8 +5,9 @@ import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.VariantReservation;
 import com.ecmsp.productservice.dto.variant_reservation.*;
 import com.ecmsp.productservice.repository.VariantReservationRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,6 @@ public class VariantReservationService {
                 .build();
     }
 
-    @Transactional
     protected VariantReservation createVariantReservation(VariantReservationCreateRequestDTO request) {
         boolean reserved = variantService.reserveVariant(request.getVariantId(), request.getQuantity());
 
@@ -50,6 +50,7 @@ public class VariantReservationService {
         return variantReservationRepository.save(variantReservation);
     }
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public VariantReservationResultDTO createVariantsReservation(VariantsReservationCreateRequestDTO request) {
         List<FailedReservationVariantDTO> failedVariants = new ArrayList<>();
 
@@ -60,21 +61,14 @@ public class VariantReservationService {
 
             var availableStock = variantService.getAvailableStock(variantId);
 
-            if (availableStock.isEmpty()) {
-                // Variant doesn't exist
+            if(availableStock.isEmpty() || availableStock.get() < requestedQuantity){
                 failedVariants.add(FailedReservationVariantDTO.builder()
                         .variantId(variantId)
                         .requestedQuantity(requestedQuantity)
-                        .availableQuantity(0)
-                        .build());
-            } else if (availableStock.get() < requestedQuantity) {
-                // Insufficient stock
-                failedVariants.add(FailedReservationVariantDTO.builder()
-                        .variantId(variantId)
-                        .requestedQuantity(requestedQuantity)
-                        .availableQuantity(availableStock.get())
+                        .availableQuantity(availableStock.orElse(0))
                         .build());
             }
+
         }
 
         // If any validation failed, return immediately without reserving
@@ -94,7 +88,6 @@ public class VariantReservationService {
                 .build();
     }
 
-    @Transactional
     protected List<UUID> reserveAllVariantsAtomically(VariantsReservationCreateRequestDTO request) {
         List<UUID> reservedIds = new ArrayList<>();
 
