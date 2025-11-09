@@ -132,8 +132,13 @@ public class VariantService {
     }
 
     @Transactional
-    void reserveVariant(UUID variantId, int quantity) {
-        variantRepository.reserveVariant(variantId, quantity);
+    boolean reserveVariant(UUID variantId, int quantity) {
+        int rowsAffected = variantRepository.reserveVariant(variantId, quantity);
+        return rowsAffected > 0;
+    }
+
+    public Optional<Integer> getAvailableStock(UUID variantId) {
+        return variantRepository.findStockQuantityById(variantId);
     }
 
     @Transactional

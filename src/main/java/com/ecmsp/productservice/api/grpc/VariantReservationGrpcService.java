@@ -2,7 +2,7 @@ package com.ecmsp.productservice.api.grpc;
 
 import com.ecmsp.product.v1.reservation.v1.*;
 import com.ecmsp.productservice.domain.VariantReservation;
-import com.ecmsp.productservice.dto.variant_reservation.VariantReservationCreateRequestDTO;
+import com.ecmsp.productservice.dto.variant_reservation.VariantReservationResultDTO;
 import com.ecmsp.productservice.dto.variant_reservation.VariantsReservationCreateRequestDTO;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.service.ProductService;
@@ -43,12 +43,11 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
     public void createVariantsReservation(CreateVariantsReservationRequest request, StreamObserver<CreateVariantsReservationResponse> responseObserver) {
         logger.info("got a create variant reservation request");
 
-        UUID reservationId = UUID.randomUUID();
-        List<ReservedVariant> reservedVariants = request.getItemsList();
+        UUID reservationId = UUID.fromString(request.getOrderId());
 
         Map<UUID, Integer> variants = request.getItemsList().stream()
                 .collect(Collectors.toMap(
-                        item -> UUID.fromString(item.getVariantId()),
+                        item-> UUID.fromString(item.getVariantId()),
                         ReservedVariant::getQuantity
                 ));
 
@@ -56,13 +55,26 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
                 .reservationId(reservationId)
                 .variants(variants)
                 .build();
-        variantReservationService.createVariantsReservation(bRequest);
+
+        VariantReservationResultDTO result = variantReservationService.createVariantsReservation(bRequest);
+
+        List<String> reservedVariantIds = result.getReservedVariantIds().stream()
+                .map(UUID::toString)
+                .toList();
+
+        List<FailedReservationVariant> failedVariants = result.getFailedVariants().stream()
+                .map(failure -> FailedReservationVariant.newBuilder()
+                        .setVariantId(failure.getVariantId().toString())
+                        .setRequestedQuantity(failure.getRequestedQuantity())
+                        .setAvailableQuantity(failure.getAvailableQuantity())
+                        .build())
+                .toList();
 
         CreateVariantsReservationResponse response = CreateVariantsReservationResponse
                 .newBuilder()
-                .setReservationId(reservationId.toString())
+                .addAllReservedVariantIds(reservedVariantIds)
+                .addAllFailedVariants(failedVariants)
                 .build();
-                // TODO: add fields for succeeded and failed reservation variants
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();
@@ -74,7 +86,7 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
     public void removeVariantsReservation(RemoveVariantsReservationRequest request, StreamObserver<RemoveVariantsReservationResponse> responseObserver) {
         logger.info("got a remove variant reservation request");
 
-        UUID reservationId = UUID.fromString(request.getReservationId());
+        UUID reservationId = UUID.fromString(request.getOrderId());
         variantReservationService.deleteVariantsReservation(reservationId);
 
         RemoveVariantsReservationResponse response = RemoveVariantsReservationResponse
@@ -91,7 +103,7 @@ public class VariantReservationGrpcService extends VariantReservationServiceGrpc
     public void getVariantsReservation(GetVariantsReservationRequest request, StreamObserver<GetVariantsReservationResponse> responseObserver) {
         logger.info("got a get variant reservation request");
 
-        UUID reservationId = UUID.fromString(request.getReservationId());
+        UUID reservationId = UUID.fromString(request.getOrderId());
 
         List<VariantReservation> variantReservations = variantReservationService.getReservation(reservationId);
 
