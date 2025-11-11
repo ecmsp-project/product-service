@@ -148,4 +148,8 @@ public class VariantService {
         }
         variantRepository.deleteById(id);
     }
+
+    public List<Variant> getVariantsByCategoryId(UUID categoryId) {
+        return variantRepository.findByProductCategoryId(categoryId);
+    }
 }

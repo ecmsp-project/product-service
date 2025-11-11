@@ -66,4 +66,23 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
             nativeQuery = true
     )
     Page<Variant> getOneVariantPerProductByCategoryId(UUID categoryId, Pageable pageable);
+
+    List<Variant> findByProductCategoryId(UUID categoryId);
+
+    @Query(value = """
+        SELECT DISTINCT ON (v.product_id) v.*\s
+        FROM variants v\s
+        INNER JOIN variant_properties vp ON v.id = vp.variant_id\s
+        INNER JOIN properties p ON p.id = vp.property_id\s
+        INNER JOIN default_property_options dpo ON dpo.property_id = p.id\s
+        WHERE (:ids IS NULL OR dpo.id IN (:ids))\s
+          AND (:minPrice IS NULL OR v.price >= :minPrice)\s
+          AND (:maxPrice IS NULL OR v.price <= :maxPrice);
+        """, nativeQuery = true)
+    Page<Variant> findByDefaultPropertyOptionIds(
+            @Param("ids") List<UUID> ids,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            Pageable pageable
+    );
 }
