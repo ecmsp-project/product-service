@@ -29,7 +29,7 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
         SELECT DISTINCT p
         FROM Property p
         JOIN FETCH p.defaultPropertyOptions
-        WHERE p.categoryId = :categoryId
+        WHERE p.category.id = :categoryId
     """)
     List<Property> findAllWithDefaultPropertyOptionsByCategoryId(@Param("categoryId") UUID categoryId);
 }
