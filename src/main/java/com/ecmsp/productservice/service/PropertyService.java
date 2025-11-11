@@ -1,11 +1,14 @@
 package com.ecmsp.productservice.service;
 
-import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.domain.Category;
-import com.ecmsp.productservice.dto.property.*;
+import com.ecmsp.productservice.domain.Property;
+import com.ecmsp.productservice.dto.property.PropertyCreateRequestDTO;
+import com.ecmsp.productservice.dto.property.PropertyCreateResponseDTO;
+import com.ecmsp.productservice.dto.property.PropertyResponseDTO;
+import com.ecmsp.productservice.dto.property.PropertyUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
-import com.ecmsp.productservice.repository.PropertyRepository;
 import com.ecmsp.productservice.repository.CategoryRepository;
+import com.ecmsp.productservice.repository.PropertyRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -100,5 +103,9 @@ public class PropertyService {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Property", id));
         propertyRepository.delete(property);
+    }
+
+    public List<Property> getPropertiesWithDefaultPropertyOptionsByCategoryId(UUID categoryId) {
+        return propertyRepository.findAllWithDefaultPropertyOptionsByCategoryId(categoryId);
     }
 }

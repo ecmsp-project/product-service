@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -223,4 +224,7 @@ public class VariantPropertyService {
         };
     }
 
+    public VariantProperty getVariantPropertyByVariantIdAndPropertyId(UUID variantId, UUID propertyId) {
+        return variantPropertyRepository.findByVariantIdAndPropertyId(variantId, propertyId);
+    }
 }
