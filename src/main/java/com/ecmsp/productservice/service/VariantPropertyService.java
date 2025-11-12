@@ -4,6 +4,7 @@ import com.ecmsp.productservice.domain.DefaultPropertyOption;
 import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.VariantProperty;
+import com.ecmsp.productservice.dto.variant.VariantResponseDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyCreateRequestDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyCreateResponseDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyResponseDTO;
@@ -18,9 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class VariantPropertyService {
@@ -128,6 +127,9 @@ public class VariantPropertyService {
 
         response.setDisplayText(variantProperty.getDisplayText());
 
+        response.setIsDefaultPropertyOption(variantProperty.getProperty().isHasDefaultOptions());
+        response.setIsRequired(variantProperty.getProperty().isRequired());
+
         return response;
     }
 
@@ -223,4 +225,34 @@ public class VariantPropertyService {
         };
     }
 
+    public VariantProperty getVariantPropertyByVariantIdAndPropertyId(UUID variantId, UUID propertyId) {
+        return variantPropertyRepository.findByVariantIdAndPropertyId(variantId, propertyId);
+    }
+
+    public Map<String, List<VariantPropertyResponseDTO>> getVariantPropertiesByVariantIdGrouped(UUID variantId) {
+        List<VariantPropertyResponseDTO> properties = variantPropertyRepository.findByVariantId(variantId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+
+        Map<String, List<VariantPropertyResponseDTO>> propertiesMap = new HashMap<>();
+        List<VariantPropertyResponseDTO> requiredProperties = new ArrayList<>();
+        List<VariantPropertyResponseDTO> hasDefaultOptionsProperties = new ArrayList<>();
+        List<VariantPropertyResponseDTO> otherProperties = new ArrayList<>();
+
+        for (VariantPropertyResponseDTO property : properties) {
+            if (property.getIsRequired()) {
+                requiredProperties.add(property);
+            } else if (property.getIsDefaultPropertyOption()) {
+                hasDefaultOptionsProperties.add(property);
+            } else {
+                otherProperties.add(property);
+            }
+        }
+
+        propertiesMap.put("requiredProperties", requiredProperties);
+        propertiesMap.put("defaultProperties", hasDefaultOptionsProperties);
+        propertiesMap.put("otherProperties", hasDefaultOptionsProperties);
+        return propertiesMap;
+    }
 }

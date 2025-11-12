@@ -131,4 +131,27 @@ public class CategoryService {
 
         categoryRepository.deleteById(id);
     }
+
+    public CategoryResponseDTO getCategoryByName(String name) {
+        return categoryRepository.getCategoryByName(name)
+                .map(this::convertToDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Category of such a name no found"));
+    }
+
+    public List<CategoryResponseDTO> getSubcategories(UUID categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category", categoryId));
+
+        return category.getSubCategories().stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    public List<CategoryResponseDTO> getCategoriesByParentCategoryID(UUID parentCategoryId) {
+        List<Category> categories = categories = categoryRepository.findByParentCategory_Id(parentCategoryId);
+
+        return categories.stream()
+                .map(this::convertToDto)
+                .toList();
+    }
 }

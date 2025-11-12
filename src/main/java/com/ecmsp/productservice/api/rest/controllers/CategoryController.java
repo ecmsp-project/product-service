@@ -1,0 +1,65 @@
+package com.ecmsp.productservice.api.rest.controllers;
+
+import com.ecmsp.productservice.dto.category.CategoryResponseDTO;
+import com.ecmsp.productservice.dto.rest.category.GetCategoriesResponseDTO;
+import com.ecmsp.productservice.service.CategoryService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api")
+public class CategoryController {
+
+    private final CategoryService categoryService;
+
+    public CategoryController(
+            CategoryService categoryService
+    ) {
+        this.categoryService = categoryService;
+    }
+
+    @GetMapping("/categories/{categoryId}/subcategories")
+    public ResponseEntity<GetCategoriesResponseDTO> getSubcategories(
+            @PathVariable(required = true) UUID categoryId
+    ) {
+        List<CategoryResponseDTO> categories = categoryService.getSubcategories(categoryId);
+
+        GetCategoriesResponseDTO response = GetCategoriesResponseDTO.builder()
+                .categories(categories)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/categories/subcategories")
+    public ResponseEntity<GetCategoriesResponseDTO> getRootCategories() {
+
+        List<CategoryResponseDTO> categories = categoryService.getCategoriesByParentCategoryID(null);
+
+        GetCategoriesResponseDTO response = GetCategoriesResponseDTO.builder()
+                .categories(categories)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/categories")
+    public ResponseEntity<GetCategoriesResponseDTO> getCategories() {
+        List<CategoryResponseDTO> categories = categoryService.getAllCategories();
+
+        GetCategoriesResponseDTO response = GetCategoriesResponseDTO.builder()
+                .categories(categories)
+                .build();
+        return ResponseEntity.ok(response);
+    }
+
+
+
+
+}
