@@ -26,15 +26,21 @@ public class CategoryController {
 
     @GetMapping("/categories/{categoryId}/subcategories")
     public ResponseEntity<GetCategoriesResponseDTO> getSubcategories(
-            @PathVariable(required = false) UUID categoryId
+            @PathVariable(required = true) UUID categoryId
     ) {
-        List<CategoryResponseDTO> categories;
+        List<CategoryResponseDTO> categories = categoryService.getSubcategories(categoryId);
 
-        if (categoryId != null) {
-            categories = categoryService.getSubcategories(categoryId);
-        } else {
-            categories = categoryService.getCategoriesByParentCategoryID(null);
-        }
+        GetCategoriesResponseDTO response = GetCategoriesResponseDTO.builder()
+                .categories(categories)
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/categories/subcategories")
+    public ResponseEntity<GetCategoriesResponseDTO> getRootCategories() {
+
+        List<CategoryResponseDTO> categories = categoryService.getCategoriesByParentCategoryID(null);
 
         GetCategoriesResponseDTO response = GetCategoriesResponseDTO.builder()
                 .categories(categories)

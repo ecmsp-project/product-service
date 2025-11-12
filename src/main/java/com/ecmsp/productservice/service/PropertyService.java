@@ -108,4 +108,11 @@ public class PropertyService {
     public List<Property> getPropertiesWithDefaultPropertyOptionsByCategoryId(UUID categoryId) {
         return propertyRepository.findAllWithDefaultPropertyOptionsByCategoryId(categoryId);
     }
+
+    public List<PropertyResponseDTO> getPropertiesByCategoryId(UUID categoryId) {
+        return propertyRepository.findByCategory_Id(categoryId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
 }

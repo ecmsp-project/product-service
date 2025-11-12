@@ -2,6 +2,7 @@ package com.ecmsp.productservice.api.rest.controllers;
 
 import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.dto.default_property_option.DefaultPropertyOptionResponseDTO;
+import com.ecmsp.productservice.dto.property.PropertyResponseDTO;
 import com.ecmsp.productservice.dto.rest.property.GetPropertiesResponseDTO;
 import com.ecmsp.productservice.dto.rest.property.GetPropertyResponseDTO;
 import com.ecmsp.productservice.service.DefaultPropertyOptionService;
@@ -31,10 +32,11 @@ public class PropertyController {
     }
 
     @GetMapping("/properties")
-    public ResponseEntity<GetPropertiesResponseDTO> getPropertiesOfGivenCategory(
+    public ResponseEntity<List<GetPropertyResponseDTO>> getPropertiesOfGivenCategory(
             @RequestParam UUID categoryId
     ) {
 
+        List<PropertyResponseDTO> properties = propertyService.getPropertiesByCategoryId(categoryId);
         return ResponseEntity.ok(null);
     }
 

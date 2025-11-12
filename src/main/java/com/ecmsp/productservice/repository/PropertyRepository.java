@@ -32,4 +32,6 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
         WHERE p.category.id = :categoryId
     """)
     List<Property> findAllWithDefaultPropertyOptionsByCategoryId(@Param("categoryId") UUID categoryId);
+
+    List<Property> findByCategory_Id(UUID categoryId);
 }
