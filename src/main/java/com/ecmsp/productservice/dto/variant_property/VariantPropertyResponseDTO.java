@@ -28,4 +28,7 @@ public class VariantPropertyResponseDTO {
     private LocalDate valueDate;
 
     private String displayText;
+
+    private Boolean isDefaultPropertyOption;
+    private Boolean isRequired;
 }

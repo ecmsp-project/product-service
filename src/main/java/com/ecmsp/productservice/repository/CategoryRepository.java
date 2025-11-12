@@ -26,6 +26,8 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
      */
     List<Category> findByParentCategory(Category parentCategory);
 
+    List<Category> findByParentCategory_Id(UUID parentCategoryId);
+
     /**
      * Finds a category by its name and parent category.
      * This can be used to check if a category name is unique within the same level of the category tree.
@@ -37,4 +39,6 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
 
     @Query("SELECT COUNT(c) FROM Category c WHERE c.parentCategory = :category")
     boolean hasSubCategories(Category category);
+
+    Optional<Category> getCategoryByName(String name);
 }

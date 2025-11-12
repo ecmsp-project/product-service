@@ -1,3 +1,4 @@
+
 package com.ecmsp.productservice.service;
 
 import com.ecmsp.productservice.domain.Variant;
@@ -10,6 +11,9 @@ import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
+import org.aspectj.weaver.ast.Var;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -76,6 +80,14 @@ public class VariantService {
         return variantRepository.findById(id);
     }
 
+    public List<Variant> getVariantsByProductId(UUID productId) {
+        return variantRepository.findByProductId(productId);
+    }
+
+    public Page<Variant> getOneVariantPerProductByCategoryId(UUID categoryId, Pageable pageable) {
+        return variantRepository.getOneVariantPerProductByCategoryId(categoryId, pageable);
+    }
+
     @Transactional
     public VariantResponseDTO createVariant(VariantCreateRequestDTO request) {
         Variant variant = convertToEntity(request);
@@ -120,10 +132,31 @@ public class VariantService {
     }
 
     @Transactional
+    boolean reserveVariant(UUID variantId, int quantity) {
+        int rowsAffected = variantRepository.reserveVariant(variantId, quantity);
+        return rowsAffected > 0;
+    }
+
+    public Optional<Integer> getAvailableStock(UUID variantId) {
+        return variantRepository.findStockQuantityById(variantId);
+    }
+
+    @Transactional
     public void deleteVariant(UUID id) {
         if (!variantRepository.existsById(id)) {
             throw new ResourceNotFoundException("Variant", id);
         }
         variantRepository.deleteById(id);
+    }
+
+    public List<Variant> getVariantsByCategoryId(UUID categoryId) {
+        return variantRepository.findByProductCategoryId(categoryId);
+    }
+
+    public List<VariantResponseDTO> getOtherVariantsIds(UUID productId, UUID excludeVariantId) {
+        return variantRepository.findOtherVariantsIds(productId, excludeVariantId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 }
