@@ -152,4 +152,11 @@ public class VariantService {
     public List<Variant> getVariantsByCategoryId(UUID categoryId) {
         return variantRepository.findByProductCategoryId(categoryId);
     }
+
+    public List<VariantResponseDTO> getOtherVariantsIds(UUID productId, UUID excludeVariantId) {
+        return variantRepository.findOtherVariantsIds(productId, excludeVariantId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
 }
