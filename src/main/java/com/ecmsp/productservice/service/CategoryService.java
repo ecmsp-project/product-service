@@ -80,7 +80,7 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryCreateResponseDTO createCategorySplit(CategoryCreateRequestDTO request) {
+    public CategoryCreateResponseDTO createCategoryAllSplit(CategoryCreateRequestDTO request) {
         Category category = convertToEntity(request);
         Category savedCategory = categoryRepository.save(category);
 
@@ -88,6 +88,22 @@ public class CategoryService {
             childCategory.setParentCategory(savedCategory);
             categoryRepository.save(childCategory);
         }
+
+        return CategoryCreateResponseDTO.builder()
+                .id(savedCategory.getId())
+                .build();
+    }
+
+    @Transactional
+    public CategoryCreateResponseDTO createCategorySplit(CategoryCreateRequestDTO request) {
+        Category category = convertToEntity(request);
+        Category savedCategory = categoryRepository.save(category);
+
+        Category childCategory = categoryRepository.findById(request.getChildCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Child category not found", request.getChildCategoryId()));
+
+        childCategory.setParentCategory(savedCategory);
+        categoryRepository.save(childCategory);
 
         return CategoryCreateResponseDTO.builder()
                 .id(savedCategory.getId())
