@@ -71,6 +71,18 @@ CREATE TABLE variant_reservations (
                                       CONSTRAINT variant_reservations_pk PRIMARY KEY (id)
 );
 
+-- Table: variant_images
+CREATE TABLE variant_images (
+                                id uuid  NOT NULL,
+                                variant_id uuid  NOT NULL,
+                                url varchar(100)  NOT NULL,
+                                is_main boolean  NOT NULL,
+                                position int  NOT NULL,
+                                created_at timestamp  NOT NULL,
+                                updated_at timestamp  NOT NULL,
+                                CONSTRAINT variant_images_pk PRIMARY KEY (id)
+);
+
 -- Table: variants
 CREATE TABLE variants (
                           id uuid  NOT NULL,
@@ -128,6 +140,14 @@ ALTER TABLE variant_properties ADD CONSTRAINT variant_attribute_attribute
 
 -- Reference: variant_attribute_variant (table: variant_properties)
 ALTER TABLE variant_properties ADD CONSTRAINT variant_attribute_variant
+    FOREIGN KEY (variant_id)
+        REFERENCES variants (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: variant_images_variants (table: variant_images)
+ALTER TABLE variant_images ADD CONSTRAINT variant_images_variants
     FOREIGN KEY (variant_id)
         REFERENCES variants (id)
         NOT DEFERRABLE
