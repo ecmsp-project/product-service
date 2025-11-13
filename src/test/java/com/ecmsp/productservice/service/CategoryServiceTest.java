@@ -191,7 +191,7 @@ class CategoryServiceTest {
         when(categoryRepository.save(any(Category.class))).thenReturn(savedCategory);
 
         // When
-        CategoryCreateResponseDTO result = categoryService.createCategorySplit(request);
+        CategoryCreateResponseDTO result = categoryService.createCategoryAllSplit(request);
 
         // Then
         assertThat(result.getId()).isEqualTo(categoryId);
