@@ -88,6 +88,7 @@ CREATE TABLE variants (
                           id uuid  NOT NULL,
                           product_id uuid  NOT NULL,
                           price decimal(12,2)  NOT NULL,
+                          margin decimal(5,2)  NULL,
                           stock_quantity int  NOT NULL,
                           image_url varchar(255)  NOT NULL,
                           additional_properties jsonb  NULL,

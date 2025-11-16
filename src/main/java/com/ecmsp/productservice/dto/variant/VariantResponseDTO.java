@@ -24,6 +24,7 @@ public class VariantResponseDTO {
     private String imageUrl;
     private Map<String, Object> additionalProperties;
     private String description;
+    private BigDecimal margin;
 
     private String productName;
 

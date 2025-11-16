@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.publisher.kafka.events;
+package com.ecmsp.productservice.publisher.kafka.cart.events;
 
 import java.math.BigDecimal;
 
@@ -6,4 +6,4 @@ public record KafkaVariantPriceChangedEvent(
    String variantId,
    BigDecimal oldPrice,
    BigDecimal newPrice
-) implements ProductEvent {}
+) implements CartEvent {}

@@ -32,4 +32,8 @@ public class VariantCreateRequestDTO {
     private Map<String, Object> additionalProperties;
 
     private String description;
+
+    @DecimalMin(value = "5", message = "Margin cannot be less than 5%")
+    @DecimalMax(value = "80", message = "Margin cannot exceed 80%")
+    private BigDecimal margin;
 }

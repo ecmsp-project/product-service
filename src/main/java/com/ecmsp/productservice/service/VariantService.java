@@ -42,6 +42,7 @@ public class VariantService {
                 .imageUrl(variant.getImageUrl())
                 .additionalProperties(variant.getAdditionalProperties())
                 .description(variant.getDescription())
+                .margin(variant.getMargin())
                 .productId(variant.getProduct().getId())
 
                 .createdAt(variant.getCreatedAt())
@@ -60,6 +61,7 @@ public class VariantService {
                 .imageUrl(request.getImageUrl())
                 .additionalProperties(request.getAdditionalProperties())
                 .description(request.getDescription())
+                .margin(request.getMargin())
                 .product(product)
                 .build();
     }
@@ -114,6 +116,9 @@ public class VariantService {
         }
         if (request.getDescription() != null) {
             existingVariant.setDescription(request.getDescription());
+        }
+        if (request.getMargin() != null) {
+            existingVariant.setMargin(request.getMargin());
         }
 
         if (request.getProductId() != null) {

@@ -45,6 +45,9 @@ public class Variant {
     @Column(name="description", columnDefinition = "text")
     private String description;
 
+    @Column(name = "margin", precision = 5, scale = 2)
+    private BigDecimal margin;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

@@ -38,6 +38,7 @@ public class TestEntitiesBuilder {
                 .stockQuantity(10)
                 .imageUrl("http://example.com/image.jpg")
                 .description("Test variant description")
+                .margin(new BigDecimal("25.00"))
                 .additionalProperties(new HashMap<>());
     }
 
