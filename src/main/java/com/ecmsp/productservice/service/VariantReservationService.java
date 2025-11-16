@@ -67,6 +67,7 @@ public class VariantReservationService {
                         .requestedQuantity(requestedQuantity)
                         .availableQuantity(availableStock.orElse(0))
                         .build());
+
             }
 
         }
@@ -115,6 +116,14 @@ public class VariantReservationService {
 
         reservedVariants.forEach(reservedVariant -> {
             reservedVariant.setStatus(request.getStatus());
+
+            if(request.getStatus() == ReservationStatus.PAYMENT_FAILED){
+                variantService.releaseReservedVariantStock(
+                        reservedVariant.getVariant().getId(),
+                        reservedVariant.getReservedQuantity()
+                );
+            }
+
             variantReservationRepository.save(reservedVariant);
         });
 
