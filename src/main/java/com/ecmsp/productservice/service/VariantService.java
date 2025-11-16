@@ -137,6 +137,11 @@ public class VariantService {
         return rowsAffected > 0;
     }
 
+    @Transactional
+    public void releaseReservedVariantStock(UUID variantId, int quantity) {
+        variantRepository.releaseReservedVariantStock(variantId, quantity);
+    }
+
     public Optional<Integer> getAvailableStock(UUID variantId) {
         return variantRepository.findStockQuantityById(variantId);
     }

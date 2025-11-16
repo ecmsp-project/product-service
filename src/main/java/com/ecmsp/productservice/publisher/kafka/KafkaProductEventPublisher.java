@@ -74,6 +74,7 @@ public class KafkaProductEventPublisher {
     }
 
 
+    //TODO: implements in event record definition might be a problem for serialization -> need to check it later
     private void sendEvent(String topic, String key, Object event) {
         try {
             String eventJson = objectMapper.writeValueAsString(event);
