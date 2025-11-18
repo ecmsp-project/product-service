@@ -1,13 +1,13 @@
-package com.ecmsp.productservice.publisher.kafka.cart;
+package com.ecmsp.productservice.kafka.publisher.cart;
 
-import com.ecmsp.productservice.publisher.kafka.cart.events.*;
+import com.ecmsp.productservice.kafka.publisher.cart.events.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 
 
-class KafkaCartEventPublisher {
+public class KafkaCartEventPublisher {
 
     private final KafkaTemplate<String, KafkaVariantPriceChangedEvent> kafkaVariantPriceChangedEventKafkaTemplate;
     private final KafkaTemplate<String, KafkaVariantStockChangedEvent> kafkaVariantStockChangedEventKafkaTemplate;

@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.publisher.kafka.statistics;
+package com.ecmsp.productservice.kafka.publisher.statistics;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;

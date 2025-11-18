@@ -1,6 +1,6 @@
-package com.ecmsp.productservice.publisher.kafka.cart;
+package com.ecmsp.productservice.kafka.publisher.cart;
 
-import com.ecmsp.productservice.publisher.kafka.cart.events.*;
+import com.ecmsp.productservice.kafka.publisher.cart.events.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;

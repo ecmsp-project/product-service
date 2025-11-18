@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.publisher.kafka.cart.events;
+package com.ecmsp.productservice.kafka.publisher.cart.events;
 
 public record KafkaVariantImageUpdatedEvent(
    String variantId,

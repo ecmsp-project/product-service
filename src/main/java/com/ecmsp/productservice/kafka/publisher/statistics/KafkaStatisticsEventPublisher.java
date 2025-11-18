@@ -1,13 +1,15 @@
-package com.ecmsp.productservice.publisher.kafka.statistics;
+package com.ecmsp.productservice.kafka.publisher.statistics;
 
-import com.ecmsp.productservice.publisher.kafka.statistics.events.*;
+import com.ecmsp.productservice.kafka.publisher.statistics.events.KafkaVariantSoldEvent;
+import com.ecmsp.productservice.kafka.publisher.statistics.events.KafkaVariantStockUpdatedEvent;
+import com.ecmsp.productservice.kafka.publisher.statistics.events.StatisticsEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 
 
-class KafkaStatisticsEventPublisher {
+public class KafkaStatisticsEventPublisher {
 
     //TODO: inject in specific service and implement bussiness logic to publish events
 

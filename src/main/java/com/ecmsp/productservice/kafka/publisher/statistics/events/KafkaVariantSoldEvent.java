@@ -1,14 +1,15 @@
-package com.ecmsp.productservice.publisher.kafka.statistics.events;
+package com.ecmsp.productservice.kafka.publisher.statistics.events;
 
 import java.math.BigDecimal;
 
 public record KafkaVariantSoldEvent(
         String eventId,
         String variantId,
-        BigDecimal price,
+        String productId,
+        String productName,
+        BigDecimal soldAt,
         Integer quantitySold,
         BigDecimal margin,
-        Integer stockRemaining,
-        String soldAt
+        Integer stockRemaining
 ) implements StatisticsEvent {
 }

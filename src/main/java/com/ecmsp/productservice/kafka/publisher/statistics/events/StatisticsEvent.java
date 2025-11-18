@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.publisher.kafka.statistics.events;
+package com.ecmsp.productservice.kafka.publisher.statistics.events;
 
 public sealed interface StatisticsEvent permits
         KafkaVariantSoldEvent,
