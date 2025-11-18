@@ -1,13 +1,13 @@
-package com.ecmsp.productservice.publisher.kafka;
+package com.ecmsp.productservice.kafka.publisher.cart;
 
-import com.ecmsp.productservice.publisher.kafka.events.*;
+import com.ecmsp.productservice.kafka.publisher.cart.events.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 
 
-public class KafkaProductEventPublisher {
+public class KafkaCartEventPublisher {
 
     private final KafkaTemplate<String, KafkaVariantPriceChangedEvent> kafkaVariantPriceChangedEventKafkaTemplate;
     private final KafkaTemplate<String, KafkaVariantStockChangedEvent> kafkaVariantStockChangedEventKafkaTemplate;
@@ -18,28 +18,30 @@ public class KafkaProductEventPublisher {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${kafka.topic.variant-price-changed}")
+    @Value("${kafka.topic.product.variant-price-changed}")
     private String variantPriceChangedTopic;
 
-    @Value("${kafka.topic.variant-stock-changed}")
+    @Value("${kafka.topic.product.variant-stock-changed}")
     private String variantStockChangedTopic;
 
-    @Value("${kafka.topic.variant-deleted}")
+    @Value("${kafka.topic.product.variant-deleted}")
     private String variantDeletedTopic;
 
-    @Value("${kafka.topic.product-deleted}")
+    @Value("${kafka.topic.product.product-deleted}")
     private String productDeletedTopic;
 
-    @Value("${kafka.topic.variant-image-updated}")
+    @Value("${kafka.topic.product.variant-image-updated}")
     private String variantImageUpdatedTopic;
 
 
-    public KafkaProductEventPublisher(
+    public KafkaCartEventPublisher(
             KafkaTemplate<String, KafkaVariantPriceChangedEvent> kafkaVariantPriceChangedEventKafkaTemplate,
             KafkaTemplate<String, KafkaVariantStockChangedEvent> kafkaVariantStockChangedEventKafkaTemplate,
             KafkaTemplate<String, KafkaVariantDeletedEvent> kafkaVariantDeletedEventKafkaTemplate,
             KafkaTemplate<String, KafkaProductDeletedEvent> kafkaProductDeletedEventKafkaTemplate,
-            KafkaTemplate<String, KafkaVariantImageUpdatedEvent> kafkaVariantImageUpdatedEventKafkaTemplate, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+            KafkaTemplate<String, KafkaVariantImageUpdatedEvent> kafkaVariantImageUpdatedEventKafkaTemplate,
+            KafkaTemplate<String, String> kafkaTemplate,
+            ObjectMapper objectMapper) {
         this.kafkaVariantPriceChangedEventKafkaTemplate = kafkaVariantPriceChangedEventKafkaTemplate;
         this.kafkaVariantStockChangedEventKafkaTemplate = kafkaVariantStockChangedEventKafkaTemplate;
         this.kafkaVariantDeletedEventKafkaTemplate = kafkaVariantDeletedEventKafkaTemplate;
@@ -51,7 +53,7 @@ public class KafkaProductEventPublisher {
 
 
 
-    public void publish(ProductEvent event){
+    public void publish(CartEvent event){
         switch (event){
             case KafkaVariantPriceChangedEvent variantPriceChangedEvent -> {
                 sendEvent(variantPriceChangedTopic, variantPriceChangedEvent.variantId(), variantPriceChangedEvent);
@@ -73,7 +75,6 @@ public class KafkaProductEventPublisher {
     }
 
 
-    //TODO: implements in event record definition might be a problem for serialization -> need to check it later
     private void sendEvent(String topic, String key, Object event) {
         try {
             String eventJson = objectMapper.writeValueAsString(event);
