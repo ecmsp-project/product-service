@@ -6,6 +6,7 @@ import com.ecmsp.productservice.kafka.publisher.statistics.events.KafkaVariantSo
 import com.ecmsp.productservice.kafka.publisher.statistics.events.KafkaVariantStockUpdatedEvent;
 import com.ecmsp.productservice.kafka.publisher.statistics.events.StatisticsEvent;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -119,6 +120,61 @@ class OutboxEventProcessorTest {
         assertThat(stockEvent.variantId()).isEqualTo(event.variantId());
         assertThat(stockEvent.deliveredQuantity()).isEqualTo(event.deliveredQuantity());
         assertThat(stockEvent.deliveredAt()).isEqualTo(event.deliveredAt());
+    }
+
+    @Test
+    void should_serialize_kafka_variant_sold_event_to_correct_json_format() throws JsonProcessingException {
+        // Given - create event with known values matching the expected format
+        KafkaVariantSoldEvent event = new KafkaVariantSoldEvent(
+                "550e8400-e29b-41d4-a716-446655440001",  // eventId
+                "660e8400-e29b-41d4-a716-446655440002",  // variantId
+                "770e8400-e29b-41d4-a716-446655440003",  // productId
+                "Premium Wireless Headphones",            // productName
+                new BigDecimal("199.99"),                 // soldAt
+                3,                                        // quantitySold
+                new BigDecimal("45.50"),                  // margin
+                47                                        // stockRemaining
+        );
+
+        // When - serialize to JSON with pretty printing for debugging
+        String jsonPretty = objectMapper.writerWithDefaultPrettyPrinter()
+                .writeValueAsString(event);
+        String json = objectMapper.writeValueAsString(event);
+
+        // Debug output - print the formatted JSON
+        System.out.println("\n=== Serialized KafkaVariantSoldEvent JSON (Pretty) ===");
+        System.out.println(jsonPretty);
+        System.out.println("\n=== Serialized KafkaVariantSoldEvent JSON (Compact) ===");
+        System.out.println(json);
+        System.out.println("=======================================================\n");
+
+        // Then - verify the JSON structure
+        JsonNode jsonNode = objectMapper.readTree(json);
+
+        // Verify all fields are present and have correct values
+        assertThat(jsonNode.get("eventId").asText()).isEqualTo("550e8400-e29b-41d4-a716-446655440001");
+        assertThat(jsonNode.get("variantId").asText()).isEqualTo("660e8400-e29b-41d4-a716-446655440002");
+        assertThat(jsonNode.get("productId").asText()).isEqualTo("770e8400-e29b-41d4-a716-446655440003");
+        assertThat(jsonNode.get("productName").asText()).isEqualTo("Premium Wireless Headphones");
+        assertThat(jsonNode.get("soldAt").asDouble()).isEqualTo(199.99);
+        assertThat(jsonNode.get("quantitySold").asInt()).isEqualTo(3);
+        assertThat(jsonNode.get("margin").asDouble()).isEqualTo(45.50);
+        assertThat(jsonNode.get("stockRemaining").asInt()).isEqualTo(47);
+
+        // Verify the JSON contains all required fields
+        assertThat(json).contains("\"eventId\"");
+        assertThat(json).contains("\"variantId\"");
+        assertThat(json).contains("\"productId\"");
+        assertThat(json).contains("\"productName\"");
+        assertThat(json).contains("\"soldAt\"");
+        assertThat(json).contains("\"quantitySold\"");
+        assertThat(json).contains("\"margin\"");
+        assertThat(json).contains("\"stockRemaining\"");
+
+        // Verify UUIDs are serialized as strings (not objects)
+        assertThat(jsonNode.get("eventId").isTextual()).isTrue();
+        assertThat(jsonNode.get("variantId").isTextual()).isTrue();
+        assertThat(jsonNode.get("productId").isTextual()).isTrue();
     }
 
     private Outbox createOutboxWithEvent(Object event, String eventType) throws JsonProcessingException {
