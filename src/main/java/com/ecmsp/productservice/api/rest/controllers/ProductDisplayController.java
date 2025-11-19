@@ -36,4 +36,13 @@ public class ProductDisplayController {
         GetProductsResponseDTO response = productDisplayService.getProductsFiltered(request);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/products/search")
+    public ResponseEntity<GetProductsResponseDTO> searchProducts(
+            @RequestBody GetProductsRequestDTO request,
+            @RequestParam(required = true) String query
+    ) {
+        GetProductsResponseDTO response = productDisplayService.getProductsQueried(request, query);
+        return ResponseEntity.ok(response);
+    }
 }
