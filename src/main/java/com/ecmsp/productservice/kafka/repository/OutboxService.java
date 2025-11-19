@@ -19,12 +19,12 @@ public class OutboxService {
     private final ObjectMapper objectMapper;
 
     @Transactional
-    public Outbox save(Object eventPayload, String eventType) {
+    public Outbox save(Object eventPayload, UUID eventId, String eventType) {
         try {
             String payload = objectMapper.writeValueAsString(eventPayload);
 
             Outbox outboxEvent = Outbox.builder()
-                    .eventId(UUID.randomUUID())
+                    .eventId(eventId)
                     .payload(payload)
                     .createdAt(LocalDateTime.now())
                     .processed(false)

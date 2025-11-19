@@ -138,8 +138,9 @@ public class VariantReservationService {
                 UUID variantId = reservedVariant.getVariant().getId();
                 Integer stockRemaining = variantService.getAvailableStock(variantId).orElse(0);
                 //save outbox event that the stock has been sold
+                UUID eventId = eventIdSupplier.get();
                 KafkaVariantSoldEvent variantSoldEvent = new KafkaVariantSoldEvent(
-                        eventIdSupplier.get().toString(),
+                        eventId.toString(),
                         variantId.toString(),
                         reservedVariant.getVariant().getProduct().getId().toString(),
                         reservedVariant.getVariant().getProduct().getName(),
@@ -149,7 +150,7 @@ public class VariantReservationService {
                         stockRemaining
                 );
 
-                outboxService.save(variantSoldEvent, KafkaVariantSoldEvent.class.getName());
+                outboxService.save(variantSoldEvent, eventId, KafkaVariantSoldEvent.class.getName());
             }
 
             variantReservationRepository.save(reservedVariant);
