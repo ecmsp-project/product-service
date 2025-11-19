@@ -73,6 +73,7 @@ public class ProductDisplayService {
         List<ProductRepresentationDTO> productRepresentationsDTO = page.map(item ->
                 ProductRepresentationDTO.builder()
                         .productId(item.getProduct().getId())
+                        .name(item.getProduct().getName())
                         .variantDetail(
                                 VariantDetailDTO.builder()
                                         .variant_id(item.getId())
