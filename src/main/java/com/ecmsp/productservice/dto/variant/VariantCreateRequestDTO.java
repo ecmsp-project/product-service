@@ -25,9 +25,6 @@ public class VariantCreateRequestDTO {
     @Min(value = 0, message = "Stock quantity cannot be negative")
     private int stockQuantity;
 
-    @NotBlank(message = "Image URL cannot be blank")
-    private String imageUrl;
-
     @NotNull(message = "Additional attributes are required")
     private Map<String, Object> additionalProperties;
 

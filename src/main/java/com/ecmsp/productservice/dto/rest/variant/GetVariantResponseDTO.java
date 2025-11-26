@@ -8,9 +8,13 @@ import java.util.Map;
 import java.util.UUID;
 
 @Builder
-public record GetVariantRequestResponseDTO(
+public record GetVariantResponseDTO(
     VariantResponseDTO variant,
-    Map<UUID, String> otherVariantsWithImageURL
+
+    List<String> selectablePropertyDescriptions,
+    List<String> selectablePropertyNames,
+
+    List<Map<String, Object>> allVariants
 ) {
 }
 

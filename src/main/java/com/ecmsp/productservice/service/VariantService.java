@@ -39,7 +39,6 @@ public class VariantService {
 
                 .price(variant.getPrice())
                 .stockQuantity(variant.getStockQuantity())
-                .imageUrl(variant.getImageUrl())
                 .additionalProperties(variant.getAdditionalProperties())
                 .description(variant.getDescription())
                 .margin(variant.getMargin())
@@ -58,7 +57,6 @@ public class VariantService {
         return Variant.builder()
                 .price(request.getPrice())
                 .stockQuantity(request.getStockQuantity())
-                .imageUrl(request.getImageUrl())
                 .additionalProperties(request.getAdditionalProperties())
                 .description(request.getDescription())
                 .margin(request.getMargin())
@@ -82,8 +80,15 @@ public class VariantService {
         return variantRepository.findById(id);
     }
 
-    public List<Variant> getVariantsByProductId(UUID productId) {
+    public List<Variant> getVariantsEntityByProductId(UUID productId) {
         return variantRepository.findByProductId(productId);
+    }
+
+    public List<VariantResponseDTO> getVariantsByProductId(UUID productId) {
+        return variantRepository.findByProductId(productId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     public Page<Variant> getOneVariantPerProductByCategoryId(UUID categoryId, Pageable pageable) {
@@ -107,9 +112,6 @@ public class VariantService {
         }
         if (request.getStockQuantity() != null) {
             existingVariant.setStockQuantity(request.getStockQuantity());
-        }
-        if (request.getImageUrl() != null) {
-            existingVariant.setImageUrl(request.getImageUrl());
         }
         if (request.getAdditionalProperties() != null) {
             existingVariant.setAdditionalProperties(request.getAdditionalProperties());
@@ -163,10 +165,4 @@ public class VariantService {
         return variantRepository.findByProductCategoryId(categoryId);
     }
 
-    public List<VariantResponseDTO> getOtherVariantsIds(UUID productId, UUID excludeVariantId) {
-        return variantRepository.findOtherVariantsIds(productId, excludeVariantId)
-                .stream()
-                .map(this::convertToDto)
-                .toList();
-    }
 }

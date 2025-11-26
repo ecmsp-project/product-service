@@ -95,4 +95,5 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
 
     @Query("SELECT v FROM Variant v WHERE v.product.id = :productId AND v.id <> :excludeVariantId")
     List<Variant> findOtherVariantsIds(@Param("productId") UUID productId, @Param("excludeVariantId") UUID excludeVariantId);
+
 }

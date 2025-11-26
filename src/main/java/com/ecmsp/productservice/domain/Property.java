@@ -42,6 +42,9 @@ public class Property {
     @Column(name = "has_default_options", nullable = false)
     private boolean hasDefaultOptions;
 
+    @Column(name = "role", nullable = false)
+    private PropertyRole role;
+
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<DefaultPropertyOption> defaultPropertyOptions = new HashSet<>();
