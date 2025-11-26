@@ -36,9 +36,8 @@ public class PropertyService {
                 .dataType(property.getDataType())
                 .categoryId(property.getCategory().getId())
 
-                .required(property.isRequired())
                 .hasDefaultOptions(property.isHasDefaultOptions())
-
+                .role(property.getRole())
                 .propertyValueCount(property.getDefaultPropertyOptions().size())
                 .variantPropertyCount(property.getVariantProperties().size())
                 .build();
@@ -52,7 +51,7 @@ public class PropertyService {
                 .name(request.getName())
                 .unit(request.getUnit())
                 .dataType(request.getDataType())
-                .required(request.getRequired())
+                .role(request.getRole())
                 .category(category)
                 .build();
     }
@@ -90,9 +89,6 @@ public class PropertyService {
         }
         if (request.getUnit() != null) {
             existingProperty.setUnit(request.getUnit());
-        }
-        if (request.getRequired() != null) {
-            existingProperty.setRequired(request.getRequired());
         }
 
         Property updatedProperty = propertyRepository.save(existingProperty);

@@ -15,8 +15,6 @@ import java.util.UUID;
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, UUID> {
 
-    List<Property> findByIdAndRequired(UUID id, boolean required);
-
     List<Property> findByIdAndCategory(UUID id, Category category);
 
     /**

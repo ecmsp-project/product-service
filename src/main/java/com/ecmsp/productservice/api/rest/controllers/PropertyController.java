@@ -65,8 +65,8 @@ public class PropertyController {
                     .categoryId(property.getId())
                     .name(property.getName())
                     .dataType(String.valueOf(property.getDataType()))
-                    .required(property.isRequired())
                     .hasDefaultOptions(property.isHasDefaultOptions())
+                    .role(property.getRole())
                     .defaultPropertyOptions(defaultPropertyOptions)
                     .build();
         }).toList();

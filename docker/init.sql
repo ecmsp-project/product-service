@@ -77,6 +77,7 @@ CREATE TABLE variant_images (
                                 variant_id uuid  NOT NULL,
                                 url TEXT  NOT NULL,
                                 position int DEFAULT 1 NOT NULL,
+                                is_main boolean DEFAULT FALSE NOT NULL,
                                 created_at timestamp  NOT NULL,
                                 updated_at timestamp  NOT NULL,
                                 CONSTRAINT variant_images_pk PRIMARY KEY (id)

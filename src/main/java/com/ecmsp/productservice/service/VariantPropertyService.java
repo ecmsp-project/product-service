@@ -124,6 +124,7 @@ public class VariantPropertyService {
 
         response.setDisplayText(variantProperty.getDisplayText());
         response.setIsDefaultPropertyOption(variantProperty.getProperty().isHasDefaultOptions());
+        response.setPropertyName(variantProperty.getProperty().getName());
 
         return response;
     }

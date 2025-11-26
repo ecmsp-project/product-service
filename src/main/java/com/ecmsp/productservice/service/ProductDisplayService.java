@@ -133,6 +133,7 @@ public class ProductDisplayService {
                 variantPropertiesMap.put(variantPropertyResponse.getPropertyName(), variantPropertyResponse.getDisplayText());
             }
             variantPropertiesMap.put("variantId", variantResponse.getId().toString());
+            System.out.println(variantPropertiesMap);
             variantsWithPropertiesMap.add(variantPropertiesMap);
         }
 

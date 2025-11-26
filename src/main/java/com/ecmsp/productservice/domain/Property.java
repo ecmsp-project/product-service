@@ -36,13 +36,11 @@ public class Property {
     @Enumerated(EnumType.STRING)
     private PropertyDataType dataType;
 
-    @Column(name = "required", nullable = false)
-    private boolean required;
-
     @Column(name = "has_default_options", nullable = false)
     private boolean hasDefaultOptions;
 
     @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
     private PropertyRole role;
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
