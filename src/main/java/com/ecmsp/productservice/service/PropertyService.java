@@ -2,6 +2,7 @@ package com.ecmsp.productservice.service;
 
 import com.ecmsp.productservice.domain.Category;
 import com.ecmsp.productservice.domain.Property;
+import com.ecmsp.productservice.domain.PropertyRole;
 import com.ecmsp.productservice.dto.property.PropertyCreateRequestDTO;
 import com.ecmsp.productservice.dto.property.PropertyCreateResponseDTO;
 import com.ecmsp.productservice.dto.property.PropertyResponseDTO;
@@ -111,6 +112,13 @@ public class PropertyService {
 
     public List<PropertyResponseDTO> getPropertiesByCategoryId(UUID categoryId) {
         return propertyRepository.findByCategory_Id(categoryId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    public List<PropertyResponseDTO> getPropertiesByCategoryIdAndRole(UUID categoryId, PropertyRole role) {
+        return propertyRepository.findByCategoryIdAndRole(categoryId, role)
                 .stream()
                 .map(this::convertToDto)
                 .toList();

@@ -20,6 +20,8 @@ public class VariantPropertyResponseDTO {
     private UUID variantId;
     private UUID propertyId;
 
+    private String propertyName;
+
     private PropertyDataType propertyDataType;
 
     private String valueText;
@@ -30,5 +32,4 @@ public class VariantPropertyResponseDTO {
     private String displayText;
 
     private Boolean isDefaultPropertyOption;
-    private Boolean isRequired;
 }

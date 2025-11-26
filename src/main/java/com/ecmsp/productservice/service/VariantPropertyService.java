@@ -1,9 +1,6 @@
 package com.ecmsp.productservice.service;
 
-import com.ecmsp.productservice.domain.DefaultPropertyOption;
-import com.ecmsp.productservice.domain.Property;
-import com.ecmsp.productservice.domain.Variant;
-import com.ecmsp.productservice.domain.VariantProperty;
+import com.ecmsp.productservice.domain.*;
 import com.ecmsp.productservice.dto.variant.VariantResponseDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyCreateRequestDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyCreateResponseDTO;
@@ -230,29 +227,34 @@ public class VariantPropertyService {
     }
 
     public Map<String, List<VariantPropertyResponseDTO>> getVariantPropertiesByVariantIdGrouped(UUID variantId) {
-        List<VariantPropertyResponseDTO> properties = variantPropertyRepository.findByVariantId(variantId)
-                .stream()
-                .map(this::convertToDto)
-                .toList();
+        List<VariantProperty> variantProperties = variantPropertyRepository.findByVariantId(variantId);
 
         Map<String, List<VariantPropertyResponseDTO>> propertiesMap = new HashMap<>();
         List<VariantPropertyResponseDTO> requiredProperties = new ArrayList<>();
-        List<VariantPropertyResponseDTO> hasDefaultOptionsProperties = new ArrayList<>();
-        List<VariantPropertyResponseDTO> otherProperties = new ArrayList<>();
+        List<VariantPropertyResponseDTO> infoProperties = new ArrayList<>();
+        List<VariantPropertyResponseDTO> selectableProperties = new ArrayList<>();
 
-        for (VariantPropertyResponseDTO property : properties) {
-            if (property.getIsRequired()) {
-                requiredProperties.add(property);
-            } else if (property.getIsDefaultPropertyOption()) {
-                hasDefaultOptionsProperties.add(property);
-            } else {
-                otherProperties.add(property);
+        for (VariantProperty variantProperty : variantProperties) {
+            switch (variantProperty.getProperty().getRole()) {
+                case REQUIRED -> requiredProperties.add(convertToDto(variantProperty));
+                case INFO -> infoProperties.add(convertToDto(variantProperty));
+                case SELECTABLE -> selectableProperties.add(convertToDto(variantProperty));
             }
         }
 
-        propertiesMap.put("requiredProperties", requiredProperties);
-        propertiesMap.put("defaultProperties", hasDefaultOptionsProperties);
-        propertiesMap.put("otherProperties", hasDefaultOptionsProperties);
+        propertiesMap.put("required", requiredProperties);
+        propertiesMap.put("info", infoProperties);
+        propertiesMap.put("selectable", selectableProperties);
         return propertiesMap;
+    }
+
+    public List<VariantPropertyResponseDTO> getVariantPropertiesByVariantIdAndPropertyRole(
+            UUID variantId,
+            PropertyRole propertyRole
+    ) {
+        return variantPropertyRepository.findByVariantIdAndPropertyRole(variantId, propertyRole)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 }
