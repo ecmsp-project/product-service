@@ -62,7 +62,7 @@ public class PropertyController {
 
             return GetPropertyResponseDTO.builder()
                     .id(property.getId())
-                    .categoryId(property.getId())
+                    .categoryId(property.getCategory().getId())
                     .name(property.getName())
                     .dataType(String.valueOf(property.getDataType()))
                     .hasDefaultOptions(property.isHasDefaultOptions())

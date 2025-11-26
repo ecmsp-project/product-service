@@ -13,7 +13,6 @@ public record GetPropertyResponseDTO(
         UUID categoryId,
         String name,
         String dataType,
-        Boolean required,
         Boolean hasDefaultOptions,
         PropertyRole role,
         List<DefaultPropertyOptionResponseDTO> defaultPropertyOptions

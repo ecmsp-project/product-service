@@ -29,7 +29,7 @@ public class ProductDisplayController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/products/filter")
+    @PostMapping("/products/filtered")
     public ResponseEntity<GetProductsResponseDTO> getProductsFiltered(
             @RequestBody GetProductsFilteredRequestDTO request
     ) {

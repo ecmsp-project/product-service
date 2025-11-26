@@ -37,9 +37,6 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
     @Query("SELECT v.stockQuantity FROM Variant v WHERE v.id = :id")
     Optional<Integer> findStockQuantityById(@Param("id") UUID id);
 
-
-
-
 //    @Query("""
 //        SELECT v FROM Variant v
 //        WHERE v.product.category.id = :categoryId
@@ -83,8 +80,10 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
         INNER JOIN properties p ON p.id = vp.property_id\s
         INNER JOIN default_property_options dpo ON dpo.property_id = p.id\s
         WHERE (:ids IS NULL OR dpo.id IN (:ids))\s
+          AND vp.display_text = dpo.display_text\s
           AND (:minPrice IS NULL OR v.price >= :minPrice)\s
-          AND (:maxPrice IS NULL OR v.price <= :maxPrice);
+          AND (:maxPrice IS NULL OR v.price <= :maxPrice)\s
+        ORDER BY v.product_id, v.price;
         """, nativeQuery = true)
     Page<Variant> findByDefaultPropertyOptionIds(
             @Param("ids") List<UUID> ids,
