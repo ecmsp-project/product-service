@@ -25,4 +25,8 @@ public interface VariantPropertyRepository extends JpaRepository<VariantProperty
     List<VariantProperty> findByVariantIdAndPropertyIdIn(UUID variantId, List<UUID> properties);
 
     List<VariantProperty> findByVariantIdAndPropertyRole(UUID id, PropertyRole role);
+
+    List<VariantProperty> findByVariantIdInAndPropertyRole(List<UUID> ids, PropertyRole role);
+
+    List<VariantProperty> findByVariantInAndPropertyRole(List<Variant> variants, PropertyRole role);
 }

@@ -123,9 +123,7 @@ public class VariantPropertyService {
         response.setValueText(variantProperty.getValueText());
 
         response.setDisplayText(variantProperty.getDisplayText());
-
         response.setIsDefaultPropertyOption(variantProperty.getProperty().isHasDefaultOptions());
-        response.setIsRequired(variantProperty.getProperty().isRequired());
 
         return response;
     }
@@ -257,4 +255,25 @@ public class VariantPropertyService {
                 .map(this::convertToDto)
                 .toList();
     }
+
+    public List<VariantPropertyResponseDTO> getVariantPropertiesByVariantIdInAndPropertyRole(
+            List<UUID> variantIds,
+            PropertyRole propertyRole
+    ) {
+        return variantPropertyRepository.findByVariantIdInAndPropertyRole(variantIds, propertyRole)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
+    public List<VariantPropertyResponseDTO> getVariantPropertiesByVariantInAndPropertyRole(
+            List<Variant> variants,
+            PropertyRole propertyRole
+    ) {
+        return variantPropertyRepository.findByVariantInAndPropertyRole(variants, propertyRole)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
+    }
+
 }

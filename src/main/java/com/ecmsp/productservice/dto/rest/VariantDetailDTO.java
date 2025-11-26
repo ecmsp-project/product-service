@@ -1,6 +1,5 @@
 package com.ecmsp.productservice.dto.rest;
 
-import com.ecmsp.productservice.domain.VariantImage;
 import com.ecmsp.productservice.dto.VariantImageResponseDTO;
 import lombok.Builder;
 
@@ -11,14 +10,12 @@ import java.util.UUID;
 
 @Builder
 public record VariantDetailDTO(
-    UUID variant_id,
+    UUID variantId,
     BigDecimal price,
     Integer stockQuantity,
     String description,
     List<VariantImageResponseDTO> variantImages,
     Map<String, Object> additionalProperties
 ) {
-    public List<VariantImageResponseDTO> convertToVariantImageResponseDTO(List<VariantImage> variantImages) {
 
-    }
 }

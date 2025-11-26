@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class VariantImageService {
@@ -32,5 +33,9 @@ public class VariantImageService {
                 .map(this::convertToDto)
                 .sorted(Comparator.comparing(VariantImageResponseDTO::position))
                 .toList();
+    }
+
+    public List<VariantImage> getVariantImagesByVariantId(UUID variantId) {
+        return variantImageRepository.findByVariantId(variantId);
     }
 }
