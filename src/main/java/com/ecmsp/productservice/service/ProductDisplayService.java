@@ -118,7 +118,10 @@ public class ProductDisplayService {
 
         List<VariantResponseDTO> variants = variantService.getVariantsByProductId(primaryVariantEntity.getProduct().getId());
 
-        List<PropertyResponseDTO> propertyResponseDTOs = propertyService.getPropertiesByCategoryIdAndRole(primaryVariantEntity.getProduct().getCategory().getId(), PropertyRole.SELECTABLE);
+        List<PropertyResponseDTO> propertyResponseDTOs = propertyService.getPropertiesByCategoryIdAndRole(
+                primaryVariantEntity.getProduct().getCategory().getId(),
+                PropertyRole.SELECTABLE
+        );
 
         List<Map<String, Object>> variantsWithPropertiesMap = new ArrayList<>();
 
@@ -133,7 +136,6 @@ public class ProductDisplayService {
                 variantPropertiesMap.put(variantPropertyResponse.getPropertyName(), variantPropertyResponse.getDisplayText());
             }
             variantPropertiesMap.put("variantId", variantResponse.getId().toString());
-            System.out.println(variantPropertiesMap);
             variantsWithPropertiesMap.add(variantPropertiesMap);
         }
 

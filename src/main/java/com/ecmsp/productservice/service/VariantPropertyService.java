@@ -1,7 +1,6 @@
 package com.ecmsp.productservice.service;
 
 import com.ecmsp.productservice.domain.*;
-import com.ecmsp.productservice.dto.variant.VariantResponseDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyCreateRequestDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyCreateResponseDTO;
 import com.ecmsp.productservice.dto.variant_property.VariantPropertyResponseDTO;
@@ -251,7 +250,7 @@ public class VariantPropertyService {
             UUID variantId,
             PropertyRole propertyRole
     ) {
-        return variantPropertyRepository.findByVariantIdAndPropertyRole(variantId, propertyRole)
+        return variantPropertyRepository.findByVariantIdAndProperty_Role(variantId, propertyRole)
                 .stream()
                 .map(this::convertToDto)
                 .toList();
@@ -261,7 +260,7 @@ public class VariantPropertyService {
             List<UUID> variantIds,
             PropertyRole propertyRole
     ) {
-        return variantPropertyRepository.findByVariantIdInAndPropertyRole(variantIds, propertyRole)
+        return variantPropertyRepository.findByVariantIdInAndProperty_Role(variantIds, propertyRole)
                 .stream()
                 .map(this::convertToDto)
                 .toList();

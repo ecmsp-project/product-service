@@ -1,5 +1,6 @@
 package com.ecmsp.productservice.service;
 
+import com.ecmsp.productservice.api.rest.mappers.PropertyMapper;
 import com.ecmsp.productservice.domain.Category;
 import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.domain.PropertyRole;
@@ -7,6 +8,7 @@ import com.ecmsp.productservice.dto.property.PropertyCreateRequestDTO;
 import com.ecmsp.productservice.dto.property.PropertyCreateResponseDTO;
 import com.ecmsp.productservice.dto.property.PropertyResponseDTO;
 import com.ecmsp.productservice.dto.property.PropertyUpdateRequestDTO;
+import com.ecmsp.productservice.dto.rest.property.GetPropertyResponseDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.CategoryRepository;
 import com.ecmsp.productservice.repository.PropertyRepository;
@@ -103,14 +105,11 @@ public class PropertyService {
     }
 
     public List<Property> getPropertiesWithDefaultPropertyOptionsByCategoryId(UUID categoryId) {
-        return propertyRepository.findAllWithDefaultPropertyOptionsByCategoryId(categoryId);
+        return propertyRepository.findAllWithDefaultPropertyOptionsByCategoryId(categoryId)
     }
 
-    public List<PropertyResponseDTO> getPropertiesByCategoryId(UUID categoryId) {
-        return propertyRepository.findByCategory_Id(categoryId)
-                .stream()
-                .map(this::convertToDto)
-                .toList();
+    public List<Property> getPropertiesByCategoryId(UUID categoryId) {
+        return propertyRepository.findByCategory_Id(categoryId);
     }
 
     public List<PropertyResponseDTO> getPropertiesByCategoryIdAndRole(UUID categoryId, PropertyRole role) {

@@ -124,6 +124,12 @@
 			<classifier>jakarta</classifier>
 		</dependency>
 
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.6.3</version>
+        </dependency>
+
 		<dependency>
 			<groupId>com.ecmsp</groupId>
 			<artifactId>protos</artifactId>
