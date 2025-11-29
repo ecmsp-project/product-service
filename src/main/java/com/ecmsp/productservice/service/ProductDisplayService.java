@@ -22,7 +22,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.IntStream;
 
 @Component
 public class ProductDisplayService {
@@ -88,26 +90,51 @@ public class ProductDisplayService {
 
     private GetProductsResponseDTO mapVariantsToGetProductRepresentationDTO(int pageNumber, Page<Variant> page) {
         List<ProductRepresentationDTO> productRepresentationsDTO = page.map(item -> {
-                    List<VariantImageResponseDTO> variantImages = variantImageService.convertVariantImagesToDto(item.getVariantImages());
+            List<VariantImageResponseDTO> variantImages = variantImageService.convertVariantImagesToDto(item.getVariantImages());
 
-                    return ProductRepresentationDTO.builder()
-                            .productId(item.getProduct().getId())
-                            .variantDetail(
-                                    VariantDetailDTO.builder()
-                                            .variantId(item.getId())
-                                            .price(item.getPrice())
-                                            .stockQuantity(item.getStockQuantity())
-                                            .variantImages(variantImages)
-                                            .description(item.getDescription())
-                                            .additionalProperties(item.getAdditionalProperties())
-                                            .build()
-                            )
-                            .build();
-                }).toList();
+            return ProductRepresentationDTO.builder()
+                    .productId(item.getProduct().getId())
+                    .name(item.getProduct().getName())
+                    .variantDetail(
+                            VariantDetailDTO.builder()
+                                    .variantId(item.getId())
+                                    .price(item.getPrice())
+                                    .stockQuantity(item.getStockQuantity())
+                                    .variantImages(variantImages)
+                                    .description(item.getDescription())
+                                    .additionalProperties(item.getAdditionalProperties())
+                                    .build()
+                    )
+                    .build();
+        }).toList();
 
         return GetProductsResponseDTO.builder()
                 .productsRepresentation(productRepresentationsDTO)
                 .nextPageNumber(pageNumber + 1)
+                .build();
+    }
+    // TODO: Add correct product search logic based on Query- for now it will be dummy data
+    public GetProductsResponseDTO getProductsQueried(GetProductsRequestDTO request, String query) {
+        List<ProductRepresentationDTO> productRepresentationsDTO = IntStream.range(0, 4)
+                .mapToObj(i -> ProductRepresentationDTO.builder()
+                        .productId(UUID.randomUUID())
+                        .name("Mocked product " + (i + 1))
+                        .variantDetail(
+                                VariantDetailDTO.builder()
+                                        .variantId(UUID.randomUUID())
+                                        .price(BigDecimal.valueOf(1000 + (i * 500L)))
+                                        .stockQuantity(100 + (i * 200))
+                                        .variantImages(List.of(VariantImageResponseDTO.builder().url("https://images.pexels.com/photos/45201/kitty-cat-kitten-pet-45201.jpeg").build()))
+                                        .description("Description for product " + (i + 1) + query)
+                                        .additionalProperties(null)
+                                        .build()
+                        )
+                        .build())
+                .toList();
+
+        return GetProductsResponseDTO.builder()
+                .productsRepresentation(productRepresentationsDTO)
+                .nextPageNumber(1)
                 .build();
     }
 
