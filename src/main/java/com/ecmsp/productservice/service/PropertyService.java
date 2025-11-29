@@ -105,7 +105,7 @@ public class PropertyService {
     }
 
     public List<Property> getPropertiesWithDefaultPropertyOptionsByCategoryId(UUID categoryId) {
-        return propertyRepository.findAllWithDefaultPropertyOptionsByCategoryId(categoryId)
+        return propertyRepository.findAllWithDefaultPropertyOptionsByCategoryId(categoryId);
     }
 
     public List<Property> getPropertiesByCategoryId(UUID categoryId) {
