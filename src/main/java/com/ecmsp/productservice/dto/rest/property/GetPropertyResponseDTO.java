@@ -1,5 +1,6 @@
 package com.ecmsp.productservice.dto.rest.property;
 
+import com.ecmsp.productservice.domain.PropertyRole;
 import com.ecmsp.productservice.dto.default_property_option.DefaultPropertyOptionResponseDTO;
 import lombok.Builder;
 
@@ -12,8 +13,8 @@ public record GetPropertyResponseDTO(
         UUID categoryId,
         String name,
         String dataType,
-        Boolean required,
         Boolean hasDefaultOptions,
+        PropertyRole role,
         List<DefaultPropertyOptionResponseDTO> defaultPropertyOptions
 ) {
 }

@@ -1,6 +1,7 @@
 package com.ecmsp.productservice.dto.property;
 
 import com.ecmsp.productservice.domain.PropertyDataType;
+import com.ecmsp.productservice.domain.PropertyRole;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -29,8 +30,8 @@ public class PropertyCreateRequestDTO {
     @NotNull(message = "Data type is required")
     private PropertyDataType dataType;
 
-    @NotNull(message = "Required field cannot be empty")
-    private Boolean required;
+    @NotNull(message = "Property role cannot be empty")
+    PropertyRole role;
 
 //    @NotNull(message = "HasDefaultOptions field cannot be empty")
 //    private Boolean hasDefaultOptions;

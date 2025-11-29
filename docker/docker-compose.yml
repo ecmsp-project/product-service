@@ -15,7 +15,8 @@ services:
             - "9400:5432"
         volumes:
             - product-service-db-dev:/var/lib/postgresql/data
-            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+            - ./init.sql:/docker-entrypoint-initdb.d/init-2.sql
+            - ./init-2.sql:/docker-entrypoint-initdb.d/init-3.sql
         secrets:
             - product-service-db-password
         environment:
