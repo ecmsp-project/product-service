@@ -39,9 +39,9 @@ public class VariantService {
 
                 .price(variant.getPrice())
                 .stockQuantity(variant.getStockQuantity())
-                .imageUrl(variant.getImageUrl())
                 .additionalProperties(variant.getAdditionalProperties())
                 .description(variant.getDescription())
+                .margin(variant.getMargin())
                 .productId(variant.getProduct().getId())
 
                 .createdAt(variant.getCreatedAt())
@@ -57,9 +57,9 @@ public class VariantService {
         return Variant.builder()
                 .price(request.getPrice())
                 .stockQuantity(request.getStockQuantity())
-                .imageUrl(request.getImageUrl())
                 .additionalProperties(request.getAdditionalProperties())
                 .description(request.getDescription())
+                .margin(request.getMargin())
                 .product(product)
                 .build();
     }
@@ -80,8 +80,15 @@ public class VariantService {
         return variantRepository.findById(id);
     }
 
-    public List<Variant> getVariantsByProductId(UUID productId) {
+    public List<Variant> getVariantsEntityByProductId(UUID productId) {
         return variantRepository.findByProductId(productId);
+    }
+
+    public List<VariantResponseDTO> getVariantsByProductId(UUID productId) {
+        return variantRepository.findByProductId(productId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     public Page<Variant> getOneVariantPerProductByCategoryId(UUID categoryId, Pageable pageable) {
@@ -106,14 +113,14 @@ public class VariantService {
         if (request.getStockQuantity() != null) {
             existingVariant.setStockQuantity(request.getStockQuantity());
         }
-        if (request.getImageUrl() != null) {
-            existingVariant.setImageUrl(request.getImageUrl());
-        }
         if (request.getAdditionalProperties() != null) {
             existingVariant.setAdditionalProperties(request.getAdditionalProperties());
         }
         if (request.getDescription() != null) {
             existingVariant.setDescription(request.getDescription());
+        }
+        if (request.getMargin() != null) {
+            existingVariant.setMargin(request.getMargin());
         }
 
         if (request.getProductId() != null) {
@@ -137,6 +144,11 @@ public class VariantService {
         return rowsAffected > 0;
     }
 
+    @Transactional
+    public void releaseReservedVariantStock(UUID variantId, int quantity) {
+        variantRepository.releaseReservedVariantStock(variantId, quantity);
+    }
+
     public Optional<Integer> getAvailableStock(UUID variantId) {
         return variantRepository.findStockQuantityById(variantId);
     }
@@ -153,10 +165,4 @@ public class VariantService {
         return variantRepository.findByProductCategoryId(categoryId);
     }
 
-    public List<VariantResponseDTO> getOtherVariantsIds(UUID productId, UUID excludeVariantId) {
-        return variantRepository.findOtherVariantsIds(productId, excludeVariantId)
-                .stream()
-                .map(this::convertToDto)
-                .toList();
-    }
 }

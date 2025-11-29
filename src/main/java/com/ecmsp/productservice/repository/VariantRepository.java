@@ -30,6 +30,10 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
     @Query("UPDATE Variant v SET v.stockQuantity = v.stockQuantity - :quantity WHERE v.id = :variantId AND v.stockQuantity >= :quantity")
     int reserveVariant(@Param("variantId") UUID variantId, @Param("quantity") int quantity);
 
+    @Modifying
+    @Query("UPDATE Variant v SET v.stockQuantity = v.stockQuantity + :quantity WHERE v.id = :variantId")
+    int releaseReservedVariantStock(@Param("variantId") UUID variantId, @Param("quantity") int quantity);
+
     @Query("SELECT v.stockQuantity FROM Variant v WHERE v.id = :id")
     Optional<Integer> findStockQuantityById(@Param("id") UUID id);
 
@@ -76,8 +80,10 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
         INNER JOIN properties p ON p.id = vp.property_id\s
         INNER JOIN default_property_options dpo ON dpo.property_id = p.id\s
         WHERE (:ids IS NULL OR dpo.id IN (:ids))\s
+          AND vp.display_text = dpo.display_text\s
           AND (:minPrice IS NULL OR v.price >= :minPrice)\s
-          AND (:maxPrice IS NULL OR v.price <= :maxPrice);
+          AND (:maxPrice IS NULL OR v.price <= :maxPrice)\s
+        ORDER BY v.product_id, v.price;
         """, nativeQuery = true)
     Page<Variant> findByDefaultPropertyOptionIds(
             @Param("ids") List<UUID> ids,
@@ -88,4 +94,5 @@ public interface VariantRepository extends JpaRepository<Variant, UUID> {
 
     @Query("SELECT v FROM Variant v WHERE v.product.id = :productId AND v.id <> :excludeVariantId")
     List<Variant> findOtherVariantsIds(@Param("productId") UUID productId, @Param("excludeVariantId") UUID excludeVariantId);
+
 }

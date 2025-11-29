@@ -4,7 +4,10 @@ import com.ecmsp.productservice.domain.ReservationStatus;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.VariantReservation;
 import com.ecmsp.productservice.dto.variant_reservation.*;
+import com.ecmsp.productservice.kafka.publisher.statistics.events.KafkaVariantSoldEvent;
+import com.ecmsp.productservice.kafka.repository.OutboxService;
 import com.ecmsp.productservice.repository.VariantReservationRepository;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,17 +15,26 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Service
 public class VariantReservationService {
     private final VariantReservationRepository variantReservationRepository;
     private final VariantService variantService;
+    private final OutboxService outboxService;
+    private final Supplier<UUID> eventIdSupplier;
+
+
 
     public VariantReservationService(
             VariantReservationRepository variantReservationRepository,
-            VariantService variantService) {
+            VariantService variantService,
+            OutboxService outboxService,
+            @Qualifier("eventIdSupplier") Supplier<UUID> eventIdSupplier) {
         this.variantReservationRepository = variantReservationRepository;
         this.variantService = variantService;
+        this.outboxService = outboxService;
+        this.eventIdSupplier = eventIdSupplier;
     }
 
     private VariantReservation convertToEntity(VariantReservationCreateRequestDTO request) {
@@ -67,6 +79,7 @@ public class VariantReservationService {
                         .requestedQuantity(requestedQuantity)
                         .availableQuantity(availableStock.orElse(0))
                         .build());
+
             }
 
         }
@@ -115,6 +128,30 @@ public class VariantReservationService {
 
         reservedVariants.forEach(reservedVariant -> {
             reservedVariant.setStatus(request.getStatus());
+
+            if(request.getStatus() == ReservationStatus.PAYMENT_FAILED){
+                variantService.releaseReservedVariantStock(
+                        reservedVariant.getVariant().getId(),
+                        reservedVariant.getReservedQuantity()
+                );
+            }else{
+                UUID variantId = reservedVariant.getVariant().getId();
+                Integer stockRemaining = variantService.getAvailableStock(variantId).orElse(0);
+                //save outbox event that the stock has been sold
+                KafkaVariantSoldEvent variantSoldEvent = new KafkaVariantSoldEvent(
+                        eventIdSupplier.get().toString(),
+                        variantId.toString(),
+                        reservedVariant.getVariant().getProduct().getId().toString(),
+                        reservedVariant.getVariant().getProduct().getName(),
+                        reservedVariant.getVariant().getPrice(),
+                        reservedVariant.getReservedQuantity(),
+                        reservedVariant.getVariant().getMargin(),
+                        stockRemaining
+                );
+
+                outboxService.save(variantSoldEvent, KafkaVariantSoldEvent.class.getName());
+            }
+
             variantReservationRepository.save(reservedVariant);
         });
 
