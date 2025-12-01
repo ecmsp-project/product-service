@@ -22,7 +22,7 @@ class OutboxEventProcessor {
     private final KafkaStatisticsEventPublisher statisticsEventPublisher;
     private final ObjectMapper objectMapper;
 
-    @Scheduled(fixedDelay = 10)
+    @Scheduled(fixedDelay = 2000)
     public void processOutboxEvents() {
         try {
             List<Outbox> unprocessedEvents = outboxService.getUnprocessedEvents();

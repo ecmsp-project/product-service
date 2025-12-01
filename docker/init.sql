@@ -171,6 +171,22 @@ ALTER TABLE variant_reservations ADD CONSTRAINT variant_reservations_variants
             INITIALLY IMMEDIATE
 ;
 
+
+CREATE TABLE kafka_outbox
+(
+    event_id     UUID PRIMARY KEY,
+    payload      TEXT,
+    created_at   TIMESTAMP    NOT NULL,
+    processed    BOOLEAN      NOT NULL DEFAULT FALSE,
+    processed_at TIMESTAMP,
+    event_type   TEXT
+);
+
+CREATE INDEX idx_kafka_outbox_processed ON kafka_outbox (processed);
+CREATE INDEX idx_kafka_outbox_created_at ON kafka_outbox (created_at);
+CREATE INDEX idx_kafka_outbox_processed_at ON kafka_outbox (processed_at) WHERE processed = TRUE;
+
+
 INSERT INTO categories(id, parent_category_id, name)
 VALUES
     ('bf3ab474-42a4-426a-a867-d2bf2d2604c9', NULL, 'Clothes'),
