@@ -4,19 +4,31 @@ package com.ecmsp.productservice.api.grpc;
 import com.ecmsp.product.v1.property.v1.*;
 import com.ecmsp.productservice.domain.PropertyDataType;
 import com.ecmsp.productservice.domain.PropertyRole;
+import com.ecmsp.productservice.dto.default_property_option.DefaultPropertyOptionCreateRequestDTO;
 import com.ecmsp.productservice.dto.property.PropertyCreateRequestDTO;
 import com.ecmsp.productservice.dto.property.PropertyCreateResponseDTO;
+import com.ecmsp.productservice.service.DefaultPropertyOptionService;
+import com.ecmsp.productservice.service.PropertyOrchestratorService;
 import com.ecmsp.productservice.service.PropertyService;
 import io.grpc.stub.StreamObserver;
 
+import java.util.List;
 import java.util.UUID;
 
 public class PropertyGrpcService extends PropertyServiceGrpc.PropertyServiceImplBase {
 
     private final PropertyService propertyService;
+    private final DefaultPropertyOptionService defaultPropertyOptionService;
+    private final PropertyOrchestratorService propertyOrchestratorService;
 
-    public PropertyGrpcService(PropertyService propertyService) {
+    public PropertyGrpcService(
+            PropertyService propertyService,
+            DefaultPropertyOptionService defaultPropertyOptionService,
+            PropertyOrchestratorService propertyOrchestratorService
+    ) {
         this.propertyService = propertyService;
+        this.defaultPropertyOptionService = defaultPropertyOptionService;
+        this.propertyOrchestratorService = propertyOrchestratorService;
     }
 
     private PropertyRole propertyMapper(com.ecmsp.product.v1.property.v1.PropertyRole propertyRole) {
@@ -39,10 +51,19 @@ public class PropertyGrpcService extends PropertyServiceGrpc.PropertyServiceImpl
                 .dataType(PropertyDataType.TEXT)
                 .build();
 
-        PropertyCreateResponseDTO propertyCreateResponse = propertyService.createProperty(propertyCreateRequest);
+        List<DefaultPropertyOptionCreateRequestDTO> defaultPropertyOptionCreateRequests = request.getDefaultPropertyOptionValuesList().stream()
+                .map(p ->
+                        DefaultPropertyOptionCreateRequestDTO.builder()
+                                .propertyId(null)
+                                .valueText(p.getDisplayText())
+                                .displayText(p.getDisplayText())
+                                .build())
+                .toList();
+
+        UUID propertyId = propertyOrchestratorService.createFullProperty(propertyCreateRequest, defaultPropertyOptionCreateRequests);
 
         CreatePropertyResponse response = CreatePropertyResponse.newBuilder()
-                .setId(propertyCreateResponse.getId().toString())
+                .setId(propertyId.toString())
                 .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();

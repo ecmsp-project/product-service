@@ -60,29 +60,4 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/categories")
-    public ResponseEntity<CreateCategoryResponseDTO> createCategory(
-            @RequestBody CreateCategoryRequestDTO request
-    ) {
-        CategoryCreateRequestDTO bRequest = CategoryCreateRequestDTO.builder()
-                .childCategoryId(request.childCategoryId())
-                .parentCategoryId(request.parentCategoryId())
-                .name(request.name())
-                .build();
-
-        CategoryCreateResponseDTO bResponse;
-
-        if (request.parentCategoryId() != null && request.childCategoryId() != null) {
-            bResponse = categoryService.createCategorySplit(bRequest);
-        } else if (request.childCategoryId() == null) {
-            bResponse = categoryService.createCategoryAllSplit(bRequest);
-        } else {
-            bResponse = categoryService.createCategoryLeaf(bRequest);
-        }
-
-        CreateCategoryResponseDTO response = CreateCategoryResponseDTO.builder().id(bResponse.getId()).build();
-        return ResponseEntity.ok(response);
-    }
-
-
 }
