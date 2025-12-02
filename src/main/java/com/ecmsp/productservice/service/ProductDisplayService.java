@@ -170,6 +170,7 @@ public class ProductDisplayService {
                 .variant(
                         VariantDetailDTO.builder()
                                 .variantId(primaryVariantEntity.getId())
+                                .name(primaryVariantEntity.getProduct().getName())
                                 .price(primaryVariantEntity.getPrice())
                                 .stockQuantity(primaryVariantEntity.getStockQuantity())
                                 .variantImages(variantImages)
@@ -192,6 +193,7 @@ public class ProductDisplayService {
                 .variant(
                         VariantDetailDTO.builder()
                                 .variantId(variant.getId())
+                                .name(variant.getProductName())
                                 .price(variant.getPrice())
                                 .stockQuantity(variant.getStockQuantity())
                                 .variantImages(variantImages)
