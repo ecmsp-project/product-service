@@ -11,10 +11,12 @@ import com.ecmsp.productservice.service.DefaultPropertyOptionService;
 import com.ecmsp.productservice.service.PropertyOrchestratorService;
 import com.ecmsp.productservice.service.PropertyService;
 import io.grpc.stub.StreamObserver;
+import net.devh.boot.grpc.server.service.GrpcService;
 
 import java.util.List;
 import java.util.UUID;
 
+@GrpcService
 public class PropertyGrpcService extends PropertyServiceGrpc.PropertyServiceImplBase {
 
     private final PropertyService propertyService;

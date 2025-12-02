@@ -5,10 +5,13 @@ import com.ecmsp.productservice.dto.category.CategoryCreateRequestDTO;
 import com.ecmsp.productservice.dto.category.CategoryCreateResponseDTO;
 import com.ecmsp.productservice.dto.rest.category.CreateCategoryRequestDTO;
 import com.ecmsp.productservice.service.CategoryService;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import net.devh.boot.grpc.server.service.GrpcService;
 
 import java.util.UUID;
 
+@GrpcService
 public class CategoryGrpcService extends CategoryServiceGrpc.CategoryServiceImplBase {
     private final CategoryService categoryService;
 
@@ -24,7 +27,13 @@ public class CategoryGrpcService extends CategoryServiceGrpc.CategoryServiceImpl
     @Override
     public void createCategory(CreateCategoryRequest request, StreamObserver<CreateCategoryResponse> responseObserver) {
         UUID parentCategoryId = UUID.fromString(request.getParentCategoryId());
-        UUID childCategoryId = UUID.fromString(request.getChildCategoryId());
+        UUID childCategoryId;
+
+        try {
+            childCategoryId = UUID.fromString(request.getChildCategoryId());
+        } catch (IllegalArgumentException e) {
+            childCategoryId = null;
+        }
 
         CategoryCreateRequestDTO categoryCreateRequest = CategoryCreateRequestDTO.builder()
                 .name(request.getName())
@@ -38,6 +47,10 @@ public class CategoryGrpcService extends CategoryServiceGrpc.CategoryServiceImpl
             case CREATE_CATEGORY_TYPE_ALL_SPLIT ->   categoryService.createCategoryAllSplit(categoryCreateRequest);
         };
 
-
+        CreateCategoryResponse response = CreateCategoryResponse.newBuilder()
+                .setId(categoryCreateResponse.getId().toString())
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 }
