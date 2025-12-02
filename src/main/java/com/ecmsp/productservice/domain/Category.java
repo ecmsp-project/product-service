@@ -29,7 +29,8 @@ public class Category {
     @JoinColumn(name = "parent_category_id")
     private Category parentCategory;
 
-    @OneToMany(mappedBy = "parentCategory", cascade = CascadeType.ALL, orphanRemoval = true)
+//  cascade = CascadeType.ALL, orphanRemoval = true
+    @OneToMany(mappedBy = "parentCategory")
     @Builder.Default
     private Set<Category> subCategories = new HashSet<>();
 
