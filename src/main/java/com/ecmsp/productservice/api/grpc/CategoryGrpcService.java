@@ -21,7 +21,12 @@ public class CategoryGrpcService extends CategoryServiceGrpc.CategoryServiceImpl
 
     @Override
     public void deleteCategory(DeleteCategoryRequest request, StreamObserver<DeleteCategoryResponse> responseObserver) {
-        super.deleteCategory(request, responseObserver);
+        UUID categoryId = UUID.fromString(request.getId());
+        categoryService.deleteCategory(categoryId);
+
+        DeleteCategoryResponse response = DeleteCategoryResponse.newBuilder().build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override
