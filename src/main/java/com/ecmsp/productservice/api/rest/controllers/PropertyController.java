@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -33,14 +34,15 @@ public class PropertyController {
     }
 
     @GetMapping("/properties")
-    public ResponseEntity<List<GetPropertyResponseDTO>> getPropertiesOfGivenCategory(
+    public ResponseEntity<Map<String, List<GetPropertyResponseDTO>>> getPropertiesOfGivenCategory(
             @RequestParam UUID categoryId
     ) {
         List<Property> properties = propertyService.getPropertiesByCategoryId(categoryId);
-        List<GetPropertyResponseDTO> response = properties.stream()
+        List<GetPropertyResponseDTO> initialResponse = properties.stream()
                 .map(PropertyMapper::toGetPropertyResponseDTO)
                 .toList();
 
+        Map<String, List<GetPropertyResponseDTO>> response = PropertyMapper.toGetPropertyResponseGrouped(initialResponse);
         return ResponseEntity.ok(response);
     }
 

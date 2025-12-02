@@ -4,19 +4,20 @@ import com.ecmsp.productservice.api.rest.mappers.PropertyMapper;
 import com.ecmsp.productservice.domain.Category;
 import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.domain.PropertyRole;
+import com.ecmsp.productservice.domain.VariantProperty;
 import com.ecmsp.productservice.dto.property.PropertyCreateRequestDTO;
 import com.ecmsp.productservice.dto.property.PropertyCreateResponseDTO;
 import com.ecmsp.productservice.dto.property.PropertyResponseDTO;
 import com.ecmsp.productservice.dto.property.PropertyUpdateRequestDTO;
 import com.ecmsp.productservice.dto.rest.property.GetPropertyResponseDTO;
+import com.ecmsp.productservice.dto.variant_property.VariantPropertyResponseDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.CategoryRepository;
 import com.ecmsp.productservice.repository.PropertyRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class PropertyService {
