@@ -11,10 +11,14 @@ import java.util.UUID;
 
 public interface DeliveryRepository extends JpaRepository<Delivery, UUID> {
 
-    @Query("SELECT DISTINCT d FROM Delivery d " +
-           "JOIN FETCH d.items di " +
-           "WHERE di.variant.id = :variantId " +
-           "AND d.recordedAt BETWEEN :fromDate AND :toDate")
+    @Query(value = """
+            SELECT DISTINCT d.*
+            FROM deliveries d
+            JOIN delivery_items di ON d.id = di.delivery_id
+            WHERE di.variant_id = :variantId
+            AND d.recorded_at >= COALESCE(:fromDate, '1900-01-01'::timestamp)
+            AND d.recorded_at <= COALESCE(:toDate, '2100-01-01'::timestamp)
+            """, nativeQuery = true)
     List<Delivery> findDeliveriesByVariantIdAndDateRange(
             @Param("variantId") UUID variantId,
             @Param("fromDate") LocalDateTime fromDate,

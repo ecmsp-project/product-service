@@ -8,7 +8,6 @@ import com.ecmsp.productservice.repository.DeliveryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -59,14 +58,15 @@ public class DeliveryService {
                 .build();
     }
 
+    @Transactional(readOnly = true)
     public List<DeliveryDTO> listDeliveries(ListDeliveriesRequestDTO request) {
         logger.info("Listing deliveries for variant: " + request.getVariantId() +
                 " from " + request.getFromDate() + " to " + request.getToDate());
 
         List<Delivery> deliveries = deliveryRepository.findDeliveriesByVariantIdAndDateRange(
                 request.getVariantId(),
-                request.getFromDate() != null ? request.getFromDate() : LocalDateTime.MIN,
-                request.getToDate() != null ? request.getToDate() : LocalDateTime.MAX
+                request.getFromDate(),
+                request.getToDate()
         );
 
         return deliveries.stream()
