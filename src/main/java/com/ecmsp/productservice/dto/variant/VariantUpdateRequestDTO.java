@@ -27,8 +27,6 @@ public class VariantUpdateRequestDTO {
     @Min(value = 0, message = "Stock quantity cannot be negative")
     private Integer stockQuantity;
 
-    private String imageUrl;
-
     private Map<String, Object> additionalProperties;
 
     private String description;

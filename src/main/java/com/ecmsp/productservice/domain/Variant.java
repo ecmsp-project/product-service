@@ -34,9 +34,6 @@ public class Variant {
     @Column(name = "stock_quantity", nullable = false)
     private int stockQuantity;
 
-    @Column(name = "image_url", nullable = false)
-    private String imageUrl;
-
     @Type(io.hypersistence.utils.hibernate.type.json.JsonType.class)
     @Column(name = "additional_properties", columnDefinition = "jsonb")
     @Builder.Default
@@ -53,6 +50,9 @@ public class Variant {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VariantImage> variantImages;
 
     @OneToMany(mappedBy = "variant", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

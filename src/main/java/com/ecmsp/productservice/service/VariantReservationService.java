@@ -1,5 +1,4 @@
 package com.ecmsp.productservice.service;
-
 import com.ecmsp.productservice.domain.ReservationStatus;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.VariantReservation;
@@ -137,6 +136,7 @@ public class VariantReservationService {
             }else{
                 UUID variantId = reservedVariant.getVariant().getId();
                 Integer stockRemaining = variantService.getAvailableStock(variantId).orElse(0);
+
                 //save outbox event that the stock has been sold
                 UUID eventId = eventIdSupplier.get();
                 KafkaVariantSoldEvent variantSoldEvent = new KafkaVariantSoldEvent(

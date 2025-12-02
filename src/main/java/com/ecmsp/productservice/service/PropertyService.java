@@ -1,19 +1,23 @@
 package com.ecmsp.productservice.service;
 
+import com.ecmsp.productservice.api.rest.mappers.PropertyMapper;
 import com.ecmsp.productservice.domain.Category;
 import com.ecmsp.productservice.domain.Property;
+import com.ecmsp.productservice.domain.PropertyRole;
+import com.ecmsp.productservice.domain.VariantProperty;
 import com.ecmsp.productservice.dto.property.PropertyCreateRequestDTO;
 import com.ecmsp.productservice.dto.property.PropertyCreateResponseDTO;
 import com.ecmsp.productservice.dto.property.PropertyResponseDTO;
 import com.ecmsp.productservice.dto.property.PropertyUpdateRequestDTO;
+import com.ecmsp.productservice.dto.rest.property.GetPropertyResponseDTO;
+import com.ecmsp.productservice.dto.variant_property.VariantPropertyResponseDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.CategoryRepository;
 import com.ecmsp.productservice.repository.PropertyRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class PropertyService {
@@ -35,9 +39,8 @@ public class PropertyService {
                 .dataType(property.getDataType())
                 .categoryId(property.getCategory().getId())
 
-                .required(property.isRequired())
                 .hasDefaultOptions(property.isHasDefaultOptions())
-
+                .role(property.getRole())
                 .propertyValueCount(property.getDefaultPropertyOptions().size())
                 .variantPropertyCount(property.getVariantProperties().size())
                 .build();
@@ -51,7 +54,7 @@ public class PropertyService {
                 .name(request.getName())
                 .unit(request.getUnit())
                 .dataType(request.getDataType())
-                .required(request.getRequired())
+                .role(request.getRole())
                 .category(category)
                 .build();
     }
@@ -90,9 +93,6 @@ public class PropertyService {
         if (request.getUnit() != null) {
             existingProperty.setUnit(request.getUnit());
         }
-        if (request.getRequired() != null) {
-            existingProperty.setRequired(request.getRequired());
-        }
 
         Property updatedProperty = propertyRepository.save(existingProperty);
         return convertToDto(updatedProperty);
@@ -109,8 +109,12 @@ public class PropertyService {
         return propertyRepository.findAllWithDefaultPropertyOptionsByCategoryId(categoryId);
     }
 
-    public List<PropertyResponseDTO> getPropertiesByCategoryId(UUID categoryId) {
-        return propertyRepository.findByCategory_Id(categoryId)
+    public List<Property> getPropertiesByCategoryId(UUID categoryId) {
+        return propertyRepository.findByCategory_Id(categoryId);
+    }
+
+    public List<PropertyResponseDTO> getPropertiesByCategoryIdAndRole(UUID categoryId, PropertyRole role) {
+        return propertyRepository.findByCategoryIdAndRole(categoryId, role)
                 .stream()
                 .map(this::convertToDto)
                 .toList();

@@ -7,6 +7,7 @@ import java.util.UUID;
 @Builder
 public record ProductRepresentationDTO(
         UUID productId,
+        String name,
         VariantDetailDTO variantDetail
 ) {
 
