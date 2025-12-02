@@ -53,7 +53,6 @@ public class VariantService {
     private Variant convertToEntity(VariantCreateRequestDTO request) {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product", request.getProductId()));
-
         return Variant.builder()
                 .price(request.getPrice())
                 .stockQuantity(request.getStockQuantity())
