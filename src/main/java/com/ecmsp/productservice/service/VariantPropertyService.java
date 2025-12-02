@@ -266,14 +266,4 @@ public class VariantPropertyService {
                 .toList();
     }
 
-    public List<VariantPropertyResponseDTO> getVariantPropertiesByVariantInAndPropertyRole(
-            List<Variant> variants,
-            PropertyRole propertyRole
-    ) {
-        return variantPropertyRepository.findByVariantInAndPropertyRole(variants, propertyRole)
-                .stream()
-                .map(this::convertToDto)
-                .toList();
-    }
-
 }

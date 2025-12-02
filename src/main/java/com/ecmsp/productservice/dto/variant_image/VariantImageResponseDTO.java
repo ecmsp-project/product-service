@@ -1,4 +1,4 @@
-package com.ecmsp.productservice.dto;
+package com.ecmsp.productservice.dto.variant_image;
 
 import lombok.Builder;
 
@@ -9,7 +9,6 @@ public record VariantImageResponseDTO(
         UUID id,
         UUID variantId,
         String url,
-        Boolean isMain,
         Integer position
 ) {
 }
