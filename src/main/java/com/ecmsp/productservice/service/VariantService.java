@@ -4,19 +4,16 @@ package com.ecmsp.productservice.service;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.Product;
 import com.ecmsp.productservice.dto.variant.VariantCreateRequestDTO;
-import com.ecmsp.productservice.dto.variant.VariantRequestDTO;
 import com.ecmsp.productservice.dto.variant.VariantResponseDTO;
 import com.ecmsp.productservice.dto.variant.VariantUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
-import org.aspectj.weaver.ast.Var;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -146,6 +143,11 @@ public class VariantService {
     @Transactional
     public void releaseReservedVariantStock(UUID variantId, int quantity) {
         variantRepository.releaseReservedVariantStock(variantId, quantity);
+    }
+
+    @Transactional
+    public void increaseStock(UUID variantId, int quantity) {
+        variantRepository.addVariantToStock(variantId, quantity);
     }
 
     public Optional<Integer> getAvailableStock(UUID variantId) {

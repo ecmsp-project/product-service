@@ -97,6 +97,22 @@ CREATE TABLE variants (
                           CONSTRAINT variants_pk PRIMARY KEY (id)
 );
 
+-- Table: deliveries
+CREATE TABLE deliveries (
+                            id uuid  NOT NULL,
+                            recorded_at timestamp  NOT NULL,
+                            CONSTRAINT deliveries_pk PRIMARY KEY (id)
+);
+
+-- Table: delivery_items
+CREATE TABLE delivery_items (
+                                 id uuid  NOT NULL,
+                                 delivery_id uuid  NOT NULL,
+                                 variant_id uuid  NOT NULL,
+                                 quantity int  NOT NULL,
+                                 CONSTRAINT delivery_items_pk PRIMARY KEY (id)
+);
+
 -- foreign keys
 -- Reference: Copy_of_product_category_product (table: products)
 ALTER TABLE products ADD CONSTRAINT Copy_of_product_category_product
@@ -164,6 +180,22 @@ ALTER TABLE variants ADD CONSTRAINT variant_product
 
 -- Reference: variant_reservations_variants (table: variant_reservations)
 ALTER TABLE variant_reservations ADD CONSTRAINT variant_reservations_variants
+    FOREIGN KEY (variant_id)
+        REFERENCES variants (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: delivery_items_deliveries (table: delivery_items)
+ALTER TABLE delivery_items ADD CONSTRAINT delivery_items_deliveries
+    FOREIGN KEY (delivery_id)
+        REFERENCES deliveries (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: delivery_items_variants (table: delivery_items)
+ALTER TABLE delivery_items ADD CONSTRAINT delivery_items_variants
     FOREIGN KEY (variant_id)
         REFERENCES variants (id)
         NOT DEFERRABLE
