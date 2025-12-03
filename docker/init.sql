@@ -186,6 +186,22 @@ ALTER TABLE variant_reservations ADD CONSTRAINT variant_reservations_variants
             INITIALLY IMMEDIATE
 ;
 
+-- Reference: delivery_items_deliveries (table: delivery_items)
+ALTER TABLE delivery_items ADD CONSTRAINT delivery_items_deliveries
+    FOREIGN KEY (delivery_id)
+        REFERENCES deliveries (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
+-- Reference: delivery_items_variants (table: delivery_items)
+ALTER TABLE delivery_items ADD CONSTRAINT delivery_items_variants
+    FOREIGN KEY (variant_id)
+        REFERENCES variants (id)
+        NOT DEFERRABLE
+            INITIALLY IMMEDIATE
+;
+
 CREATE OR REPLACE FUNCTION update_has_default_options()
 RETURNS TRIGGER AS $$
 BEGIN
