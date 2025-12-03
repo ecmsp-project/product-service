@@ -11,6 +11,7 @@ import java.util.UUID;
 @Builder
 public record VariantDetailDTO(
     UUID variantId,
+    String name,
     BigDecimal price,
     Integer stockQuantity,
     String description,
