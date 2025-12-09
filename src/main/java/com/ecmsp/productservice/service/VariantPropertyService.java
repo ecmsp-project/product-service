@@ -138,6 +138,11 @@ public class VariantPropertyService {
         return VariantProperty.builder()
                 .variant(variant)
                 .property(property)
+                .displayText(request.getDisplayText())
+                .valueDecimal(request.getValueDecimal())
+                .valueBoolean(request.getValueBoolean())
+                .valueDate(request.getValueDate())
+                .valueText(request.getValueText())
                 .build();
     }
 
