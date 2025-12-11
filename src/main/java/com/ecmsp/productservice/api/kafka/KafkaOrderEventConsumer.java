@@ -32,6 +32,7 @@ class KafkaOrderEventConsumer {
 
         try {
             ReservationUpdateRequestDTO reservationToUpdate = KafkaOrderStatusUpdatedEvent.toReservationUpdate(orderStatusUpdatedEvent);
+            log.info("Updating reservation for order: {} with status: {}", reservationToUpdate.getReservationId(), reservationToUpdate.getStatus());
             variantReservationService.updateVariantsReservation(reservationToUpdate);
         } catch (Exception e) {
             log.error("Failed to consume order request for order status update: {}", orderStatusUpdatedEvent.orderId(), e);

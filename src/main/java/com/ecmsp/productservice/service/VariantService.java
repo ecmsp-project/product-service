@@ -4,19 +4,16 @@ package com.ecmsp.productservice.service;
 import com.ecmsp.productservice.domain.Variant;
 import com.ecmsp.productservice.domain.Product;
 import com.ecmsp.productservice.dto.variant.VariantCreateRequestDTO;
-import com.ecmsp.productservice.dto.variant.VariantRequestDTO;
 import com.ecmsp.productservice.dto.variant.VariantResponseDTO;
 import com.ecmsp.productservice.dto.variant.VariantUpdateRequestDTO;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.VariantRepository;
 import com.ecmsp.productservice.repository.ProductRepository;
 import jakarta.transaction.Transactional;
-import org.aspectj.weaver.ast.Var;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,9 +36,9 @@ public class VariantService {
 
                 .price(variant.getPrice())
                 .stockQuantity(variant.getStockQuantity())
-                .imageUrl(variant.getImageUrl())
                 .additionalProperties(variant.getAdditionalProperties())
                 .description(variant.getDescription())
+                .margin(variant.getMargin())
                 .productId(variant.getProduct().getId())
 
                 .createdAt(variant.getCreatedAt())
@@ -53,13 +50,12 @@ public class VariantService {
     private Variant convertToEntity(VariantCreateRequestDTO request) {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Product", request.getProductId()));
-
         return Variant.builder()
                 .price(request.getPrice())
                 .stockQuantity(request.getStockQuantity())
-                .imageUrl(request.getImageUrl())
                 .additionalProperties(request.getAdditionalProperties())
                 .description(request.getDescription())
+                .margin(request.getMargin())
                 .product(product)
                 .build();
     }
@@ -80,8 +76,15 @@ public class VariantService {
         return variantRepository.findById(id);
     }
 
-    public List<Variant> getVariantsByProductId(UUID productId) {
+    public List<Variant> getVariantsEntityByProductId(UUID productId) {
         return variantRepository.findByProductId(productId);
+    }
+
+    public List<VariantResponseDTO> getVariantsByProductId(UUID productId) {
+        return variantRepository.findByProductId(productId)
+                .stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     public Page<Variant> getOneVariantPerProductByCategoryId(UUID categoryId, Pageable pageable) {
@@ -106,14 +109,14 @@ public class VariantService {
         if (request.getStockQuantity() != null) {
             existingVariant.setStockQuantity(request.getStockQuantity());
         }
-        if (request.getImageUrl() != null) {
-            existingVariant.setImageUrl(request.getImageUrl());
-        }
         if (request.getAdditionalProperties() != null) {
             existingVariant.setAdditionalProperties(request.getAdditionalProperties());
         }
         if (request.getDescription() != null) {
             existingVariant.setDescription(request.getDescription());
+        }
+        if (request.getMargin() != null) {
+            existingVariant.setMargin(request.getMargin());
         }
 
         if (request.getProductId() != null) {
@@ -137,6 +140,16 @@ public class VariantService {
         return rowsAffected > 0;
     }
 
+    @Transactional
+    public void releaseReservedVariantStock(UUID variantId, int quantity) {
+        variantRepository.releaseReservedVariantStock(variantId, quantity);
+    }
+
+    @Transactional
+    public void increaseStock(UUID variantId, int quantity) {
+        variantRepository.addVariantToStock(variantId, quantity);
+    }
+
     public Optional<Integer> getAvailableStock(UUID variantId) {
         return variantRepository.findStockQuantityById(variantId);
     }
@@ -153,10 +166,4 @@ public class VariantService {
         return variantRepository.findByProductCategoryId(categoryId);
     }
 
-    public List<VariantResponseDTO> getOtherVariantsIds(UUID productId, UUID excludeVariantId) {
-        return variantRepository.findOtherVariantsIds(productId, excludeVariantId)
-                .stream()
-                .map(this::convertToDto)
-                .toList();
-    }
 }

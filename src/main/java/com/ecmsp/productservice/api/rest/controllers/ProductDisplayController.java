@@ -29,11 +29,20 @@ public class ProductDisplayController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/products/filter")
+    @PostMapping("/products/filtered")
     public ResponseEntity<GetProductsResponseDTO> getProductsFiltered(
             @RequestBody GetProductsFilteredRequestDTO request
     ) {
         GetProductsResponseDTO response = productDisplayService.getProductsFiltered(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/products/search")
+    public ResponseEntity<GetProductsResponseDTO> searchProducts(
+            @RequestBody GetProductsRequestDTO request,
+            @RequestParam(required = true) String query
+    ) {
+        GetProductsResponseDTO response = productDisplayService.getProductsQueried(request, query);
         return ResponseEntity.ok(response);
     }
 }

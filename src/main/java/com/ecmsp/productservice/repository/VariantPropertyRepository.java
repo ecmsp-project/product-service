@@ -1,9 +1,6 @@
 package com.ecmsp.productservice.repository;
 
-import com.ecmsp.productservice.domain.Property;
-import com.ecmsp.productservice.domain.DefaultPropertyOption;
-import com.ecmsp.productservice.domain.Variant;
-import com.ecmsp.productservice.domain.VariantProperty;
+import com.ecmsp.productservice.domain.*;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -23,4 +20,12 @@ public interface VariantPropertyRepository extends JpaRepository<VariantProperty
     Optional<VariantProperty> findByVariantAndProperty(Variant variant, Property property);
 
     VariantProperty findByVariantIdAndPropertyId(UUID id, UUID propertyId);
+
+    List<VariantProperty> findByVariantIdAndPropertyIdIn(UUID variantId, List<UUID> properties);
+
+    List<VariantProperty> findByVariantIdAndProperty_Role(UUID id, PropertyRole role);
+
+    List<VariantProperty> findByVariantIdInAndProperty_Role(List<UUID> ids, PropertyRole role);
+
+    List<VariantProperty> findByVariantInAndPropertyRole(List<Variant> variants, PropertyRole role);
 }

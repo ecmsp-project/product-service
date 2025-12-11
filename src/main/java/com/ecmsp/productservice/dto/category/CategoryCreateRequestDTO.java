@@ -18,5 +18,6 @@ public class CategoryCreateRequestDTO {
     @Size(max = 255, message = "Category name cannot exceed 255 characters")
     private String name;
 
+    private UUID childCategoryId;
     private UUID parentCategoryId;
 }

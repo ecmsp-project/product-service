@@ -1,5 +1,6 @@
 package com.ecmsp.productservice.api.rest.controllers;
 
+import com.ecmsp.productservice.api.rest.mappers.PropertyMapper;
 import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.dto.default_property_option.DefaultPropertyOptionResponseDTO;
 import com.ecmsp.productservice.dto.property.PropertyResponseDTO;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -32,12 +34,16 @@ public class PropertyController {
     }
 
     @GetMapping("/properties")
-    public ResponseEntity<List<GetPropertyResponseDTO>> getPropertiesOfGivenCategory(
+    public ResponseEntity<Map<String, List<GetPropertyResponseDTO>>> getPropertiesOfGivenCategory(
             @RequestParam UUID categoryId
     ) {
+        List<Property> properties = propertyService.getPropertiesByCategoryId(categoryId);
+        List<GetPropertyResponseDTO> initialResponse = properties.stream()
+                .map(PropertyMapper::toGetPropertyResponseDTO)
+                .toList();
 
-        List<PropertyResponseDTO> properties = propertyService.getPropertiesByCategoryId(categoryId);
-        return ResponseEntity.ok(null);
+        Map<String, List<GetPropertyResponseDTO>> response = PropertyMapper.toGetPropertyResponseGrouped(initialResponse);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/properties/default-property-options")
@@ -45,31 +51,9 @@ public class PropertyController {
             @RequestParam UUID categoryId
     ) {
         List<Property> properties = propertyService.getPropertiesWithDefaultPropertyOptionsByCategoryId(categoryId);
-
-        List<GetPropertyResponseDTO> response = properties.stream().map(property -> {
-            List<DefaultPropertyOptionResponseDTO> defaultPropertyOptions = property.getDefaultPropertyOptions().stream()
-                    .map(option -> {
-                        return DefaultPropertyOptionResponseDTO.builder()
-                                .id(option.getId())
-                                .propertyId(property.getId())
-                                .valueText(option.getValueText())
-                                .valueBoolean(option.getValueBoolean())
-                                .valueDecimal(option.getValueDecimal())
-                                .valueDate(option.getValueDate())
-                                .displayText(option.getDisplayText())
-                                .build();
-                    }).toList();
-
-            return GetPropertyResponseDTO.builder()
-                    .id(property.getId())
-                    .categoryId(property.getId())
-                    .name(property.getName())
-                    .dataType(String.valueOf(property.getDataType()))
-                    .required(property.isRequired())
-                    .hasDefaultOptions(property.isHasDefaultOptions())
-                    .defaultPropertyOptions(defaultPropertyOptions)
-                    .build();
-        }).toList();
+        List<GetPropertyResponseDTO> response = properties.stream()
+                .map(PropertyMapper::toGetPropertyResponseDTO)
+                .toList();
 
         return ResponseEntity.ok(response);
     }

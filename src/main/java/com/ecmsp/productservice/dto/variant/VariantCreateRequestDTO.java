@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,11 +26,12 @@ public class VariantCreateRequestDTO {
     @Min(value = 0, message = "Stock quantity cannot be negative")
     private int stockQuantity;
 
-    @NotBlank(message = "Image URL cannot be blank")
-    private String imageUrl;
-
     @NotNull(message = "Additional attributes are required")
     private Map<String, Object> additionalProperties;
 
     private String description;
+
+    @DecimalMin(value = "5", message = "Margin cannot be less than 5%")
+    @DecimalMax(value = "80", message = "Margin cannot exceed 80%")
+    private BigDecimal margin;
 }

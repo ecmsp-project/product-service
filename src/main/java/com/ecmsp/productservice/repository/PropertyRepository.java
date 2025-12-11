@@ -3,6 +3,7 @@ package com.ecmsp.productservice.repository;
 import com.ecmsp.productservice.domain.Property;
 import com.ecmsp.productservice.domain.PropertyDataType;
 import com.ecmsp.productservice.domain.Category;
+import com.ecmsp.productservice.domain.PropertyRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,8 +14,6 @@ import java.util.UUID;
 
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, UUID> {
-
-    List<Property> findByIdAndRequired(UUID id, boolean required);
 
     List<Property> findByIdAndCategory(UUID id, Category category);
 
@@ -34,4 +33,6 @@ public interface PropertyRepository extends JpaRepository<Property, UUID> {
     List<Property> findAllWithDefaultPropertyOptionsByCategoryId(@Param("categoryId") UUID categoryId);
 
     List<Property> findByCategory_Id(UUID categoryId);
+
+    List<Property> findByCategoryIdAndRole(UUID categoryId, PropertyRole role);
 }

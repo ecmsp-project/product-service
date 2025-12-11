@@ -1,5 +1,6 @@
 package com.ecmsp.productservice.dto.property;
 
+import com.ecmsp.productservice.domain.PropertyRole;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,7 +21,7 @@ public class PropertyResponseDTO {
     private String unit;
     private PropertyDataType dataType;
 
-    private boolean required;
+    private PropertyRole role;
     private boolean hasDefaultOptions;
 
     private int propertyValueCount;

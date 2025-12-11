@@ -1,13 +1,14 @@
 package com.ecmsp.productservice.api.rest.controllers;
 
+import com.ecmsp.productservice.dto.category.CategoryCreateRequestDTO;
+import com.ecmsp.productservice.dto.category.CategoryCreateResponseDTO;
 import com.ecmsp.productservice.dto.category.CategoryResponseDTO;
+import com.ecmsp.productservice.dto.rest.category.CreateCategoryRequestDTO;
+import com.ecmsp.productservice.dto.rest.category.CreateCategoryResponseDTO;
 import com.ecmsp.productservice.dto.rest.category.GetCategoriesResponseDTO;
 import com.ecmsp.productservice.service.CategoryService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -59,7 +60,28 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/categories")
+    public ResponseEntity<CreateCategoryResponseDTO> createCategory(
+            @RequestBody CreateCategoryRequestDTO request
+    ) {
+        CategoryCreateRequestDTO bRequest = CategoryCreateRequestDTO.builder()
+                .childCategoryId(request.childCategoryId())
+                .parentCategoryId(request.parentCategoryId())
+                .name(request.name())
+                .build();
 
+        CategoryCreateResponseDTO bResponse;
 
+        if (request.parentCategoryId() != null && request.childCategoryId() != null) {
+            bResponse = categoryService.createCategorySplit(bRequest);
+        } else if (request.childCategoryId() == null) {
+            bResponse = categoryService.createCategoryAllSplit(bRequest);
+        } else {
+            bResponse = categoryService.createCategoryLeaf(bRequest);
+        }
+
+        CreateCategoryResponseDTO response = CreateCategoryResponseDTO.builder().id(bResponse.getId()).build();
+        return ResponseEntity.ok(response);
+    }
 
 }

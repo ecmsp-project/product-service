@@ -28,7 +28,7 @@ public class DefaultPropertyOptionService {
         this.propertyRepository = propertyRepository;
     }
 
-    private DefaultPropertyOptionResponseDTO convertToDto(DefaultPropertyOption defaultPropertyOption) {
+    public DefaultPropertyOptionResponseDTO convertToDto(DefaultPropertyOption defaultPropertyOption) {
         return DefaultPropertyOptionResponseDTO.builder()
                 .id(defaultPropertyOption.getId())
                 .displayText(defaultPropertyOption.getDisplayText())
