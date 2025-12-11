@@ -1,4 +1,4 @@
-name: Build and deploy Docker images to GCP Artifact Registry
+name: Build and deploy Docker images to AWS ECR (Elastic Container Registry)
 
 on:
     push:
@@ -7,7 +7,7 @@ on:
     workflow_dispatch:
 
 env:
-    GCP_REGISTRY: ${{ secrets.ECMSP_GCP_ARTIFACT_REGISTRY }}
+    ECR_REGISTRY: ${{ secrets.ECR_ARTIFACT_REGISTRY }}
     IMAGE_TAG: ${{ github.sha }}
     IMAGE_NAME: ${{ github.event.repository.name }}
 
@@ -32,37 +32,24 @@ jobs:
                 name: Update Maven snapshots
                 run: mvn -U dependency:resolve
 
-            - 
-                name: Authenticate to Google Cloud
-                uses: google-github-actions/auth@v1
+            -
+                name: Configure AWS credentials via OIDC
+                uses: aws-actions/configure-aws-credentials@v4
                 with:
-                    credentials_json: ${{ secrets.ECMSP_REGISTRY_PUSHER_GCP_SA_KEY }}
-
-            - 
-                name: Setup gcloud CLI
-                uses: google-github-actions/setup-gcloud@v2
-                with:
-                    version: "latest"
-                    project_id: ecmsp
-
-            - 
-                name: Install gcloud auth
-                run: gcloud components install gke-gcloud-auth-plugin
+                  role-to-assume: arn:aws:iam::529236942244:role/github-actions-ecr
+                  aws-region: eu-central-1
 
             -
-                name: Configure Docker for Artifact Registry
-                run: gcloud auth configure-docker europe-west1-docker.pkg.dev
+                name: Login to Amazon ECR
+                uses: aws-actions/amazon-ecr-login@v2
 
             - 
-                name: Build, tag, and push backend Docker image to GCP Artifact Registry
+                name: Build, tag, and push backend Docker image to AWS ECR
                 run: |
                     docker build \
-                      -t $GCP_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
-                      -t $GCP_REGISTRY/$IMAGE_NAME:latest \
+                      -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
+                      -t $ECR_REGISTRY/$IMAGE_NAME:latest \
                       -f ./Dockerfile .
 
-                    docker push $GCP_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                    docker push $GCP_REGISTRY/$IMAGE_NAME:latest
-
-
-
+                    docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+                    docker push $ECR_REGISTRY/$IMAGE_NAME:latest
