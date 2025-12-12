@@ -41,4 +41,16 @@ public interface CategoryRepository extends JpaRepository<Category, UUID> {
     boolean hasSubCategories(Category category);
 
     Optional<Category> getCategoryByName(String name);
+
+    @Query(value = """
+    WITH RECURSIVE category_tree AS (
+      SELECT id FROM categories WHERE id = :categoryId
+      UNION ALL
+      SELECT c.id 
+      FROM categories c
+      JOIN category_tree ct ON c.parent_category_id = ct.id
+    )
+    SELECT id FROM category_tree
+    """, nativeQuery = true)
+    List<UUID> findAllChildrenByCategoryId(UUID categoryId);
 }

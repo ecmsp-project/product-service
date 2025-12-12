@@ -18,6 +18,7 @@ import com.ecmsp.productservice.repository.DefaultPropertyOptionRepository;
 import com.ecmsp.productservice.repository.ProductDisplayRepository;
 import com.ecmsp.productservice.repository.VariantRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
@@ -67,8 +68,17 @@ public class ProductDisplayService {
         int pageNumber = request.pageNumber() != null ? request.pageNumber() : 0;
 
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        Page<Variant> page = productDisplayRepository.findOneVariantPerProductByCategoryId(categoryId, pageable);
-        return mapVariantsToGetProductRepresentationDTO(pageNumber, page);
+//        Page<Variant> page = productDisplayRepository.findOneVariantPerProductByCategoryId(categoryId, pageable);
+
+        List<UUID> allCategoryIds = categoryService.getAllChildrenByCategoryId(categoryId);
+        Page<Variant> page = productDisplayRepository.findOneVariantPerProductByCategoryIds(allCategoryIds, pageable);
+
+        List<Variant> variants = new ArrayList<>(page.getContent());
+        Collections.shuffle(variants);
+        Page<Variant> shuffledPage = new PageImpl<>(variants, pageable, page.getTotalElements());
+
+//        return mapVariantsToGetProductRepresentationDTO(pageNumber, page);
+        return mapVariantsToGetProductRepresentationDTO(pageNumber, shuffledPage);
     }
 
     public GetProductsResponseDTO getProductsFiltered(GetProductsFilteredRequestDTO request) {
