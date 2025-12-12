@@ -4,6 +4,7 @@ import com.ecmsp.productservice.domain.Category;
 import com.ecmsp.productservice.dto.category.*;
 import com.ecmsp.productservice.exception.ResourceNotFoundException;
 import com.ecmsp.productservice.repository.CategoryRepository;
+import jakarta.persistence.Cacheable;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -169,5 +170,9 @@ public class CategoryService {
         return categories.stream()
                 .map(this::convertToDto)
                 .toList();
+    }
+
+    public List<UUID> getAllChildrenByCategoryId(UUID categoryId) {
+        return categoryRepository.findAllChildrenByCategoryId(categoryId);
     }
 }

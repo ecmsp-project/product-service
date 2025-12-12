@@ -6,10 +6,14 @@ on:
             - main
     workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 env:
     ECR_REGISTRY: ${{ secrets.ECR_ARTIFACT_REGISTRY }}
     IMAGE_TAG: ${{ github.sha }}
-    IMAGE_NAME: ${{ github.event.repository.name }}
+    IMAGE_NAME: ecmsp-project/${{ github.event.repository.name }}
 
 jobs:
     build_deploy:
