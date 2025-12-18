@@ -8,11 +8,11 @@ on:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
 
 env:
     ECR_REGISTRY: ${{ secrets.ECR_ARTIFACT_REGISTRY }}
-    IMAGE_TAG: ${{ github.sha }}
+#     IMAGE_TAG: ${{ github.sha }}
     IMAGE_NAME: ecmsp-project/${{ github.event.repository.name }}
 
 jobs:
@@ -47,13 +47,23 @@ jobs:
                 name: Login to Amazon ECR
                 uses: aws-actions/amazon-ecr-login@v2
 
+            -
+                name: Release new version
+                id: release
+                run: |
+                  bash ./scripts/git_update.sh -v patch
+
+            -
+                name: Add app version (Optional)
+                run: echo ${{ steps.release.outputs.new-tag }} > version.txt
+
             - 
                 name: Build, tag, and push backend Docker image to AWS ECR
+                env:
+                    IMAGE_TAG: ${{ steps.release.outputs.new-tag }}
                 run: |
                     docker build \
                       -t $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG \
-                      -t $ECR_REGISTRY/$IMAGE_NAME:latest \
                       -f ./Dockerfile .
 
                     docker push $ECR_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
-                    docker push $ECR_REGISTRY/$IMAGE_NAME:latest
