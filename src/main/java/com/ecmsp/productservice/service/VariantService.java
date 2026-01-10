@@ -33,7 +33,7 @@ public class VariantService {
     private VariantResponseDTO convertToDto(Variant variant) {
         return VariantResponseDTO.builder()
                 .id(variant.getId())
-
+                .productName(variant.getProduct().getName())
                 .price(variant.getPrice())
                 .stockQuantity(variant.getStockQuantity())
                 .additionalProperties(variant.getAdditionalProperties())
